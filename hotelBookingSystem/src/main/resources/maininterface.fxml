@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="600" prefWidth="900" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController">
+
+    <!-- 🔹 TOP: Barra de búsqueda -->
+    <top>
+        <VBox spacing="10" style="-fx-background-color: #007bff;" BorderPane.alignment="CENTER">
+            <Label style="-fx-font-size: 24px; -fx-text-fill: white; -fx-padding: 15 0 0 20;" text="Find your next stay" />
+
+            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 0 20 20;">
+                <ComboBox fx:id="hotelCombo" prefWidth="150" promptText="Select Hotel" />
+                <DatePicker fx:id="fromDate" />
+                <DatePicker fx:id="toDate" />
+                <ComboBox fx:id="clientCombo" prefWidth="150" promptText="Who" />
+                <Button fx:id="searchButton" prefWidth="40" text="🔍" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- 🔹 CENTER: Contenido dinámico MDI -->
+    <center>
+        <VBox spacing="15" style="-fx-padding: 15;">
+            <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Trending rooms" />
+            <HBox spacing="15">
+                <ImageView fitHeight="150" fitWidth="250" preserveRatio="true">
+                    <image>
+                        <Image url="@/img/Captura de pantalla 2025-05-16 180737.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="150" fitWidth="250" preserveRatio="true">
+                    <image>
+                        <Image url="@/img/Captura de pantalla 2025-05-16 180839.png" />
+                    </image>
+                </ImageView>
+                <ImageView fitHeight="150" fitWidth="250" preserveRatio="true">
+                    <image>
+                        <Image url="@/img/Captura de pantalla 2025-05-16 180936.png" />
+                    </image>
+                </ImageView>
+            </HBox>
+
+            <!-- Este StackPane se usará para cargar otras vistas en MDI -->
+            <StackPane fx:id="contentPane" prefWidth="870.0" style="-fx-padding: 15;" />
+         <TableView fx:id="hotelTable" prefHeight="200.0" prefWidth="200.0">
+           <columns>
+             <TableColumn prefWidth="75.0" text="C1" />
+             <TableColumn prefWidth="75.0" text="C2" />
+           </columns>
+         </TableView>
+        </VBox>
+    </center>
+
+</BorderPane>

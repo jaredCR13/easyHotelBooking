@@ -2,7 +2,7 @@ package hotelbookingcommon.domain;
 
 import java.io.Serializable;
 
-public class Hotel implements Serializable {
+public class Hotel  {
     private int numHotel;
     private String hotelName;
     private String hotelLocation;

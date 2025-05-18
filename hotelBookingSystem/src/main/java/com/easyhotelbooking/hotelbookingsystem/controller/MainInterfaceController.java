@@ -1,13 +1,18 @@
 package com.easyhotelbooking.hotelbookingsystem.controller;
 
 
+import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import hotelbookingcommon.domain.Hotel;
 import hotelbookingserver.service.HotelService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
+import java.io.IOException;
 import java.util.List;
 
 public class MainInterfaceController {
@@ -16,19 +21,21 @@ public class MainInterfaceController {
         private ComboBox<?> clientCombo;
 
         @FXML
+        private BorderPane bp;
+        @FXML
         private StackPane contentPane;
 
         @FXML
         private DatePicker fromDate;
 
         @FXML
-        private ComboBox<?> hotelCombo;
+        private ComboBox<Hotel> hotelCombo;
 
         @FXML
         private Button searchButton;
 
         @FXML
-        private TableView hotelTable;
+        private TextArea textArea;
 
         @FXML
         private DatePicker toDate;
@@ -38,8 +45,15 @@ public class MainInterfaceController {
         @FXML
         public void initialize() {
             List<Hotel> hotels = hotelService.getAllHotels();
-            hotelTable.setItems(FXCollections.observableArrayList(hotels));
+
+            }
+
+        @FXML
+        void hotelOptionsOnAction() {
+               Utility.loadPage("hoteloptions.fxml",bp);
         }
 
-    }
+}
+
+
 

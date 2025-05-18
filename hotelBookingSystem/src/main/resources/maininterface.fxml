@@ -4,8 +4,9 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -13,14 +14,23 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600" prefWidth="900" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController">
+<BorderPane fx:id="bp" prefHeight="600" prefWidth="900" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController">
 
     <!-- 🔹 TOP: Barra de búsqueda -->
     <top>
         <VBox spacing="10" style="-fx-background-color: #007bff;" BorderPane.alignment="CENTER">
+         <MenuBar>
+           <menus>
+             <Menu mnemonicParsing="false" text="Options">
+                  <items>
+                     <MenuItem mnemonicParsing="false" onAction="#hotelOptionsOnAction" text="HotelOptions" />
+                  </items>
+             </Menu>
+           </menus>
+         </MenuBar>
             <Label style="-fx-font-size: 24px; -fx-text-fill: white; -fx-padding: 15 0 0 20;" text="Find your next stay" />
 
-            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 0 20 20;">
+                        <HBox alignment="CENTER_LEFT" prefHeight="89.0" prefWidth="900.0" spacing="10" style="-fx-padding: 0 0 20 20;">
                 <ComboBox fx:id="hotelCombo" prefWidth="150" promptText="Select Hotel" />
                 <DatePicker fx:id="fromDate" />
                 <DatePicker fx:id="toDate" />
@@ -54,12 +64,6 @@
 
             <!-- Este StackPane se usará para cargar otras vistas en MDI -->
             <StackPane fx:id="contentPane" prefWidth="870.0" style="-fx-padding: 15;" />
-         <TableView fx:id="hotelTable" prefHeight="200.0" prefWidth="200.0">
-           <columns>
-             <TableColumn prefWidth="75.0" text="C1" />
-             <TableColumn prefWidth="75.0" text="C2" />
-           </columns>
-         </TableView>
         </VBox>
     </center>
 

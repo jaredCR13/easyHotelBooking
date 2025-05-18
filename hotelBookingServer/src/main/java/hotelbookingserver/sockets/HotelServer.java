@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class HotelServer {
-    private static final int PORT=9999;
+    private static final int PORT=5000;
     private ArrayList<Socket>clients=new ArrayList<>();
 
     public static void main(String[] args) {

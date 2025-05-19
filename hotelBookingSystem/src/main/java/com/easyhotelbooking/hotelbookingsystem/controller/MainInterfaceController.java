@@ -166,6 +166,7 @@ public class MainInterfaceController  {
                         mostrarAlerta("Habitación encontrada",
                                 "Número: " + room.getRoomNumber() +
                                         "\nPrecio: " + room.getRoomPrice() +
+                                        "\nDescripción detallada:"+ room.getDetailedDescription()+
                                         "\nEstado: " + room.getStatus() +
                                         "\nEstilo: " + room.getStyle());
                 } else {

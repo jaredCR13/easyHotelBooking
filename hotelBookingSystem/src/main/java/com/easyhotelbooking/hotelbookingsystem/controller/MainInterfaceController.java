@@ -5,10 +5,7 @@ import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import hotelbookingcommon.domain.Hotel;
-import hotelbookingcommon.domain.Request;
-import hotelbookingcommon.domain.Response;
-import hotelbookingcommon.domain.Room;
+import hotelbookingcommon.domain.*;
 import hotelbookingserver.service.HotelService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -173,6 +170,45 @@ public class MainInterfaceController  {
                         mostrarAlerta("Error", "Habitación no encontrada.");
                 }
         }
+
+        @FXML
+        void frontDeskOptionsOnAction() {
+                FrontDeskOptionsController controller = Utility.loadPage2("frontdeskoptions.fxml", bp);
+                if (controller != null) {
+                        controller.setMainController(this); // Referencia al controlador principal
+                } else {
+                        logger.error("No se pudo cargar frontdeskoptions.fxml o el controlador es null.");
+                        mostrarAlerta("Error", "No se pudo cargar la página de opciones de recepcionista.");
+                }
+        }
+
+        public void registerFrontDesk(FrontDesk frontDesk) {
+                Request request = new Request("registerFrontDesk", frontDesk);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("201".equalsIgnoreCase(response.getStatus())) {
+                        mostrarAlerta("Éxito", "Recepcionista registrado correctamente.");
+                } else {
+                        mostrarAlerta("Error", "No se pudo registrar el recepcionista: " + response.getMessage());
+                }
+        }
+
+        public void consultFrontDesk(String employeeId) {
+                Request request = new Request("getFrontDesk", employeeId);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        FrontDesk frontDesk = gson.fromJson(gson.toJson(response.getData()), FrontDesk.class);
+                        mostrarAlerta("Recepcionista encontrado",
+                                "N° Empleado: " + frontDesk.getEmployeeId() +
+                                        "\nNombre: " + frontDesk.getName() + " " + frontDesk.getLastName() +
+                                        "\nTeléfono: " + frontDesk.getPhoneNumber() +
+                                        "\nUsuario: " + frontDesk.getUser());
+                } else {
+                        mostrarAlerta("Error", "Recepcionista no encontrado.");
+                }
+        }
+
 
 }
 

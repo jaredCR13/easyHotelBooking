@@ -1,14 +1,16 @@
 package hotelbookingcommon.domain;
 
-public class FrontDesk {
-    private int employeeId;
+import java.io.Serializable;
+
+public class FrontDesk implements Serializable {
+    private String employeeId;
     private String name;
     private String lastName;
     private String password;
     private String user;
-    private int phoneNumber;
+    private String phoneNumber;
 
-    public FrontDesk(int employeeId, String name, String lastName, String password, String user, int phoneNumber) {
+    public FrontDesk(String employeeId, String name, String lastName, String password, String user, String phoneNumber) {
         this.employeeId = employeeId;
         this.name = name;
         this.lastName = lastName;
@@ -17,11 +19,11 @@ public class FrontDesk {
         this.phoneNumber = phoneNumber;
     }
 
-    public int getEmployeeId() {
+    public String getEmployeeId() {
         return employeeId;
     }
 
-    public void setEmployeeId(int employeeId) {
+    public void setEmployeeId(String employeeId) {
         this.employeeId = employeeId;
     }
 
@@ -57,11 +59,22 @@ public class FrontDesk {
         this.user = user;
     }
 
-    public int getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(int phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public String toString() {
+        return "FrontDeskStaff{" +
+                "employeeNumber=" + employeeId +
+                ", firstName='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", phone='" + phoneNumber + '\'' +
+                ", username='" + user + '\'' +
+                '}';
     }
 }

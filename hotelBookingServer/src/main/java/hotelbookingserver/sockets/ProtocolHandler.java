@@ -2,8 +2,10 @@ package hotelbookingserver.sockets;
 
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.*;
+import hotelbookingserver.service.FrontDeskService;
 import hotelbookingserver.service.HotelService;
 import hotelbookingserver.service.RoomService;
+import hotelbookingcommon.domain.FrontDesk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,6 +15,8 @@ public class ProtocolHandler {
     private static final Logger logger = LogManager.getLogger(ProtocolHandler.class);
     private final HotelService hotelService = new HotelService();
     private final RoomService roomService = new RoomService();
+    private final FrontDeskService frontDeskService = new FrontDeskService();
+
     private final Gson gson = new Gson();
 
     public Response handle(Request request) {
@@ -87,6 +91,34 @@ public class ProtocolHandler {
                     } catch (Exception e) {
                         logger.error("Error al registrar habitación", e);
                         return new Response("500", "Error interno al registrar habitación", null);
+                    }
+                }
+
+                //FrontDesks
+                case "registerFrontDesk": {
+                    try {
+                        FrontDesk frontDesk = gson.fromJson(gson.toJson(request.getData()), FrontDesk.class);
+                        List<FrontDesk> updatedFrontDeskList = frontDeskService.addFrontDesk(frontDesk);
+                        logger.info("Recepcionista registrado: {}", frontDesk);
+                        return new Response("201", "Recepcionista registrado con éxito", updatedFrontDeskList);
+                    } catch (Exception e) {
+                        logger.error("Error al registrar recepcionista", e);
+                        return new Response("500", "Error interno al registrar recepcionista", null);
+                    }
+                }
+
+                case "getFrontDesk": {
+                    try {
+                        String employeeId = String.valueOf(parseIntFromRequest(request.getData()));
+                        FrontDesk found = frontDeskService.findByEmployeeId(employeeId);
+                        if (found != null) {
+                            return new Response("200", "Recepcionista encontrado", found);
+                        } else {
+                            return new Response("404", "Recepcionista no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al consultar recepcionista", e);
+                        return new Response("500", "Error interno al consultar recepcionista", null);
                     }
                 }
 

@@ -1,9 +1,11 @@
 package com.easyhotelbooking.hotelbookingsystem.util;
 
+import com.easyhotelbooking.hotelbookingsystem.controller.FrontDeskOptionsController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -41,7 +43,7 @@ public class Utility {
             FXMLLoader loader = new FXMLLoader(Utility.class.getResource("/" + fxmlFileName));
             Parent view = loader.load();
             bp.setCenter(view);
-            return loader.getController(); // 👈 Devuelve el controlador
+            return loader.getController(); // Devuelve el controlador
         } catch (IOException e) {
             System.out.println("❌ Error loading center content: " + fxmlFileName);
             e.printStackTrace();

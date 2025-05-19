@@ -1,4 +1,12 @@
 package hotelbookingcommon.domain;
 
-public enum RoomStyle {
+import java.io.Serializable;
+
+public enum RoomStyle implements Serializable {
+
+        STANDARD,
+        DELUXE,
+        SUITE,
+        FAMILY
+
 }

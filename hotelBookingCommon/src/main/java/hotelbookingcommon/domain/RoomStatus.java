@@ -1,4 +1,10 @@
 package hotelbookingcommon.domain;
 
-public enum RoomStatus {
+import java.io.Serializable;
+
+public enum RoomStatus implements Serializable {
+
+    AVAILABLE,
+    OCCUPIED,
+    MAINTENANCE
 }

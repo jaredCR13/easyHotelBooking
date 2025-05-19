@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.Hotel;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
+import hotelbookingcommon.domain.Room;
 import hotelbookingserver.service.HotelService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -133,6 +134,45 @@ public class MainInterfaceController  {
                 alert.setContentText(content);
                 alert.showAndWait();
         }
+
+        @FXML
+        void roomOptionsOnAction(){
+                RoomOptionsController controller = Utility.loadPage2("roomoptions.fxml", bp);
+                if (controller != null) {
+                        controller.setMainController(this); // 👈 Aquí se pasa la referencia correctamente
+                } else {
+                        logger.error("No se pudo cargar roomoptions.fxml o el controlador es null.");
+                        mostrarAlerta("Error", "No se pudo cargar la página de opciones de habitaciones.");
+                }
+        }
+
+        public void registerRoom(Room room) {
+                Request request = new Request("registerRoom", room);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("201".equalsIgnoreCase(response.getStatus())) {
+                        mostrarAlerta("Éxito", "Habitación registrada correctamente.");
+                } else {
+                        mostrarAlerta("Error", "No se pudo registrar la habitación: " + response.getMessage());
+                }
+        }
+
+        public void consultRoom(int roomNumber) {
+                Request request = new Request("getRoom", roomNumber);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        Room room = gson.fromJson(gson.toJson(response.getData()), Room.class);
+                        mostrarAlerta("Habitación encontrada",
+                                "Número: " + room.getRoomNumber() +
+                                        "\nPrecio: " + room.getRoomPrice() +
+                                        "\nEstado: " + room.getStatus() +
+                                        "\nEstilo: " + room.getStyle());
+                } else {
+                        mostrarAlerta("Error", "Habitación no encontrada.");
+                }
+        }
+
 }
 
 

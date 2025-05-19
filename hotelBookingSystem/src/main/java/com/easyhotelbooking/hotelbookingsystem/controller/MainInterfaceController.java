@@ -125,6 +125,30 @@ public class MainInterfaceController  {
                 }
         }
 
+        public void updateHotel(Hotel hotel) {
+                Request request = new Request("updateHotel", hotel);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus())) {
+                        mostrarAlerta("Éxito", "Hotel actualizado correctamente.");
+                        loadHotelNames();
+                } else {
+                        mostrarAlerta("Error", "No se pudo actualizar el hotel: " + response.getMessage());
+                }
+        }
+
+        public void deleteHotel(int hotelNumber) {
+                Request request = new Request("deleteHotel", hotelNumber);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus())) {
+                        mostrarAlerta("Éxito", "Hotel eliminado correctamente.");
+                        loadHotelNames();
+                } else {
+                        mostrarAlerta("Error", "No se pudo eliminar el hotel: " + response.getMessage());
+                }
+        }
+
         private void mostrarAlerta(String title, String content) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle(title);
@@ -168,30 +192,6 @@ public class MainInterfaceController  {
                                         "\nEstilo: " + room.getStyle());
                 } else {
                         mostrarAlerta("Error", "Habitación no encontrada.");
-                }
-        }
-
-        public void updateHotel(Hotel hotel) {
-                Request request = new Request("updateHotel", hotel);
-                Response response = ClientConnectionManager.sendRequest(request);
-
-                if ("200".equalsIgnoreCase(response.getStatus())) {
-                        mostrarAlerta("Éxito", "Hotel actualizado correctamente.");
-                        loadHotelNames();
-                } else {
-                        mostrarAlerta("Error", "No se pudo actualizar el hotel: " + response.getMessage());
-                }
-        }
-
-        public void deleteHotel(int hotelNumber) {
-                Request request = new Request("deleteHotel", hotelNumber);
-                Response response = ClientConnectionManager.sendRequest(request);
-
-                if ("200".equalsIgnoreCase(response.getStatus())) {
-                        mostrarAlerta("Éxito", "Hotel eliminado correctamente.");
-                        loadHotelNames();
-                } else {
-                        mostrarAlerta("Error", "No se pudo eliminar el hotel: " + response.getMessage());
                 }
         }
 

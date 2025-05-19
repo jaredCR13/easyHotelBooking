@@ -35,6 +35,21 @@ public class Utility {
             e.printStackTrace();
         }
     }
+
+    public static <T> T loadPage2(String fxmlFileName, javafx.scene.layout.BorderPane bp) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Utility.class.getResource("/" + fxmlFileName));
+            Parent view = loader.load();
+            bp.setCenter(view);
+            return loader.getController(); // 👈 Devuelve el controlador
+        } catch (IOException e) {
+            System.out.println("❌ Error loading center content: " + fxmlFileName);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 }
 
 

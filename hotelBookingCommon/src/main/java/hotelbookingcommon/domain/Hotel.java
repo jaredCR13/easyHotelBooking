@@ -2,7 +2,7 @@ package hotelbookingcommon.domain;
 
 import java.io.Serializable;
 
-public class Hotel  {
+public class Hotel  implements Serializable{
     private int numHotel;
     private String hotelName;
     private String hotelLocation;
@@ -36,4 +36,14 @@ public class Hotel  {
     public void setHotelLocation(String hotelLocation) {
         this.hotelLocation = hotelLocation;
     }
+
+    @Override
+    public String toString() {
+        return "Hotel{" +
+                "hotelId=" + numHotel +
+                ", hotelName='" + hotelName + '\'' +
+                ", hotelLocation='" + hotelLocation + '\'' +
+                "}";
+    }
+
 }

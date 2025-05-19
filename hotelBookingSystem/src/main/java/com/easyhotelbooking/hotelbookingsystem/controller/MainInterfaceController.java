@@ -19,6 +19,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,35 +53,85 @@ public class MainInterfaceController  {
 
         private final HotelService hotelService = new HotelService();
 
+        private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
+        private Gson gson = new Gson();
+
         @FXML
         public void initialize() {
-           loadHotelNames();
-            }
+                loadHotelNames();
+        }
 
         @FXML
         void hotelOptionsOnAction() {
-               Utility.loadPage("hoteloptions.fxml",bp);
+                HotelOptionsController controller = Utility.loadPage2("hoteloptions.fxml", bp);
+                if (controller != null) {
+                        controller.setMainController(this); // 👈 Aquí se pasa la referencia correctamente
+                } else {
+                        logger.error("No se pudo cargar hoteloptions.fxml o el controlador es null.");
+                        mostrarAlerta("Error", "No se pudo cargar la página de opciones de hotel.");
+                }
         }
+
+
 
         private void loadHotelNames() {
                 Request request = new Request("getHotels", null);
                 Response response = ClientConnectionManager.sendRequest(request);
 
-                if ("OK".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
-                        // Convertir la lista de hoteles desde JSON a List<Hotel>
-                        Gson gson = new Gson();
-                        List<Hotel> hotelList = gson.fromJson(gson.toJson(response.getData()),
-                                new TypeToken<List<Hotel>>() {}.getType());
-
-                        // Obtener los nombres y llenar el combo
-                        List<String> names = hotelList.stream()
-                                .map(Hotel::getHotelName)
-                                .collect(Collectors.toList());
-
+                if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        List<Hotel> hotelList = gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<Hotel>>() {
+                        }.getType());
+                        List<String> names = hotelList.stream().map(Hotel::getHotelName).collect(Collectors.toList());
+                        hotelCombo.getItems().clear();
                         hotelCombo.getItems().addAll(names);
+                        hotelCombo.setValue(names.isEmpty() ? null : names.get(0));
                 } else {
-                        System.out.println("❌ Error al obtener hoteles: " + response.getMessage());
+                        String message = response != null ? response.getMessage() : "Error desconocido al obtener hoteles";
+                        logger.error("Error al obtener hoteles: {}", message);
+                        mostrarAlerta("Error", "Error al obtener hoteles: " + message);
                 }
+        }
+
+        public void registerHotel(Hotel hotel) {
+                Request request = new Request("registerHotel", hotel); // ✅ CAMBIO: operación correcta
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("201".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        logger.info("Hotel registrado exitosamente: {}", hotel);
+                        mostrarAlerta("Éxito", "Hotel registrado exitosamente.");
+
+                        List<Hotel> updatedHotelList = gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<Hotel>>() {}.getType());
+                        List<String> names = updatedHotelList.stream().map(Hotel::getHotelName).collect(Collectors.toList());
+                        hotelCombo.getItems().clear();
+                        hotelCombo.getItems().addAll(names);
+                        hotelCombo.setValue(names.isEmpty() ? null : names.get(0));
+                } else {
+                        String message = response != null ? response.getMessage() : "Error desconocido al registrar hotel";
+                        logger.error("Error al registrar hotel: {}", message);
+                        mostrarAlerta("Error", "Error al registrar hotel: " + message);
+                }
+        }
+
+        public void consultHotel(int hotelNumber) {
+                Request request = new Request("getHotel", hotelNumber);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        Hotel hotel = gson.fromJson(gson.toJson(response.getData()), Hotel.class); // ✅ conversión segura
+                        logger.info("Hotel consultado exitosamente: {}", hotel);
+                        mostrarAlerta("Información del Hotel", "Número: " + hotel.getNumHotel() + "\nNombre: " + hotel.getHotelName() + "\nUbicación: " + hotel.getHotelLocation());
+                } else {
+                        String message = response != null ? response.getMessage() : "No se encontró el hotel";
+                        logger.error("Error al consultar hotel: {}", message);
+                        mostrarAlerta("Error", message);
+                }
+        }
+
+        private void mostrarAlerta(String title, String content) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle(title);
+                alert.setContentText(content);
+                alert.showAndWait();
         }
 }
 

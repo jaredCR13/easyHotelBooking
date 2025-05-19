@@ -66,6 +66,27 @@ public class HotelService {
         }
     }
 
+    public Hotel updateHotel(Hotel updatedHotel) {
+        List<Hotel> hoteles = loadHotels();
+        for (int i = 0; i < hoteles.size(); i++) {
+            if (hoteles.get(i).getNumHotel() == updatedHotel.getNumHotel()) {
+                hoteles.set(i, updatedHotel);
+                saveHotels(hoteles);
+                return updatedHotel;
+            }
+        }
+        return null;
+    }
+
+    public boolean deleteHotel(int hotelNumber) {
+        List<Hotel> hoteles = loadHotels();
+        boolean removed = hoteles.removeIf(h -> h.getNumHotel() == hotelNumber);
+        if (removed) {
+            saveHotels(hoteles);
+        }
+        return removed;
+    }
+
     // Ejemplo de uso del método saveHotels (podría estar en otra parte, como en el ProtocolHandler)
     public static void main(String[] args) {
         HotelService hotelService = new HotelService();

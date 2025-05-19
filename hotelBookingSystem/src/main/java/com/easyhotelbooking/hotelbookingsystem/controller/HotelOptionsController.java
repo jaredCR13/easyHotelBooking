@@ -114,6 +114,48 @@ import org.apache.logging.log4j.Logger;
             }
         }
 
+        @FXML
+        void modifyHotelOnAction() {
+            try {
+                String numberStr = hotelNumberField.getText();
+                String name = nameField.getText();
+                String location = locationField.getText();
+
+                if (numberStr.isEmpty() || name.isEmpty() || location.isEmpty()) {
+                    mostrarAlerta("Error", "Por favor, complete todos los campos.");
+                    return;
+                }
+
+                int number = Integer.parseInt(numberStr);
+                Hotel hotel = new Hotel(number, name, location);
+                mainController.updateHotel(hotel);
+            } catch (NumberFormatException e) {
+                mostrarAlerta("Error", "Número inválido.");
+            } catch (Exception e) {
+                logger.error("Error al modificar hotel: {}", e.getMessage());
+                mostrarAlerta("Error", "Ocurrió un error al modificar el hotel.");
+            }
+        }
+
+        @FXML
+        void removeHotelOnAction() {
+            try {
+                String numberStr = hotelNumberField.getText();
+                if (numberStr.isEmpty()) {
+                    mostrarAlerta("Error", "Ingrese el número de hotel a eliminar.");
+                    return;
+                }
+
+                int number = Integer.parseInt(numberStr);
+                mainController.deleteHotel(number);
+            } catch (NumberFormatException e) {
+                mostrarAlerta("Error", "Número inválido.");
+            } catch (Exception e) {
+                logger.error("Error al eliminar hotel: {}", e.getMessage());
+                mostrarAlerta("Error", "Ocurrió un error al eliminar el hotel.");
+            }
+        }
+
         private void mostrarAlerta(String title, String content) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle(title);

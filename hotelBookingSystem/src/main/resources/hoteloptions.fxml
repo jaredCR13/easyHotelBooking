@@ -45,9 +45,9 @@
     <center>
         <HBox alignment="CENTER" spacing="20" style="-fx-padding: 30;">
             <Button fx:id="registerButton" onAction="#registerHotelOnAction" prefWidth="120" text="Register Hotel" />
-            <Button fx:id="removeButton" prefWidth="120" text="Remove Hotel" />
+            <Button fx:id="removeButton" onAction="#removeHotelOnAction" prefWidth="120" text="Remove Hotel" />
             <Button fx:id="consultButton" onAction="#consultHotelOnAction" prefWidth="120" text="Consult Hotel" />
-            <Button fx:id="modifyButton" prefWidth="120" text="Modify Hotel" />
+            <Button fx:id="modifyButton" onAction="#modifyHotelOnAction" prefWidth="120" text="Modify Hotel" />
          <Button fx:id="goBack" layoutX="40.0" layoutY="110.0" onAction="#goBackOnAction" prefWidth="120" text="Go back" />
         </HBox>
     </center>

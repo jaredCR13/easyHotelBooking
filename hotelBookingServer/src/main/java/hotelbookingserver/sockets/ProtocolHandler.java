@@ -122,6 +122,36 @@ public class ProtocolHandler {
                     }
                 }
 
+                case "updateHotel": {
+                    try {
+                        Hotel updated = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
+                        Hotel result = hotelService.updateHotel(updated);
+                        if (result != null) {
+                            return new Response("200", "Hotel actualizado", result);
+                        } else {
+                            return new Response("404", "Hotel no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al actualizar hotel", e);
+                        return new Response("500", "Error interno al actualizar hotel", null);
+                    }
+                }
+
+                case "deleteHotel": {
+                    try {
+                        int number = parseIntFromRequest(request.getData());
+                        boolean deleted = hotelService.deleteHotel(number);
+                        if (deleted) {
+                            return new Response("200", "Hotel eliminado", null);
+                        } else {
+                            return new Response("404", "Hotel no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar hotel", e);
+                        return new Response("500", "Error interno al eliminar hotel", null);
+                    }
+                }
+
                 default:
                     logger.warn("Acción no reconocida: {}", request.getAction());
                     return new Response("400", "Acción no reconocida: " + request.getAction(), null);

@@ -15,7 +15,7 @@ public class HotelService {
     private final List<Hotel> hoteles = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(HotelService.class);
 
-    private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFiles\\HotelServiceData/hotels.dat"; // Nombre del archivo
+    private static final String HOTEL_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\hotels.dat"; // Nombre del archivo
 
 
     public HotelService() {

@@ -10,7 +10,7 @@ import java.net.Socket;
 
 public class ClientConnectionManager {
 
-    private static final String HOST = "192.168.1.174";
+    private static final String HOST = "192.168.18.61";
     private static final int PORT = 5000;
     private static final Gson gson = new Gson();
 

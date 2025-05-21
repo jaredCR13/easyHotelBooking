@@ -1,85 +1,88 @@
 package hotelbookingserver.service;
 
-
 import hotelbookingcommon.domain.Room;
-import hotelbookingcommon.domain.RoomStatus;
-import hotelbookingcommon.domain.RoomStyle;
+import hotelbookingserver.datamanager.RoomData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class RoomService {
-    private final List<Room> rooms = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(RoomService.class);
+    private static final String ROOM_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelRoomFiles\\rooms.dat";
 
-    private static final String ROOM_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\rooms.dat";
+    private RoomData roomData;
 
     public RoomService() {
-        // Los datos se cargan desde archivo, no se inicializan aquí.
-    }
-
-    public List<Room> addRoom(Room room) {
-        List<Room> currentRooms = loadRooms();
-        currentRooms.add(room);
-        saveRooms(currentRooms);
-        return currentRooms;
-    }
-
-    public List<Room> getAllRooms() {
-        logger.info("Obteniendo todas las habitaciones");
-        List<Room> currentRooms = loadRooms();
-        return currentRooms != null ? currentRooms : new ArrayList<>();
-    }
-
-    public void saveRooms(List<Room> roomList) {
-        logger.info("Guardando habitaciones en archivo binario: {}", ROOM_FILE);
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ROOM_FILE))) {
-            oos.writeObject(roomList);
+        try {
+            roomData = new RoomData(new File(ROOM_FILE));
         } catch (IOException e) {
-            logger.error("Error al guardar habitaciones en {}: {}", ROOM_FILE, e.getMessage());
-            throw new RuntimeException("Error al guardar habitaciones", e);
+            logger.error("Error al abrir archivo de habitaciones: {}", e.getMessage());
+            throw new RuntimeException("No se pudo inicializar RoomData", e);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Room> loadRooms() {
-        File file = new File(ROOM_FILE);
-        if (!file.exists()) {
-            logger.warn("El archivo de habitaciones {} no existe. Se devuelve una lista vacía.", ROOM_FILE);
-            return new ArrayList<>();
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            List<Room> loaded = (List<Room>) ois.readObject();
-            logger.info("Habitaciones cargadas desde {}: {}", ROOM_FILE, loaded.size());
-            return loaded;
-        } catch (IOException | ClassNotFoundException e) {
-            logger.error("Error al cargar habitaciones desde {}: {}", ROOM_FILE, e.getMessage());
-            return new ArrayList<>();
+    /**
+     * Agrega una nueva habitación al archivo.
+     */
+    public boolean addRoom(Room room) {
+        try {
+            roomData.insert(room);
+            logger.info("Habitación agregada: {}", room);
+            return true;
+        } catch (IOException e) {
+            logger.error("Error al agregar habitación: {}", e.getMessage());
+            return false;
         }
     }
 
+    /**
+     * Devuelve todas las habitaciones.
+     */
+    public List<Room> getAllRooms() {
+        try {
+            return roomData.findAll();
+        } catch (IOException e) {
+            logger.error("Error al obtener habitaciones: {}", e.getMessage());
+            throw new RuntimeException("Error al obtener habitaciones", e);
+        }
+    }
 
-    /*// Prueba independiente
-    public static void main(String[] args) {
-        RoomService roomService = new RoomService();
-        List<Room> rooms = new ArrayList<>();
-        rooms.add(new Room(101, 900, "Bonita", "Disponible","estandar",));
-        rooms.add(new Room(202, 300, "Bien bonita", "Ocupado"));
-        roomService.saveRooms(rooms);
+    /**
+     * Actualiza una habitación existente.
+     */
+    public boolean updateRoom(Room room) {
+        try {
+            boolean updated = roomData.update(room);
+            if (updated) {
+                logger.info("Habitación actualizada: {}", room);
+            } else {
+                logger.warn("No se encontró habitación con número: {}", room.getRoomNumber());
+            }
+            return updated;
+        } catch (IOException e) {
+            logger.error("Error al actualizar habitación: {}", e.getMessage());
+            return false;
+        }
+    }
 
-        List<Room> loaded = roomService.getAllRooms();
-        System.out.println("Habitaciones cargadas: " + loaded);
-    }*/
-
-    public static void main(String[] args) {
-        RoomService srv = new RoomService();
-
-        srv.addRoom(new Room(101, 900, "Bonita", RoomStatus.AVAILABLE, RoomStyle.DELUXE, Collections.emptyList()));
-        System.out.println(srv.getAllRooms());
+    /**
+     * Elimina una habitación por su número.
+     */
+    public boolean deleteRoom(int roomNumber) {
+        try {
+            boolean deleted = roomData.delete(roomNumber);
+            if (deleted) {
+                logger.info("Habitación eliminada con número: {}", roomNumber);
+            } else {
+                logger.warn("No se encontró habitación para eliminar: {}", roomNumber);
+            }
+            return deleted;
+        } catch (IOException e) {
+            logger.error("Error al eliminar habitación: {}", e.getMessage());
+            return false;
+        }
     }
 }

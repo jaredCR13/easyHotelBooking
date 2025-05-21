@@ -60,12 +60,16 @@ public class HotelOptionsController {
 
         @FXML
         public void initialize(){
-            numberHotelRegister.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getNumHotel()).asObject());
-            nameHotelRegister.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getHotelName()));
-            locationHotelRegister.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getHotelLocation()));
+            numberHotelRegister.setCellValueFactory(data ->
+                    new SimpleIntegerProperty(data.getValue().getNumHotel()).asObject());
+
+            nameHotelRegister.setCellValueFactory(data ->
+                    new SimpleStringProperty(data.getValue().getHotelName()));
+            locationHotelRegister.setCellValueFactory(data ->
+                    new SimpleStringProperty(data.getValue().getHotelLocation()));
+
             loadHotelsIntoRegister();
 
-            // Permitir seleccionar un hotel para modificar
             hotelRegister.setOnMouseClicked(event -> {
                 Hotel selected = hotelRegister.getSelectionModel().getSelectedItem();
                 if (selected != null) {

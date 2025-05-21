@@ -85,14 +85,48 @@ public class ProtocolHandler {
                 case "registerRoom": {
                     try {
                         Room newRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
-                        List<Room> updatedRooms = roomService.addRoom(newRoom);
-                        logger.info("Habitación registrada: {}", newRoom);
-                        return new Response("201", "Habitación registrada con éxito", updatedRooms);
+                        boolean added = roomService.addRoom(newRoom);
+                        if (added) {
+                            return new Response("201", "Habitación registrada con éxito", newRoom);
+                        } else {
+                            return new Response("500", "No se pudo registrar la habitación", null);
+                        }
+
                     } catch (Exception e) {
                         logger.error("Error al registrar habitación", e);
                         return new Response("500", "Error interno al registrar habitación", null);
                     }
                 }
+                case "updateRoom": {
+                    try {
+                        Room updatedRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
+                        boolean updated = roomService.updateRoom(updatedRoom);
+                        if (updated) {
+                            return new Response("200", "Habitación actualizada con éxito", updatedRoom);
+                        } else {
+                            return new Response("404", "Habitación no encontrada", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al actualizar habitación", e);
+                        return new Response("500", "Error interno al actualizar habitación", null);
+                    }
+                }
+
+                case "deleteRoom": {
+                    try {
+                        int roomNumber = parseIntFromRequest(request.getData());
+                        boolean deleted = roomService.deleteRoom(roomNumber);
+                        if (deleted) {
+                            return new Response("200", "Habitación eliminada con éxito", null);
+                        } else {
+                            return new Response("404", "Habitación no encontrada", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar habitación", e);
+                        return new Response("500", "Error interno al eliminar habitación", null);
+                    }
+                }
+
 
                 //FrontDesks
                 case "registerFrontDesk": {
@@ -140,7 +174,7 @@ public class ProtocolHandler {
                 case "deleteHotel": {
                     try {
                         int number = parseIntFromRequest(request.getData());
-                        boolean deleted = hotelService.deleteHotel(number);
+                        boolean deleted = hotelService.deleteHotel(number);  // <-- CORREGIR: antes estaba incompleto
                         if (deleted) {
                             return new Response("200", "Hotel eliminado", null);
                         } else {

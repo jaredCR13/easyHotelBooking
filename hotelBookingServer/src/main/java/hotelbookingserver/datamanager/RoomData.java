@@ -20,6 +20,7 @@ public class RoomData {
 
     public RoomData(File file) throws FileNotFoundException {
         raf = new RandomAccessFile(file, "rw");
+
     }
 
     private byte[] toFixedBytes(String data, int length) {

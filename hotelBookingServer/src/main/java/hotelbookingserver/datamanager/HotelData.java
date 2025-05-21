@@ -13,7 +13,10 @@ public class HotelData {
     private RandomAccessFile raf;
 
     public HotelData(File file) throws FileNotFoundException {
+
+
         raf = new RandomAccessFile(file, "rw");
+
     }
 
     private byte[] toFixedBytes(String dato, int tamano) {

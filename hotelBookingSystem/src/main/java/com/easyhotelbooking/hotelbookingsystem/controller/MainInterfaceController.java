@@ -59,6 +59,8 @@ public class MainInterfaceController  {
                 loadHotelNames();
         }
 
+        // =================== HOTEL CRUD =========================
+
         @FXML
         void hotelOptionsOnAction() {
                 HotelOptionsController controller = Utility.loadPage2("hoteloptions.fxml", bp);
@@ -69,8 +71,6 @@ public class MainInterfaceController  {
                         mostrarAlerta("Error", "No se pudo cargar la página de opciones de hotel.");
                 }
         }
-
-
 
         private void loadHotelNames() {
                 Request request = new Request("getHotels", null);
@@ -91,7 +91,7 @@ public class MainInterfaceController  {
         }
 
         public void registerHotel(Hotel hotel) {
-                Request request = new Request("registerHotel", hotel); // ✅ CAMBIO: operación correcta
+                Request request = new Request("registerHotel", hotel);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("201".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
@@ -156,6 +156,9 @@ public class MainInterfaceController  {
                 alert.showAndWait();
         }
 
+        // ================= ROOM CRUD =====================
+
+
         @FXML
         void roomOptionsOnAction(){
                 RoomOptionsController controller = Utility.loadPage2("roomoptions.fxml", bp);
@@ -194,6 +197,34 @@ public class MainInterfaceController  {
                         mostrarAlerta("Error", "Habitación no encontrada.");
                 }
         }
+
+        public void updateRoom(Room room) {
+                Request request = new Request("updateRoom", room);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus())) {
+                        mostrarAlerta("Éxito", "Habitación actualizada correctamente.");
+                        // Si quieres, puedes refrescar alguna lista o comboBox relacionado a las habitaciones
+                } else {
+                        mostrarAlerta("Error", "No se pudo actualizar la habitación: " + response.getMessage());
+                }
+        }
+
+        public void deleteRoom(int roomNumber) {
+                Request request = new Request("deleteRoom", roomNumber);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus())) {
+                        mostrarAlerta("Éxito", "Habitación eliminada correctamente.");
+                        // También aquí podrías actualizar listas o combos de habitaciones
+                } else {
+                        mostrarAlerta("Error", "No se pudo eliminar la habitación: " + response.getMessage());
+                }
+        }
+
+
+        //==================== RECEPCIONIST CRUD =================================
+
 
         @FXML
         void frontDeskOptionsOnAction() {

@@ -7,12 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
 import hotelbookingserver.service.HotelService;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -20,7 +15,6 @@ import javafx.scene.layout.StackPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -227,18 +221,18 @@ public class MainInterfaceController  {
 
 
         @FXML
-        void frontDeskOptionsOnAction() {
-                FrontDeskOptionsController controller = Utility.loadPage2("frontdeskoptions.fxml", bp);
+        void frontDeskClerkOptionsOnAction() {
+                FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this); // Referencia al controlador principal
                 } else {
-                        logger.error("No se pudo cargar frontdeskoptions.fxml o el controlador es null.");
+                        logger.error("No se pudo cargar frontdeskoptionsclerk.fxml o el controlador es null.");
                         mostrarAlerta("Error", "No se pudo cargar la página de opciones de recepcionista.");
                 }
         }
 
-        public void registerFrontDesk(FrontDesk frontDesk) {
-                Request request = new Request("registerFrontDesk", frontDesk);
+        public void registerFrontDeskClerk(FrontDeskClerk frontDeskClerk) {
+                Request request = new Request("registerFrontDeskClerk", frontDeskClerk);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("201".equalsIgnoreCase(response.getStatus())) {
@@ -248,17 +242,17 @@ public class MainInterfaceController  {
                 }
         }
 
-        public void consultFrontDesk(String employeeId) {
-                Request request = new Request("getFrontDesk", employeeId);
+        public void consultFrontDeskClerk(String employeeId) {
+                Request request = new Request("getFrontDeskClerk", employeeId);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
-                        FrontDesk frontDesk = gson.fromJson(gson.toJson(response.getData()), FrontDesk.class);
+                        FrontDeskClerk frontDeskClerk = gson.fromJson(gson.toJson(response.getData()), FrontDeskClerk.class);
                         mostrarAlerta("Recepcionista encontrado",
-                                "N° Empleado: " + frontDesk.getEmployeeId() +
-                                        "\nNombre: " + frontDesk.getName() + " " + frontDesk.getLastName() +
-                                        "\nTeléfono: " + frontDesk.getPhoneNumber() +
-                                        "\nUsuario: " + frontDesk.getUser());
+                                "N° Empleado: " + frontDeskClerk.getEmployeeId() +
+                                        "\nNombre: " + frontDeskClerk.getName() + " " + frontDeskClerk.getLastName() +
+                                        "\nTeléfono: " + frontDeskClerk.getPhoneNumber() +
+                                        "\nUsuario: " + frontDeskClerk.getUser());
                 } else {
                         mostrarAlerta("Error", "Recepcionista no encontrado.");
                 }

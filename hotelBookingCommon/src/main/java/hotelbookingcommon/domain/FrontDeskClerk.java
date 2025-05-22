@@ -2,7 +2,7 @@ package hotelbookingcommon.domain;
 
 import java.io.Serializable;
 
-public class FrontDesk implements Serializable {
+public class FrontDeskClerk implements Serializable {
     private String employeeId;
     private String name;
     private String lastName;
@@ -10,7 +10,7 @@ public class FrontDesk implements Serializable {
     private String user;
     private String phoneNumber;
 
-    public FrontDesk(String employeeId, String name, String lastName, String password, String user, String phoneNumber) {
+    public FrontDeskClerk(String employeeId, String name, String lastName, String password, String user, String phoneNumber) {
         this.employeeId = employeeId;
         this.name = name;
         this.lastName = lastName;
@@ -69,12 +69,12 @@ public class FrontDesk implements Serializable {
 
     @Override
     public String toString() {
-        return "FrontDeskStaff{" +
-                "employeeNumber=" + employeeId +
-                ", firstName='" + name + '\'' +
+        return "FrontDeskClerk{" +
+                "employeeId=" + employeeId +
+                ", name='" + name + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", phone='" + phoneNumber + '\'' +
-                ", username='" + user + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", usern='" + user + '\'' +
                 '}';
     }
 }

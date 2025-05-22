@@ -11,7 +11,7 @@ import java.util.List;
 
 public class RoomService {
     private static final Logger logger = LogManager.getLogger(RoomService.class);
-    private static final String ROOM_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\easyHotelBooking\\hotelBookingServer\\rooms.dat";
+    private static final String ROOM_FILE = "C:\\Users\\Lexis\\Documents\\ProyectoProgra2\\easyHotelBooking\\hotelBookingServer\\rooms.dat";
 
     private RoomData roomData;
 

@@ -2,10 +2,10 @@ package hotelbookingserver.sockets;
 
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.*;
-import hotelbookingserver.service.FrontDeskService;
+import hotelbookingserver.service.FrontDeskClerkService;
 import hotelbookingserver.service.HotelService;
 import hotelbookingserver.service.RoomService;
-import hotelbookingcommon.domain.FrontDesk;
+import hotelbookingcommon.domain.FrontDeskClerk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,7 +15,7 @@ public class ProtocolHandler {
     private static final Logger logger = LogManager.getLogger(ProtocolHandler.class);
     private final HotelService hotelService = new HotelService();
     private final RoomService roomService = new RoomService();
-    private final FrontDeskService frontDeskService = new FrontDeskService();
+    private final FrontDeskClerkService frontDeskClerkService = new FrontDeskClerkService();
 
     private final Gson gson = new Gson();
 
@@ -24,7 +24,7 @@ public class ProtocolHandler {
         try {
             switch (request.getAction()) {
 
-                //  HOTELS
+                // =================== HOTEL =========================
                 case "getHotels": {
                     List<Hotel> hotels = hotelService.getAllHotels();
                     logger.debug("Retrieved {} hotels", hotels.size());
@@ -59,7 +59,37 @@ public class ProtocolHandler {
                     }
                 }
 
-                //  ROOMS
+                case "updateHotel": {
+                    try {
+                        Hotel updated = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
+                        Hotel result = hotelService.updateHotel(updated);
+                        if (result != null) {
+                            return new Response("200", "Hotel actualizado", result);
+                        } else {
+                            return new Response("404", "Hotel no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al actualizar hotel", e);
+                        return new Response("500", "Error interno al actualizar hotel", null);
+                    }
+                }
+
+                case "deleteHotel": {
+                    try {
+                        int number = parseIntFromRequest(request.getData());
+                        boolean deleted = hotelService.deleteHotel(number);  // <-- CORREGIR: antes estaba incompleto
+                        if (deleted) {
+                            return new Response("200", "Hotel eliminado", null);
+                        } else {
+                            return new Response("404", "Hotel no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar hotel", e);
+                        return new Response("500", "Error interno al eliminar hotel", null);
+                    }
+                }
+
+                // =================== ROOMS =========================
                 case "getRooms": {
                     List<Room> rooms = roomService.getAllRooms();
                     logger.debug("Habitaciones cargadas: {}", rooms.size());
@@ -128,23 +158,23 @@ public class ProtocolHandler {
                 }
 
 
-                //FrontDesks
-                case "registerFrontDesk": {
+                // =================== FRONT DESK CLERK =========================
+                case "registerFrontDeskClerk": {
                     try {
-                        FrontDesk frontDesk = gson.fromJson(gson.toJson(request.getData()), FrontDesk.class);
-                        List<FrontDesk> updatedFrontDeskList = frontDeskService.addFrontDesk(frontDesk);
-                        logger.info("Recepcionista registrado: {}", frontDesk);
-                        return new Response("201", "Recepcionista registrado con éxito", updatedFrontDeskList);
+                        FrontDeskClerk frontDeskClerk = gson.fromJson(gson.toJson(request.getData()), FrontDeskClerk.class);
+                        List<FrontDeskClerk> updatedFrontDeskClerkList = frontDeskClerkService.addFrontDesk(frontDeskClerk);
+                        logger.info("Recepcionista registrado: {}", frontDeskClerk);
+                        return new Response("201", "Recepcionista registrado con éxito", updatedFrontDeskClerkList);
                     } catch (Exception e) {
                         logger.error("Error al registrar recepcionista", e);
                         return new Response("500", "Error interno al registrar recepcionista", null);
                     }
                 }
 
-                case "getFrontDesk": {
+                case "getFrontDeskClerk": {
                     try {
                         String employeeId = String.valueOf(parseIntFromRequest(request.getData()));
-                        FrontDesk found = frontDeskService.findByEmployeeId(employeeId);
+                        FrontDeskClerk found = frontDeskClerkService.findByEmployeeId(employeeId);
                         if (found != null) {
                             return new Response("200", "Recepcionista encontrado", found);
                         } else {
@@ -153,36 +183,6 @@ public class ProtocolHandler {
                     } catch (Exception e) {
                         logger.error("Error al consultar recepcionista", e);
                         return new Response("500", "Error interno al consultar recepcionista", null);
-                    }
-                }
-
-                case "updateHotel": {
-                    try {
-                        Hotel updated = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
-                        Hotel result = hotelService.updateHotel(updated);
-                        if (result != null) {
-                            return new Response("200", "Hotel actualizado", result);
-                        } else {
-                            return new Response("404", "Hotel no encontrado", null);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error al actualizar hotel", e);
-                        return new Response("500", "Error interno al actualizar hotel", null);
-                    }
-                }
-
-                case "deleteHotel": {
-                    try {
-                        int number = parseIntFromRequest(request.getData());
-                        boolean deleted = hotelService.deleteHotel(number);  // <-- CORREGIR: antes estaba incompleto
-                        if (deleted) {
-                            return new Response("200", "Hotel eliminado", null);
-                        } else {
-                            return new Response("404", "Hotel no encontrado", null);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error al eliminar hotel", e);
-                        return new Response("500", "Error interno al eliminar hotel", null);
                     }
                 }
 

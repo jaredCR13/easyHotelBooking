@@ -16,16 +16,16 @@
 
 <BorderPane fx:id="bp" prefHeight="600" prefWidth="900" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController">
 
-    <!-- 🔹 TOP: Barra de búsqueda -->
+    <!--  TOP: Barra de búsqueda -->
     <top>
         <VBox spacing="10" style="-fx-background-color: #007bff;" BorderPane.alignment="CENTER">
          <MenuBar>
            <menus>
              <Menu mnemonicParsing="false" text="Options">
                   <items>
-                     <MenuItem mnemonicParsing="false" onAction="#hotelOptionsOnAction" text="HotelOptions" />
+                     <MenuItem mnemonicParsing="false" onAction="#hotelOptionsOnAction" text="Hotel Options" />
                      <MenuItem mnemonicParsing="false" onAction="#roomOptionsOnAction" text="Room Options" />
-                      <MenuItem mnemonicParsing="false" onAction="#frontDeskOptionsOnAction" text="Front Desk Options" />
+                      <MenuItem mnemonicParsing="false" onAction="#frontDeskClerkOptionsOnAction" text="Front Desk Clerk Options" />
                   </items>
              </Menu>
            </menus>
@@ -42,7 +42,7 @@
         </VBox>
     </top>
 
-    <!-- 🔹 CENTER: Contenido dinámico MDI -->
+    <!--  CENTER: Contenido dinámico MDI -->
     <center>
         <VBox spacing="15" style="-fx-padding: 15;">
             <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Trending rooms" />

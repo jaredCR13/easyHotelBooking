@@ -8,16 +8,16 @@ public class Booking {
     private Guest guest;
     private Date starDate;
     private Date endDate;
-    private FrontDesk frontDesk;
+    private FrontDeskClerk frontDeskClerk;
     private int daysOfStay;
     private Room room;
 
-    public Booking(int bookingNumber, Guest guest, Date starDate, Date endDate, FrontDesk frontDesk, int daysOfStay, Room room) {
+    public Booking(int bookingNumber, Guest guest, Date starDate, Date endDate, FrontDeskClerk frontDeskClerk, int daysOfStay, Room room) {
         this.bookingNumber = bookingNumber;
         this.guest = guest;
         this.starDate = starDate;
         this.endDate = endDate;
-        this.frontDesk = frontDesk;
+        this.frontDeskClerk = frontDeskClerk;
         this.daysOfStay = daysOfStay;
         this.room = room;
     }
@@ -54,12 +54,12 @@ public class Booking {
         this.endDate = endDate;
     }
 
-    public FrontDesk getFrontDesk() {
-        return frontDesk;
+    public FrontDeskClerk getFrontDesk() {
+        return frontDeskClerk;
     }
 
-    public void setFrontDesk(FrontDesk frontDesk) {
-        this.frontDesk = frontDesk;
+    public void setFrontDesk(FrontDeskClerk frontDeskClerk) {
+        this.frontDeskClerk = frontDeskClerk;
     }
 
     public int getDaysOfStay() {

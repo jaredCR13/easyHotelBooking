@@ -16,11 +16,13 @@ public class RoomData {
     private static final int DESCRIPTION_SIZE = 100; // bytes
     private static final int STATUS_SIZE = 20; // enum name string
     private static final int STYLE_SIZE = 20;  // enum name string
-    private static final int RECORD_SIZE = ROOM_NUMBER_SIZE + ROOM_PRICE_SIZE + DESCRIPTION_SIZE + STATUS_SIZE + STYLE_SIZE;
+    private static final int HOTEL_ID_SIZE = 4; // int - Nuevo campo para el ID del hotel
+
+    // Se actualiza el tamaño del registro para incluir el ID del hotel
+    private static final int RECORD_SIZE = ROOM_NUMBER_SIZE + ROOM_PRICE_SIZE + DESCRIPTION_SIZE + STATUS_SIZE + STYLE_SIZE + HOTEL_ID_SIZE;
 
     public RoomData(File file) throws FileNotFoundException {
         raf = new RandomAccessFile(file, "rw");
-
     }
 
     private byte[] toFixedBytes(String data, int length) {
@@ -45,6 +47,7 @@ public class RoomData {
         raf.write(toFixedBytes(room.getDetailedDescription(), DESCRIPTION_SIZE));
         raf.write(toFixedBytes(room.getStatus().name(), STATUS_SIZE));
         raf.write(toFixedBytes(room.getStyle().name(), STYLE_SIZE));
+        raf.writeInt(room.getHotelId()); // Guardar el ID del hotel
     }
 
     public List<Room> findAll() throws IOException {
@@ -57,11 +60,13 @@ public class RoomData {
             String desc = readFixedString(DESCRIPTION_SIZE);
             String status = readFixedString(STATUS_SIZE);
             String style = readFixedString(STYLE_SIZE);
+            int hotelId = raf.readInt(); // Leer el ID del hotel
 
             Room room = new Room(number, price, desc,
                     RoomStatus.valueOf(status),
                     RoomStyle.valueOf(style),
-                    new ArrayList<>()); // No guarda imágenes
+                    new ArrayList<>(), // La lista de imágenes no se guarda aquí
+                    hotelId); // Pasar el ID del hotel al constructor
             rooms.add(room);
         }
 
@@ -78,12 +83,14 @@ public class RoomData {
             String desc = readFixedString(DESCRIPTION_SIZE);
             String status = readFixedString(STATUS_SIZE);
             String style = readFixedString(STYLE_SIZE);
+            int hotelId = raf.readInt(); // Leer el ID del hotel
 
             if (currentNumber == roomNumber) {
                 return new Room(currentNumber, price, desc,
                         RoomStatus.valueOf(status),
                         RoomStyle.valueOf(style),
-                        new ArrayList<>());
+                        new ArrayList<>(), // La lista de imágenes no se guarda aquí
+                        hotelId); // Pasar el ID del hotel al constructor
             }
         }
 
@@ -103,9 +110,9 @@ public class RoomData {
         }
 
         if (updated) {
-            raf.setLength(0);
+            raf.setLength(0); // Borra todo el archivo
             for (Room room : rooms) {
-                insert(room);
+                insert(room);     // Vuelve a escribir cada habitación
             }
         }
 
@@ -117,7 +124,7 @@ public class RoomData {
         boolean removed = rooms.removeIf(r -> r.getRoomNumber() == roomNumber);
 
         if (removed) {
-            raf.setLength(0);
+            raf.setLength(0); // Borra todo el archivo
             for (Room room : rooms) {
                 insert(room);
             }

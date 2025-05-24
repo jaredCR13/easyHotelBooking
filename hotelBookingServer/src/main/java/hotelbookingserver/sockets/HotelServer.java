@@ -1,6 +1,7 @@
 package hotelbookingserver.sockets;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -24,7 +25,7 @@ public class HotelServer {
 
     public void start() {
         try {
-            serverSocket = new ServerSocket(PORT);
+            serverSocket = new ServerSocket(PORT, 50, InetAddress.getByName("0.0.0.0"));
             logger.info("Servidor iniciado en el puerto {}", PORT);
             while (true) {
                 Socket clientSocket = serverSocket.accept();

@@ -26,6 +26,7 @@ public class HotelServer {
     public void start() {
         try {
             serverSocket = new ServerSocket(PORT, 50, InetAddress.getByName("0.0.0.0"));
+            //serverSocket = new ServerSocket(PORT);
             logger.info("Servidor iniciado en el puerto {}", PORT);
             while (true) {
                 Socket clientSocket = serverSocket.accept();

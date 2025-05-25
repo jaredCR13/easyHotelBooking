@@ -18,7 +18,7 @@
 
     <!--  TOP: Barra de búsqueda -->
     <top>
-        <VBox spacing="10" style="-fx-background-color: #007bff;" BorderPane.alignment="CENTER">
+        <VBox spacing="10" style="-fx-background-color: #095ebb;" BorderPane.alignment="CENTER">
          <MenuBar>
            <menus>
              <Menu mnemonicParsing="false" text="Options">

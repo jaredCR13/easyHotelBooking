@@ -13,8 +13,8 @@ import java.util.List;
 
 public class RoomService {
     private static final Logger logger = LogManager.getLogger(RoomService.class);
-    private static final String ROOM_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelRoomFiles\\rooms.dat";
-    private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelFiles\\hotels.dat"; // Ruta del archivo de hoteles
+    private static final String ROOM_FILE = "C:\\Users\\Lexis\\Documents\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelRoomFiles\\rooms.dat";
+    private static final String HOTEL_FILE = "C:\\Users\\Lexis\\Documents\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelFiles\\hotels.dat"; // Ruta del archivo de hoteles
 
     private RoomData roomData;
     private HotelData hotelData; // Instancia de HotelData

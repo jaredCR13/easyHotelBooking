@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" alignment="CENTER" style="-fx-padding: 20;"
+      xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/23.0.1"
+      fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.hotel.HotelConsult">
+
+    <Label text="Information Hotel" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+    <GridPane hgap="15" vgap="15">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+            <ColumnConstraints minWidth="200"/>
+        </columnConstraints>
+
+        <rowConstraints>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+        </rowConstraints>
+
+        <Label text="Number Hotel: " GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="numberHotel" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Name Hotel: " GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Label fx:id="nameHotel" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Locate Hotel: " GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <Label fx:id="locationHotel" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    </GridPane>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Button text="Go Back" onAction="#onClose" prefWidth="100" style="-fx-background-color: #dc3545; -fx-text-fill: white;" />
+    </HBox>
+</VBox>

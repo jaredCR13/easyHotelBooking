@@ -56,7 +56,7 @@ public class MainInterfaceController {
 
         @FXML
         void hotelOptionsOnAction() {
-                HotelOptionsController controller = Utility.loadPage2("hoteloptions.fxml", bp);
+                HotelOptionsController controller = Utility.loadPage2("hotelinterface/hoteloptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this); // Se pasa la referencia correctamente
                 } else {

@@ -9,7 +9,7 @@
 <BorderPane fx:id="bp" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.FrontDeskClerkOptionsController">
 
     <top>
-        <VBox spacing="10" style="-fx-background-color: #007bff; -fx-padding: 20;">
+        <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
             <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Front Desk Clerk Options" />
             <GridPane hgap="10" vgap="10">
                 <columnConstraints>

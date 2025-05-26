@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class HotelRegister {
+public class HotelRegisterController {
 
     @FXML
     private TextField hotelNumberField;
@@ -17,7 +17,7 @@ public class HotelRegister {
 
     private MainInterfaceController mainController;
 
-    public HotelRegister() {
+    public HotelRegisterController() {
 
     }
 

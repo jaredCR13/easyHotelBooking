@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -225,7 +224,7 @@ public class RoomRegisterController {
 
 
     public void onCancel(ActionEvent event) {
-        RoomOptionsController controller = Utility.loadPage2("roomoptions.fxml", parentBp);
+        RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", parentBp);
         controller.setMainController(mainController); // Muy importante
         roomOptionsController.loadRoomsIntoRegister();
     }

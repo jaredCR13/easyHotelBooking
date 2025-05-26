@@ -5,7 +5,7 @@
 <VBox spacing="15" alignment="CENTER" style="-fx-padding: 20;"
       xmlns:fx="http://javafx.com/fxml/1"
       xmlns="http://javafx.com/javafx/23.0.1"
-      fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelModify">
+      fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelModifyController">
 
     <Label text="Modify Hotel" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
 

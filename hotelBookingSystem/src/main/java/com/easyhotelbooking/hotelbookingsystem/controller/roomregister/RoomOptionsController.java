@@ -171,7 +171,7 @@ public class RoomOptionsController {
 
     private void openConsultRoom(Room room) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/roominterface/roomconsult.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("roominterface/roomconsult.fxml"));
             Parent root = loader.load();
 
             RoomConsultController consultController = loader.getController();

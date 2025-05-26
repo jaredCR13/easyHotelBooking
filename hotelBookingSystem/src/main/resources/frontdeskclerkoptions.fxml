@@ -6,11 +6,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="bp" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.FrontDeskOptionsController">
+<BorderPane fx:id="bp" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.FrontDeskClerkOptionsController">
 
     <top>
-        <VBox spacing="10" style="-fx-background-color: #007bff; -fx-padding: 20;">
-            <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Front Desk Options" />
+        <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
+            <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Front Desk Clerk Options" />
             <GridPane hgap="10" vgap="10">
                 <columnConstraints>
                     <ColumnConstraints halignment="RIGHT" />
@@ -29,7 +29,7 @@
                 <Label text="Employee Id:" textFill="white" GridPane.rowIndex="0" />
                 <TextField fx:id="employeeIdField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="First Name:" textFill="white" GridPane.rowIndex="1" />
+                <Label text="Name:" textFill="white" GridPane.rowIndex="1" />
                 <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                 <Label text="Last Name:" textFill="white" GridPane.rowIndex="2" />
@@ -49,9 +49,9 @@
 
     <center>
         <HBox alignment="CENTER" spacing="20" style="-fx-padding: 30;">
-            <Button fx:id="registerButton" onAction="#registerFrontDeskOnAction" prefWidth="120" text="Register" />
+            <Button fx:id="registerButton" onAction="#registerFrontDeskClerkOnAction" prefWidth="120" text="Register" />
             <Button fx:id="removeButton" prefWidth="120" text="Remove" />
-            <Button fx:id="consultButton" onAction="#consultFrontDesOnAction" prefWidth="120" text="Consult" />
+            <Button fx:id="consultButton" onAction="#consultFrontDeskClerkOnAction" prefWidth="120" text="Consult" />
             <Button fx:id="modifyButton" prefWidth="120" text="Modify" />
             <Button fx:id="goBack" onAction="#goBackOnAction" prefWidth="120" text="Go back" />
         </HBox>

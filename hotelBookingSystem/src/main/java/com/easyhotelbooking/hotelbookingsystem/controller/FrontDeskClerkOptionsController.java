@@ -1,7 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller;
 
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
-import hotelbookingcommon.domain.FrontDesk;
+import hotelbookingcommon.domain.FrontDeskClerk;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -11,7 +11,7 @@ import javafx.scene.layout.BorderPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FrontDeskOptionsController {
+public class FrontDeskClerkOptionsController {
 
     @FXML
     private BorderPane bp;
@@ -49,7 +49,7 @@ public class FrontDeskOptionsController {
     @FXML
     private PasswordField passwordField;
 
-    private static final Logger logger = LogManager.getLogger(FrontDeskOptionsController.class);
+    private static final Logger logger = LogManager.getLogger(FrontDeskClerkOptionsController.class);
 
     private MainInterfaceController mainController;
 
@@ -63,7 +63,7 @@ public class FrontDeskOptionsController {
     }
 
     @FXML
-    void registerFrontDeskOnAction() {
+    void registerFrontDeskClerkOnAction() {
         try {
             String employeeId = employeeIdField.getText();
             String name = nameField.getText();
@@ -79,8 +79,8 @@ public class FrontDeskOptionsController {
 
             int employeeNumber = Integer.parseInt(employeeId);
 
-            FrontDesk frontDesk = new FrontDesk(employeeId, name, lastName, password, user, phoneNumber );
-            mainController.registerFrontDesk(frontDesk);
+            FrontDeskClerk frontDeskClerk = new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber );
+            mainController.registerFrontDeskClerk(frontDeskClerk);
 
         } catch (NumberFormatException e) {
             mostrarAlerta("Error", "Número de empleado debe ser numérico.");
@@ -91,15 +91,15 @@ public class FrontDeskOptionsController {
     }
 
     @FXML
-    void consultFrontDesOnAction() {
+    void consultFrontDeskClerkOnAction() {
         try {
-            String empStr = employeeIdField.getText();
-            if (empStr.isEmpty()) {
+            String frontDeskClerkEmployee = employeeIdField.getText();
+            if (frontDeskClerkEmployee.isEmpty()) {
                 mostrarAlerta("Error", "Ingrese el número de empleado a consultar.");
                 return;
             }
-            String employeeId = String.valueOf(Integer.parseInt(empStr));
-            mainController.consultFrontDesk(employeeId);
+            String employeeId = String.valueOf(Integer.parseInt(frontDeskClerkEmployee));
+            mainController.consultFrontDeskClerk(employeeId);
         } catch (NumberFormatException e) {
             mostrarAlerta("Error", "Número de empleado inválido.");
         } catch (Exception e) {

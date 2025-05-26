@@ -19,7 +19,7 @@ public class RoomData {
     private static final int HOTEL_ID_SIZE = 4; // int - hotel ID
 
     private static final int MAX_IMAGES = 5;
-    private static final int IMAGE_PATH_SIZE = 100; // bytes per image path
+    private static final int IMAGE_PATH_SIZE = 512; // bytes per image path
     private static final int IMAGES_SIZE = MAX_IMAGES * IMAGE_PATH_SIZE;
 
     // Nuevo tamaño total del registro
@@ -80,6 +80,7 @@ public class RoomData {
             List<String> images = new ArrayList<>();
             for (int i = 0; i < MAX_IMAGES; i++) {
                 String imagePath = readFixedString(IMAGE_PATH_SIZE);
+                System.out.println("DEBUG: RoomData leyó imagen: '" + imagePath + "' (longitud: " + imagePath.length() + ")"); // Añade este log
                 if (!imagePath.isEmpty()) {
                     images.add(imagePath);
                 }

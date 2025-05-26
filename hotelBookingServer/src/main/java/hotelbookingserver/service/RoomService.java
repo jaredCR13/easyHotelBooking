@@ -159,21 +159,27 @@ public class RoomService {
 
     public Room getRoomById(int roomNumber) {
         try {
-            Room foundRoom = roomData.findById(roomNumber);
+            Room foundRoom = roomData.findById(roomNumber); // <-- Aquí se carga la habitación con sus imágenes desde rooms.dat
 
             if (foundRoom != null) {
-
-                // Cargar el Hotel asociado
+                // Cargar el Hotel asociado (esto sí es correcto)
                 if (foundRoom.getHotelId() != -1) {
                     Hotel associatedHotel = hotelData.findById(foundRoom.getHotelId());
                     if (associatedHotel != null) {
                         foundRoom.setHotel(associatedHotel);
-                        associatedHotel.addRoom(foundRoom); // Bidireccionalidad opcional
+                        // Opcional: Asegurar bidireccionalidad si es necesario para el Hotel en memoria
+                        // associatedHotel.addRoom(foundRoom);
                     }
                 }
+                // ¡Ya no necesitas llamar a loadImagePathsForRoom ni setImagesPaths aquí!
+                // foundRoom.getImagesPaths() ya debería contener las rutas correctas.
 
-                List<String> imagePaths = loadImagePathsForRoom(roomNumber);
-                foundRoom.setImagesPaths(imagePaths);
+                logger.info("Habitación {} cargada con {} imágenes desde RoomData.", foundRoom.getRoomNumber(), foundRoom.getImagesPaths().size());
+                // Opcional: Loguea las rutas para depurar
+                foundRoom.getImagesPaths().forEach(path -> logger.info("  - Ruta de imagen: {}", path));
+
+            } else {
+                logger.warn("No se encontró la habitación con número: {}", roomNumber);
             }
 
             return foundRoom;
@@ -184,25 +190,11 @@ public class RoomService {
         }
     }
 
-    private List<String> loadImagePathsForRoom(int roomNumber) {
-        List<String> imagePaths = new ArrayList<>();
-        File folder = new File("data/rooms/" + roomNumber + "/images"); // Asegúrate de que esta sea la ruta correcta
+// *** ELIMINA COMPLETAMENTE estos dos métodos de RoomService ***
+// private List<String> loadImagePathsForRoom(int roomNumber) { ... }
+// private boolean isImageFile(File file) { ... }
 
-        if (folder.exists() && folder.isDirectory()) {
-            for (File file : folder.listFiles()) {
-                if (file.isFile() && isImageFile(file)) {
-                    imagePaths.add(file.getAbsolutePath());
-                }
-            }
-        }
 
-        return imagePaths;
-    }
-
-    private boolean isImageFile(File file) {
-        String name = file.getName().toLowerCase();
-        return name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif");
-    }
 
     public void close() {
         try {

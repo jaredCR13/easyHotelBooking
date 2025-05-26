@@ -64,7 +64,7 @@ public class RoomRegisterController {
     private ImageView roomImageView;
     private static final Logger logger = LogManager.getLogger(RoomRegisterController.class);
     // Definir un directorio base para guardar las imágenes de las habitaciones
-    private static final String ROOM_IMAGES_DIR = "data/images/rooms"; // Ruta relativa al directorio de la aplicación
+    private static final String ROOM_IMAGES_DIR = "data\\images\\rooms"; // Ruta relativa al directorio de la aplicación
     private MainInterfaceController mainController;
     private RoomOptionsController roomOptionsController;
     private BorderPane parentBp;

@@ -45,7 +45,11 @@ public class RoomOptionsController {
     private static final Logger logger = LogManager.getLogger(RoomOptionsController.class);
 
     private MainInterfaceController mainController;
+    private Stage currentStage;
 
+    public void setStage(Stage stage) {
+        this.currentStage = stage;
+    }
 
     public BorderPane getBp() {
         return bp;
@@ -125,20 +129,30 @@ public class RoomOptionsController {
         actionColumn.setCellFactory(cellFactory);
     }
 
+    // En RoomOptionsController.java
+
     private void openModifyOnAction(Room room) {
-        Request request = new Request("getRoom", room.getRoomNumber()); // Usa el protocolo existente
+        Request request = new Request("getRoom", room.getRoomNumber());
         Response response = ClientConnectionManager.sendRequest(request);
 
         if (response != null && "200".equalsIgnoreCase(response.getStatus())) {
             Room completeRoom = new Gson().fromJson(new Gson().toJson(response.getData()), Room.class);
 
+            // <<-- Usa tu método Utility.loadPage2
             ModifyRoomController controller = Utility.loadPage2("modifyroom.fxml", bp);
 
             if (controller != null) {
                 controller.setParentBp(bp);
                 controller.setMainController(mainController);
                 controller.setRoomOptionsController(this);
-                controller.setRoom(completeRoom); // ✅ Este ahora sí debería traer las imágenes
+                // ¡LA LÍNEA CLAVE! Pasa el Stage aquí
+                if (this.currentStage != null) { // Asegúrate de que currentStage no sea null
+                    controller.setStage(this.currentStage);
+                } else {
+                    logger.warn("El Stage no está disponible en RoomOptionsController para pasarlo a ModifyRoomController. El FileChooser podría no funcionar.");
+                    // Opcional: mostrar una alerta al usuario si esto es un error crítico
+                }
+                controller.setRoom(completeRoom);
             }
         } else {
             mostrarAlerta("Error", "No se pudo cargar la información completa de la habitación.");

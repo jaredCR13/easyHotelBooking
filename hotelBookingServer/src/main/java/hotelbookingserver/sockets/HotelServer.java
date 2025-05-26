@@ -3,6 +3,7 @@ package hotelbookingserver.sockets;
 import hotelbookingserver.service.HotelService;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -27,13 +28,14 @@ public class HotelServer {
 
     public void start() {
         try {
-            serverSocket = new ServerSocket(PORT);
+            serverSocket = new ServerSocket(PORT, 50, InetAddress.getByName("0.0.0.0"));
             logger.info("Servidor iniciado en el puerto {}", PORT);
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 logger.info("Cliente conectado desde {}", clientSocket.getInetAddress());
                 threadPool.execute(new ClientHandler(clientSocket));
             }
+
         } catch (IOException e) {
             logger.error("Error al iniciar el servidor: {}", e.getMessage());
             // Handle the error appropriately, maybe try to restart or shutdown

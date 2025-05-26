@@ -13,7 +13,7 @@ import java.io.*;
 
 public class HotelService {
 
-        private static final String HOTEL_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\easyHotelBooking\\hotelBookingServer\\hotels.dat";
+        private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2\\hotels.dat";
 
         private HotelData hotelData;
 

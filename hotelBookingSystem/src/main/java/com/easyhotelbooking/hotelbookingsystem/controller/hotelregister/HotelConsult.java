@@ -1,4 +1,4 @@
-package com.easyhotelbooking.hotelbookingsystem.controller.hotel;
+package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
 import hotelbookingcommon.domain.Hotel;
 import javafx.fxml.FXML;

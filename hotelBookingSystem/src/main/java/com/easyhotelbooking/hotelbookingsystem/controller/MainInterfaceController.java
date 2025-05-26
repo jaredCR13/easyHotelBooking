@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller;
 
+import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;

@@ -1,4 +1,4 @@
-package com.easyhotelbooking.hotelbookingsystem.controller.hotel;
+package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
 import hotelbookingcommon.domain.Hotel;

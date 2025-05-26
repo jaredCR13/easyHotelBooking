@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RoomService {
@@ -159,20 +160,48 @@ public class RoomService {
     public Room getRoomById(int roomNumber) {
         try {
             Room foundRoom = roomData.findById(roomNumber);
-            if (foundRoom != null && foundRoom.getHotelId() != -1) {
-                // Cargar el Hotel asociado si existe
-                Hotel associatedHotel = hotelData.findById(foundRoom.getHotelId());
-                if (associatedHotel != null) {
-                    foundRoom.setHotel(associatedHotel);
-                    // Opcional: Asegurar la bidireccionalidad en el Hotel si no la tiene ya
-                    associatedHotel.addRoom(foundRoom);
+
+            if (foundRoom != null) {
+
+                // Cargar el Hotel asociado
+                if (foundRoom.getHotelId() != -1) {
+                    Hotel associatedHotel = hotelData.findById(foundRoom.getHotelId());
+                    if (associatedHotel != null) {
+                        foundRoom.setHotel(associatedHotel);
+                        associatedHotel.addRoom(foundRoom); // Bidireccionalidad opcional
+                    }
                 }
+
+                List<String> imagePaths = loadImagePathsForRoom(roomNumber);
+                foundRoom.setImagesPaths(imagePaths);
             }
+
             return foundRoom;
+
         } catch (IOException e) {
             logger.error("Error al obtener habitación por ID: {}", e.getMessage());
             throw new RuntimeException("Error al obtener habitación por ID", e);
         }
+    }
+
+    private List<String> loadImagePathsForRoom(int roomNumber) {
+        List<String> imagePaths = new ArrayList<>();
+        File folder = new File("data/rooms/" + roomNumber + "/images"); // Asegúrate de que esta sea la ruta correcta
+
+        if (folder.exists() && folder.isDirectory()) {
+            for (File file : folder.listFiles()) {
+                if (file.isFile() && isImageFile(file)) {
+                    imagePaths.add(file.getAbsolutePath());
+                }
+            }
+        }
+
+        return imagePaths;
+    }
+
+    private boolean isImageFile(File file) {
+        String name = file.getName().toLowerCase();
+        return name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif");
     }
 
     public void close() {

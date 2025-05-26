@@ -1,10 +1,10 @@
 package com.easyhotelbooking.hotelbookingsystem.controller;
 
 
-import com.easyhotelbooking.hotelbookingsystem.controller.hotel.HotelConsult;
-import com.easyhotelbooking.hotelbookingsystem.controller.hotel.HotelModify;
+import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelConsult;
+import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelModify;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
-import com.easyhotelbooking.hotelbookingsystem.controller.hotel.HotelRegister;
+import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelRegister;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.Hotel;

@@ -1,70 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="bp" prefHeight="469.0" prefWidth="600" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.RoomOptionsController">
+<BorderPane fx:id="bp" prefHeight="469.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomOptionsController">
 
     <top>
-        <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
+        <VBox prefHeight="105.0" prefWidth="900.0" spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
             <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Room Options" />
-
-            <GridPane hgap="10" vgap="10">
-                <columnConstraints>
-                    <ColumnConstraints halignment="RIGHT" />
-                    <ColumnConstraints />
-                </columnConstraints>
-
-                <rowConstraints>
-                    <RowConstraints valignment="CENTER" />
-                    <RowConstraints valignment="CENTER" />
-                    <RowConstraints valignment="CENTER" />
-                    <RowConstraints valignment="CENTER" />
-                    <RowConstraints valignment="CENTER" />
-                </rowConstraints>
-
-                <Label text="Room number:" textFill="white" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <TextField fx:id="roomNumberTf" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-
-                <Label text="Price:" textFill="white" GridPane.rowIndex="1" />
-                <TextField fx:id="priceTf" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
-                <Label text="Detailed Description" textFill="white" GridPane.rowIndex="2" />
-                <TextField fx:id="descriptionTf" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-
-                <Label text="Hotel:" textFill="white" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <ComboBox fx:id="hotelComboBox" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-
-                <Label text="Style:" textFill="white" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                <ComboBox fx:id="styleCombo" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-
-                <Label text="Status:" textFill="white" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-                <ComboBox fx:id="statusCombo" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-            </GridPane>
         </VBox>
     </top>
 
     <center>
-        <VBox prefHeight="183.0" prefWidth="600.0" spacing="20" style="-fx-padding: 30;">
+        <VBox prefHeight="376.0" prefWidth="1120.0" spacing="20" style="-fx-padding: 30;">
             <HBox alignment="CENTER" spacing="20">
                 <Button fx:id="registerButton" onAction="#registerRoomOnAction" prefWidth="120" text="Register room" />
-                <Button fx:id="removeButton" onAction="#removeRoomOnAction" prefWidth="120" text="Remove room" />
-                <Button fx:id="consultButton" onAction="#consultRoomOnAction" prefWidth="120" text="Consult room" />
-                <Button fx:id="modifyButton" onAction="#modifyRoomOnAction" prefWidth="120" text="Modify room" />
-                <Button fx:id="goBack" layoutX="40.0" layoutY="110.0" onAction="#goBackOnAction" prefWidth="120" text="Go back" />
+                <Button fx:id="goBack" onAction="#goBackOnAction" prefWidth="120" text="Go back" />
             </HBox>
-
-            <TableView fx:id="roomRegister" prefHeight="133.0" prefWidth="540.0">
+   
+               <TableView fx:id="roomRegister" prefHeight="198.0" prefWidth="1100.0">
                 <columns>
                     <TableColumn fx:id="roomNumberColumn" prefWidth="100" text="Room Number" />
                     <TableColumn fx:id="priceColumn" prefWidth="100" text="Price" />
@@ -72,6 +31,7 @@
                     <TableColumn fx:id="statusColumn" prefWidth="100" text="Status" />
                     <TableColumn fx:id="styleColumn" prefWidth="100" text="Style" />
                     <TableColumn fx:id="hotelIdColumn" prefWidth="75.0" text="Hotel ID" />
+                    <TableColumn fx:id="actionColumn" prefWidth="250.0" text="Actions" />
                 </columns>
             </TableView>
         </VBox>

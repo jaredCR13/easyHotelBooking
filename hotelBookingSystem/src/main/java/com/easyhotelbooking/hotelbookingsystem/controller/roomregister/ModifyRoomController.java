@@ -175,11 +175,7 @@ public class ModifyRoomController {
 
     @FXML
     void onUploadImage(ActionEvent event) {
-        if (primaryStage == null) {
-            mostrarAlerta("Error", "La ventana principal no ha sido inicializada correctamente para subir imágenes.");
-            logger.error("Stage no disponible para FileChooser en ModifyRoomController.");
-            return;
-        }
+
 
         if (currentRoom.getImagesPaths().size() >= 5) { // Verificar el límite antes de abrir el FileChooser
             mostrarAlerta("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación. Elimina alguna para añadir más.");

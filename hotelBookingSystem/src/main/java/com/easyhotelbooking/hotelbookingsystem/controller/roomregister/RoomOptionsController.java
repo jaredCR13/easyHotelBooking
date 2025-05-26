@@ -138,20 +138,12 @@ public class RoomOptionsController {
         if (response != null && "200".equalsIgnoreCase(response.getStatus())) {
             Room completeRoom = new Gson().fromJson(new Gson().toJson(response.getData()), Room.class);
 
-            // <<-- Usa tu método Utility.loadPage2
             ModifyRoomController controller = Utility.loadPage2("modifyroom.fxml", bp);
 
             if (controller != null) {
                 controller.setParentBp(bp);
                 controller.setMainController(mainController);
                 controller.setRoomOptionsController(this);
-                // ¡LA LÍNEA CLAVE! Pasa el Stage aquí
-                if (this.currentStage != null) { // Asegúrate de que currentStage no sea null
-                    controller.setStage(this.currentStage);
-                } else {
-                    logger.warn("El Stage no está disponible en RoomOptionsController para pasarlo a ModifyRoomController. El FileChooser podría no funcionar.");
-                    // Opcional: mostrar una alerta al usuario si esto es un error crítico
-                }
                 controller.setRoom(completeRoom);
             }
         } else {

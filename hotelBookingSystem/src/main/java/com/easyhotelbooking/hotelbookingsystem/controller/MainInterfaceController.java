@@ -5,11 +5,12 @@ import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import hotelbookingcommon.domain.*; // Asegúrate de que RoomStatus y RoomStyle estén importados
+import hotelbookingcommon.domain.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage; // ¡IMPORTANTE! Importar Stage
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,11 +43,18 @@ public class MainInterfaceController {
         @FXML
         private DatePicker toDate;
 
-        // Aquí no necesitas HotelService directamente, ya que el controlador es el cliente y se comunica con el servidor.
-        // private final HotelService hotelService = new HotelService();
+        // AÑADIR: Variable para el Stage principal
+        private Stage primaryStage;
 
         private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
         private Gson gson = new Gson();
+
+        // AÑADIR: Setter para el Stage principal
+        public void setPrimaryStage(Stage primaryStage) {
+                this.primaryStage = primaryStage;
+                logger.info("Stage principal establecido en MainInterfaceController.");
+        }
+
 
         @FXML
         public void initialize() {
@@ -59,7 +67,7 @@ public class MainInterfaceController {
         void hotelOptionsOnAction() {
                 HotelOptionsController controller = Utility.loadPage2("hotelinterface/hoteloptions.fxml", bp);
                 if (controller != null) {
-                        controller.setMainController(this); // Se pasa la referencia correctamente
+                        controller.setMainController(this);
                 } else {
                         logger.error("No se pudo cargar hoteloptions.fxml o el controlador es null.");
                         mostrarAlerta("Error", "No se pudo cargar la página de opciones de hotel.");
@@ -92,8 +100,6 @@ public class MainInterfaceController {
                         logger.info("Hotel registrado exitosamente: {}", hotel);
                         mostrarAlerta("Éxito", "Hotel registrado exitosamente.");
 
-                        // El servidor ahora devuelve la lista actualizada de Hoteles.
-                        // Esta lista ya debería venir con las habitaciones cargadas.
                         List<Hotel> updatedHotelList = gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<Hotel>>() {
                         }.getType());
                         List<String> names = updatedHotelList.stream().map(Hotel::getHotelName).collect(Collectors.toList());
@@ -112,17 +118,15 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
-                        Hotel hotel = gson.fromJson(gson.toJson(response.getData()), Hotel.class); // Conversión segura
+                        Hotel hotel = gson.fromJson(gson.toJson(response.getData()), Hotel.class);
                         logger.info("Hotel consultado exitosamente: {}", hotel);
 
-                        // Mostrar la información del hotel, incluyendo el número de habitaciones
                         StringBuilder hotelInfo = new StringBuilder();
                         hotelInfo.append("Número: ").append(hotel.getNumHotel()).append("\n");
                         hotelInfo.append("Nombre: ").append(hotel.getHotelName()).append("\n");
                         hotelInfo.append("Ubicación: ").append(hotel.getHotelLocation()).append("\n");
-                        hotelInfo.append("Cantidad de Habitaciones: ").append(hotel.getRooms().size()).append("\n"); // Acceder a la lista de habitaciones
+                        hotelInfo.append("Cantidad de Habitaciones: ").append(hotel.getRooms().size()).append("\n");
 
-                        // Opcional: Listar las habitaciones si es necesario
                         if (!hotel.getRooms().isEmpty()) {
                                 hotelInfo.append("\nDetalles de Habitaciones:\n");
                                 for (Room room : hotel.getRooms()) {
@@ -147,7 +151,7 @@ public class MainInterfaceController {
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
                         mostrarAlerta("Éxito", "Hotel actualizado correctamente.");
-                        loadHotelNames(); // Recargar la lista de nombres de hoteles
+                        loadHotelNames();
                 } else {
                         mostrarAlerta("Error", "No se pudo actualizar el hotel: " + response.getMessage());
                 }
@@ -159,7 +163,7 @@ public class MainInterfaceController {
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
                         mostrarAlerta("Éxito", "Hotel eliminado correctamente (y sus habitaciones asociadas).");
-                        loadHotelNames(); // Recargar la lista de nombres de hoteles
+                        loadHotelNames();
                 } else {
                         mostrarAlerta("Error", "No se pudo eliminar el hotel: " + response.getMessage());
                 }
@@ -178,7 +182,13 @@ public class MainInterfaceController {
         void roomOptionsOnAction() {
                 RoomOptionsController controller = Utility.loadPage2("roomoptions.fxml", bp);
                 if (controller != null) {
-                        controller.setMainController(this); // Se pasa la referencia correctamente
+                        controller.setMainController(this);
+                        // ¡AÑADIR ESTA LÍNEA CLAVE!
+                        if (this.primaryStage != null) {
+                                controller.setStage(this.primaryStage); // Asegúrate de que RoomOptionsController tenga un setter setStage
+                        } else {
+                                logger.error("Error: primaryStage es null en MainInterfaceController al cargar RoomOptionsController.");
+                        }
                 } else {
                         logger.error("No se pudo cargar roomoptions.fxml o el controlador es null.");
                         mostrarAlerta("Error", "No se pudo cargar la página de opciones de habitaciones.");
@@ -186,15 +196,11 @@ public class MainInterfaceController {
         }
 
         public void registerRoom(Room room) {
-                // Asegúrate de que el objeto 'room' que envías ya tenga el 'hotelId' establecido.
-                // Esto es responsabilidad de la UI o del controlador que crea la 'Room' antes de llamar a registerRoom.
-                // Por ejemplo, si el usuario selecciona un hotel en un ComboBox, su ID debe ser asignado a la Room.
                 Request request = new Request("registerRoom", room);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("201".equalsIgnoreCase(response.getStatus())) {
                         mostrarAlerta("Éxito", "Habitación registrada correctamente.");
-                        // Si quieres, puedes recargar alguna lista de habitaciones si existe en la UI principal
                 } else {
                         mostrarAlerta("Error", "No se pudo registrar la habitación: " + response.getMessage());
                 }
@@ -207,7 +213,6 @@ public class MainInterfaceController {
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
                         Room room = gson.fromJson(gson.toJson(response.getData()), Room.class);
 
-                        // Mostrar la información de la habitación, incluyendo el hotel al que pertenece
                         StringBuilder roomInfo = new StringBuilder();
                         roomInfo.append("Número: ").append(room.getRoomNumber()).append("\n");
                         roomInfo.append("Precio: ").append(room.getRoomPrice()).append("\n");
@@ -215,7 +220,6 @@ public class MainInterfaceController {
                         roomInfo.append("Estado: ").append(room.getStatus()).append("\n");
                         roomInfo.append("Estilo: ").append(room.getStyle()).append("\n");
 
-                        // Mostrar el hotel asociado si existe y fue cargado por el servidor
                         if (room.getHotel() != null) {
                                 roomInfo.append("\nAsociada al Hotel:\n");
                                 roomInfo.append("  - Número de Hotel: ").append(room.getHotel().getNumHotel()).append("\n");
@@ -233,13 +237,11 @@ public class MainInterfaceController {
         }
 
         public void updateRoom(Room room) {
-                // Asegúrate de que el objeto 'room' que envías tenga el 'hotelId' correcto.
                 Request request = new Request("updateRoom", room);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
                         mostrarAlerta("Éxito", "Habitación actualizada correctamente.");
-                        // Si quieres, puedes refrescar alguna lista o ComboBox relacionado a las habitaciones
                 } else {
                         mostrarAlerta("Error", "No se pudo actualizar la habitación: " + response.getMessage());
                 }
@@ -251,7 +253,6 @@ public class MainInterfaceController {
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
                         mostrarAlerta("Éxito", "Habitación eliminada correctamente.");
-                        // También aquí podrías actualizar listas o combos de habitaciones
                 } else {
                         mostrarAlerta("Error", "No se pudo eliminar la habitación: " + response.getMessage());
                 }
@@ -264,7 +265,7 @@ public class MainInterfaceController {
         void frontDeskClerkOptionsOnAction() {
                 FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkoptions.fxml", bp);
                 if (controller != null) {
-                        controller.setMainController(this); // Referencia al controlador principal
+                        controller.setMainController(this);
                 } else {
                         logger.error("No se pudo cargar frontdeskoptionsclerk.fxml o el controlador es null.");
                         mostrarAlerta("Error", "No se pudo cargar la página de opciones de recepcionista.");
@@ -298,5 +299,4 @@ public class MainInterfaceController {
                 }
         }
 }
-
 

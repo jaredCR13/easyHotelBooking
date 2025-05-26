@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FrontDeskClerkService {
     private static final Logger logger = LogManager.getLogger(FrontDeskClerkService.class);
-    private static final String FRONTDESKCLERK_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\frontdeskdata.dat";
+    private static final String FRONTDESKCLERK_FILE = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2\\frontdeskdata.dat";
 
     public List<FrontDeskClerk> addFrontDesk(FrontDeskClerk frontDeskClerk) {
         List<FrontDeskClerk> frontDeskClerkList = loadFrontDeskClerk();

@@ -1,10 +1,8 @@
-package com.easyhotelbooking.hotelbookingsystem.controller;
+package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
 
-import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelConsult;
-import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelModify;
+import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
-import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelRegister;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.Hotel;
@@ -166,7 +164,7 @@ public class HotelOptionsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/hotelinterface/hotelregister.fxml"));
             Parent root = loader.load();
 
-            HotelRegister registrerController = loader.getController();
+            HotelRegisterController registrerController = loader.getController();
             registrerController.setMainController(mainController); // Importante
 
             Stage stage = new Stage();
@@ -193,7 +191,7 @@ public class HotelOptionsController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/hotelinterface/hotelconsult.fxml"));
                 Parent root = loader.load();
 
-                HotelConsult consultController = loader.getController();
+                HotelConsultController consultController = loader.getController();
                 consultController.setHotel(hotel);
 
                 Stage stage = new Stage();
@@ -220,7 +218,7 @@ public class HotelOptionsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/hotelinterface/hotelmodify.fxml"));
             Parent root = loader.load();
 
-            HotelModify controller = loader.getController();
+            HotelModifyController controller = loader.getController();
             controller.setMainController(mainController);
             controller.setHotel(hotel);
 

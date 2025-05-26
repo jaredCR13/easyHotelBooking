@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller;
 
+import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
@@ -176,7 +177,7 @@ public class MainInterfaceController {
 
         @FXML
         void roomOptionsOnAction() {
-                RoomOptionsController controller = Utility.loadPage2("roomoptions.fxml", bp);
+                RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this); // Se pasa la referencia correctamente
                 } else {

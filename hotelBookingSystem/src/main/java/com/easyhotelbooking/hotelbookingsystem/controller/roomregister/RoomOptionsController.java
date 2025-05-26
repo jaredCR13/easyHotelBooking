@@ -139,7 +139,7 @@ public class RoomOptionsController {
             Room completeRoom = new Gson().fromJson(new Gson().toJson(response.getData()), Room.class);
 
             // <<-- Usa tu método Utility.loadPage2
-            ModifyRoomController controller = Utility.loadPage2("modifyroom.fxml", bp);
+            ModifyRoomController controller = Utility.loadPage2("roominterface/modifyroom.fxml", bp);
 
             if (controller != null) {
                 controller.setParentBp(bp);
@@ -169,7 +169,7 @@ public class RoomOptionsController {
 
     @FXML
     void registerRoomOnAction() {
-        RoomRegisterController controller = Utility.loadPage2("registerroom.fxml", bp);
+        RoomRegisterController controller = Utility.loadPage2("roominterface/registerroom.fxml", bp);
         if (controller != null) {
             controller.setParentBp(bp); // Pasa el BorderPane para poder volver atrás desde "Cancel"
             controller.setMainController(mainController);

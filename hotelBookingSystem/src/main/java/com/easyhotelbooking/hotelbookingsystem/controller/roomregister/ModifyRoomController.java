@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.Optional; // Importar para Alert.showAndWait() con botones
@@ -228,7 +227,7 @@ public class ModifyRoomController {
 
     @FXML
     void onCancel(ActionEvent event) {
-        RoomOptionsController controller = Utility.loadPage2("roomoptions.fxml", parentBp);
+        RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", parentBp);
         if (controller != null) {
             controller.setMainController(mainController);
             controller.loadRoomsIntoRegister();

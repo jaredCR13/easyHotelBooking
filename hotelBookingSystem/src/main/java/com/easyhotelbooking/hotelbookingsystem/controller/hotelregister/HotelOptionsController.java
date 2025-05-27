@@ -3,6 +3,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+//import com.easyhotelbooking.hotelbookingsystem.util.FxUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.Hotel;
@@ -239,10 +240,10 @@ public class HotelOptionsController {
         void removeHotelOnAction(Hotel hotel) {
             try {
                 mainController.deleteHotel(hotel.getNumHotel());
-                mostrarAlerta("Éxito", "Hotel eliminado correctamente.");
+                util.FXUtility.alertInfo("Éxito", "Hotel eliminado correctamente.");
                 loadHotelsIntoRegister();
             } catch (Exception e) {
-                mostrarAlerta("Error", "Ocurrió un error al eliminar el hotel.");
+                util.FXUtility.alert("Error", "Ocurrió un error al eliminar el hotel.");
             }
         }
 
@@ -256,12 +257,6 @@ public class HotelOptionsController {
             hotelRegister.refresh();
         }
 
-        private void mostrarAlerta(String title, String content) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(title);
-            alert.setContentText(content);
-            alert.showAndWait();
-        }
 
 
     }

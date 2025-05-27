@@ -62,8 +62,8 @@ public class RoomRegisterController {
     @FXML
     private ImageView roomImageView;
     private static final Logger logger = LogManager.getLogger(RoomRegisterController.class);
-    // Definir un directorio base para guardar las imágenes de las habitaciones
-    private static final String ROOM_IMAGES_DIR = "data\\images\\rooms"; // Ruta relativa al directorio de la aplicación
+    //Directorio para guardar las imágenes de las habitaciones
+    private static final String ROOM_IMAGES_DIR = "data\\images\\rooms"; //Ruta al directorio
     private MainInterfaceController mainController;
     private RoomOptionsController roomOptionsController;
     private BorderPane parentBp;
@@ -116,10 +116,10 @@ public class RoomRegisterController {
                     logger.info("Imagen añadida: {}", relativeImagePath);
                 } catch (IOException e) {
                     logger.error("Error al copiar la imagen: {}", e.getMessage(), e);
-                    mostrarAlerta("Error", "No se pudo copiar la imagen: " + e.getMessage());
+                    util.FXUtility.alert("Error", "No se pudo copiar la imagen: " + e.getMessage());
                 }
             } else {
-                mostrarAlerta("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación.");
+                util.FXUtility.alertInfo("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación.");
             }
         }
     }
@@ -178,6 +178,7 @@ public class RoomRegisterController {
         }
     }
 
+    @FXML
     public void onSave(ActionEvent event) {
         try {
             String numberStr = roomNumberTf.getText();
@@ -186,7 +187,7 @@ public class RoomRegisterController {
             Hotel selectedHotel = hotelComboBox.getSelectionModel().getSelectedItem();
 
             if (numberStr.isEmpty() || priceStr.isEmpty() || description.isEmpty() || selectedHotel == null) {
-                mostrarAlerta("Error", "Por favor, complete todos los campos y seleccione un hotel.");
+                util.FXUtility.alert("Error", "Por favor, complete todos los campos y seleccione un hotel.");
                 return;
             }
 
@@ -196,32 +197,41 @@ public class RoomRegisterController {
             RoomStyle style = styleCombo.getValue();
 
             if (status == null || style == null) {
-                mostrarAlerta("Error", "Seleccione estado y estilo de la habitación.");
+                util.FXUtility.alert("Error", "Seleccione estado y estilo de la habitación.");
                 return;
             }
 
-            // Aquí creas el objeto Room con la lista de imágenes
             Room room = new Room(number, price, description, status, style, new ArrayList<>(imagePaths));
             room.setHotelId(selectedHotel.getNumHotel());
             room.setHotel(selectedHotel);
-            // Obtener el Hotel seleccionado del ComboBox
 
-            mainController.registerRoom(room); // Envía al servidor
+            // Envía la solicitud al servidor para registrar la habitación
+            Request request = new Request("registerRoom", room);
+            Response response = ClientConnectionManager.sendRequest(request); // Asume que este método devuelve un Response
 
-            if (roomOptionsController != null) {
-                roomOptionsController.loadRoomsIntoRegister(); // Recarga tabla
+            // Procesar la respuesta del servidor
+            if ("201".equalsIgnoreCase(response.getStatus())) { // '201 Created' para éxito
+                util.FXUtility.alertInfo("Éxito", "Habitación registrada correctamente.");
+                if (roomOptionsController != null) {
+                    roomOptionsController.loadRoomsIntoRegister(); // Recarga la tabla
+                }
+                clearFields();
+            } else if ("409".equalsIgnoreCase(response.getStatus())) { // '409 Conflict' para duplicado
+                util.FXUtility.alert("Error", response.getMessage()); // Muestra el mensaje del servidor (ej. "El número de habitación X ya existe.")
+                logger.warn("Intento de registrar habitación duplicada: {}", number);
+            } else { // Otros errores del servidor (ej. 500 Internal Server Error)
+                util.FXUtility.alert("Error", "Error al registrar habitación: " + response.getMessage());
+                logger.error("Error del servidor al registrar habitación: Status: {}, Message: {}", response.getStatus(), response.getMessage());
             }
-            clearFields();
+
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "Número de habitación o precio inválido.");
+            util.FXUtility.alert("Error", "Número de habitación o precio inválido.");
             logger.error("Error de formato al registrar habitación: {}", e.getMessage());
         } catch (Exception e) {
             logger.error("Error al registrar habitación: {}", e.getMessage());
-            mostrarAlerta("Error", "Error al registrar habitación: " + e.getMessage());
+            util.FXUtility.alert("Error", "Error inesperado al registrar habitación: " + e.getMessage());
         }
     }
-
-
 
     public void onCancel(ActionEvent event) {
         RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", parentBp);
@@ -253,16 +263,12 @@ public class RoomRegisterController {
                 }
             });
         } else {
-            mostrarAlerta("Error", "No se pudieron cargar los hoteles para el ComboBox.");
+            util.FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
             logger.error("Error al cargar hoteles para ComboBox: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }
-    private void mostrarAlerta(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titulo);
-        alert.setContentText(contenido);
-        alert.showAndWait();
-    }
+
+
     private void clearFields(){
         hotelComboBox.getSelectionModel().clearSelection();
         statusCombo.getSelectionModel().clearSelection();

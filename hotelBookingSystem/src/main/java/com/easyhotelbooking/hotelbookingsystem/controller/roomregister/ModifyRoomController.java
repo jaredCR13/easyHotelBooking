@@ -128,7 +128,7 @@ public class ModifyRoomController {
             return;
         }
 
-        // Iterar sobre una copia de la lista para evitar ConcurrentModificationException
+        // Recorrer una copia de la lista para evitar ConcurrentModificationException
         // si se elimina una imagen mientras se itera
         for (String path : new ArrayList<>(currentRoom.getImagesPaths())) {
             try {
@@ -141,9 +141,9 @@ public class ModifyRoomController {
                     imageView.setFitWidth(200);
                     imageView.setFitHeight(150);
 
-                    // Añadir evento para eliminar la imagen al hacer clic
+                    //Evento para eliminar la imagen al hacer clic
                     imageView.setOnMouseClicked(event -> {
-                        // Confirmación antes de eliminar
+                        //Mensaje de confirmacion
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                         alert.setTitle("Confirmar Eliminación");
                         alert.setHeaderText(null);
@@ -152,11 +152,8 @@ public class ModifyRoomController {
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == ButtonType.OK) {
                             currentRoom.getImagesPaths().remove(path); // Eliminar de la lista de la habitación
-                            // Opcional: Eliminar el archivo físico si ya no está referenciado por ninguna otra habitación
-                            // (Esto requiere una lógica más compleja para rastrear referencias, así que por ahora solo eliminamos de la lista)
-                            // Si solo lo eliminas de la lista, el archivo físico permanecerá en el disco.
                             logger.info("Imagen eliminada de la lista: {}", path);
-                            refreshImagesDisplay(); // Volver a dibujar para actualizar la UI
+                            refreshImagesDisplay(); //Actualizar la UI
                         }
                     });
 
@@ -176,8 +173,8 @@ public class ModifyRoomController {
     void onUploadImage(ActionEvent event) {
 
 
-        if (currentRoom.getImagesPaths().size() >= 5) { // Verificar el límite antes de abrir el FileChooser
-            mostrarAlerta("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación. Elimina alguna para añadir más.");
+        if (currentRoom.getImagesPaths().size() >= 5) { //Verificar el límite antes de abrir el FileChooser
+            util.FXUtility.alertInfo("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación. Elimina alguna para añadir más.");
             return;
         }
 
@@ -196,7 +193,7 @@ public class ModifyRoomController {
                 logger.info("Imagen añadida para modificación: {}", relativeImagePath);
             } catch (IOException e) {
                 logger.error("Error al copiar la imagen para modificación: {}", e.getMessage(), e);
-                mostrarAlerta("Error", "No se pudo copiar la imagen: " + e.getMessage());
+                util.FXUtility.alert("Error", "No se pudo copiar la imagen: " + e.getMessage());
             }
         }
     }
@@ -239,7 +236,7 @@ public class ModifyRoomController {
             Hotel selectedHotel = hotelComboBox.getSelectionModel().getSelectedItem();
 
             if (priceTf.getText().isEmpty() || description.isEmpty() || selectedHotel == null) {
-                mostrarAlerta("Error", "Por favor, complete todos los campos y seleccione un hotel.");
+                util.FXUtility.alert("Error", "Por favor, complete todos los campos y seleccione un hotel.");
                 return;
             }
 
@@ -247,7 +244,7 @@ public class ModifyRoomController {
             RoomStyle style = styleCombo.getValue();
 
             if (status == null || style == null) {
-                mostrarAlerta("Error", "Seleccione estado y estilo de la habitación.");
+                util.FXUtility.alert("Error", "Seleccione estado y estilo de la habitación.");
                 return;
             }
 
@@ -261,15 +258,15 @@ public class ModifyRoomController {
                 roomOptionsController.loadRoomsIntoRegister();
             }
 
-            mostrarAlerta("Éxito", "Habitación modificada correctamente.");
+            util.FXUtility.alertInfo("Éxito", "Habitación modificada correctamente.");
             onCancel(event);
 
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "Precio inválido.");
+            util.FXUtility.alert("Error", "Precio inválido.");
             logger.error("Error de formato al modificar habitación: {}", e.getMessage(), e);
         } catch (Exception e) {
             logger.error("Error al modificar habitación: {}", e.getMessage(), e);
-            mostrarAlerta("Error", "Error al modificar habitación: " + e.getMessage());
+            util.FXUtility.alert("Error", "Error al modificar habitación: " + e.getMessage());
         }
     }
 
@@ -294,17 +291,11 @@ public class ModifyRoomController {
                 }
             });
         } else {
-            mostrarAlerta("Error", "No se pudieron cargar los hoteles para el ComboBox.");
+            util.FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
             logger.error("Error al cargar hoteles para ComboBox en ModifyRoom: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }
 
-    private void mostrarAlerta(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titulo);
-        alert.setContentText(contenido);
-        alert.showAndWait();
-    }
 
     private void clearFields() {
         hotelComboBox.getSelectionModel().clearSelection();

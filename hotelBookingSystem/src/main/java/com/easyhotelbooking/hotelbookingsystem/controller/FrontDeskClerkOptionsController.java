@@ -73,7 +73,7 @@ public class FrontDeskClerkOptionsController {
             String password = passwordField.getText();
 
             if (employeeId.isEmpty() || name.isEmpty() || lastName.isEmpty() || phoneNumber.isEmpty() || user.isEmpty() || password.isEmpty()) {
-                mostrarAlerta("Error", "Todos los campos son obligatorios.");
+                util.FXUtility.alert("Error", "Todos los campos son obligatorios.");
                 return;
             }
 
@@ -83,10 +83,10 @@ public class FrontDeskClerkOptionsController {
             mainController.registerFrontDeskClerk(frontDeskClerk);
 
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "Número de empleado debe ser numérico.");
+            util.FXUtility.alert("Error", "Número de empleado debe ser numérico.");
         } catch (Exception e) {
             logger.error("Error al registrar recepcionista: {}", e.getMessage());
-            mostrarAlerta("Error", "Error al registrar recepcionista: " + e.getMessage());
+            util.FXUtility.alert("Error", "Error al registrar recepcionista: " + e.getMessage());
         }
     }
 
@@ -95,25 +95,19 @@ public class FrontDeskClerkOptionsController {
         try {
             String frontDeskClerkEmployee = employeeIdField.getText();
             if (frontDeskClerkEmployee.isEmpty()) {
-                mostrarAlerta("Error", "Ingrese el número de empleado a consultar.");
+                util.FXUtility.alert("Error", "Ingrese el número de empleado a consultar.");
                 return;
             }
             String employeeId = String.valueOf(Integer.parseInt(frontDeskClerkEmployee));
             mainController.consultFrontDeskClerk(employeeId);
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "Número de empleado inválido.");
+            util.FXUtility.alert("Error", "Número de empleado inválido.");
         } catch (Exception e) {
             logger.error("Error al consultar recepcionista: {}", e.getMessage());
-            mostrarAlerta("Error", "Error al consultar recepcionista: " + e.getMessage());
+            util.FXUtility.alert("Error", "Error al consultar recepcionista: " + e.getMessage());
         }
     }
 
-    private void mostrarAlerta(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
 }
 
 

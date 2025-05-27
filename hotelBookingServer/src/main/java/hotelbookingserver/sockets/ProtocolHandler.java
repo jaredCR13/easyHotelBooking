@@ -26,7 +26,7 @@ public class ProtocolHandler {
 
                 // =================== HOTEL =========================
                 case "getHotels": {
-                    // hotelService.getAllHotels() ya carga las habitaciones asociadas.
+                    // hotelService.getAllHotels() ya carga las habitaciones asociadas
                     List<Hotel> hotels = hotelService.getAllHotels();
                     logger.debug("Retrieved {} hotels", hotels.size());
                     return new Response("200", "Hoteles cargados", hotels);
@@ -35,8 +35,8 @@ public class ProtocolHandler {
                 case "getHotel": {
                     try {
                         int hotelNumber = parseIntFromRequest(request.getData());
-                        // hotelService.getAllHotels() ya carga las asociaciones.
-                        // Buscamos directamente en la lista completa.
+                        // hotelService.getAllHotels() carga las asociaciones
+                        // Buscamos directamente en la lista completa
                         List<Hotel> hoteles = hotelService.getAllHotels();
                         Hotel foundHotel = hoteles.stream()
                                 .filter(h -> h.getNumHotel() == hotelNumber)
@@ -57,8 +57,8 @@ public class ProtocolHandler {
                 case "registerHotel": {
                     try {
                         Hotel newHotel = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
-                        // Cuando se registra un hotel, su lista de habitaciones estará vacía inicialmente.
-                        // Las habitaciones se añadirán a través de registerRoom.
+                        // Cuando se registra un hotel, su lista de habitaciones estará vacía
+                        // Las habitaciones se annaden a través de registerRoom
                         List<Hotel> updatedHotels = hotelService.addHotel(newHotel);
                         logger.info("Hotel registrado: {}", newHotel);
                         return new Response("201", "Hotel registrado con éxito", updatedHotels);
@@ -71,18 +71,12 @@ public class ProtocolHandler {
                 case "updateHotel": {
                     try {
                         Hotel updated = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
-                        // Asegúrate de que, si el cliente envía un Hotel para actualizar,
-                        // la lista de habitaciones de ese Hotel en el objeto 'updated' no interfiera.
-                        // hotelService.updateHotel() solo actualiza los campos básicos del Hotel,
-                        // la gestión de las habitaciones es responsabilidad de roomService.
-                        // El objeto 'updated' aquí contendrá la lista de habitaciones que venía del cliente,
-                        // pero `hotelService.updateHotel` no la persiste.
+                        //hotelService.updateHotel() solo actualiza los campos básicos del Hotel
+                        //'updated' contendrá la lista de habitaciones que venía del cliente,
                         Hotel result = hotelService.updateHotel(updated);
                         if (result != null) {
-                            // Si necesitas devolver el Hotel actualizado con sus habitaciones,
-                            // podrías buscarlo de nuevo en el servicio.
-                            // Sin embargo, `hotelService.updateHotel` devuelve el objeto que se actualizó.
-                            // Para consistencia con la carga de habitaciones, obtén la lista completa.
+                            //Devuelve el objeto que se actualizo
+                            //se obtiene la ista completa
                             List<Hotel> allHotels = hotelService.getAllHotels();
                             Hotel fullUpdatedHotel = allHotels.stream()
                                     .filter(h -> h.getNumHotel() == result.getNumHotel())
@@ -101,7 +95,7 @@ public class ProtocolHandler {
                 case "deleteHotel": {
                     try {
                         int number = parseIntFromRequest(request.getData());
-                        // hotelService.deleteHotel() ya se encarga de eliminar las habitaciones asociadas.
+                        // hotelService.deleteHotel() elimina las habitaciones asociadas
                         boolean deleted = hotelService.deleteHotel(number);
                         if (deleted) {
                             return new Response("200", "Hotel eliminado", null);
@@ -116,7 +110,7 @@ public class ProtocolHandler {
 
                 // =================== ROOMS =========================
                 case "getRooms": {
-                    // roomService.getAllRooms() ya carga el objeto Hotel asociado a cada habitación.
+                    // roomService.getAllRooms() carga el objeto Hotel asociado
                     List<Room> rooms = roomService.getAllRooms();
                     logger.debug("Habitaciones cargadas: {}", rooms.size());
                     return new Response("200", "Habitaciones cargadas", rooms);
@@ -125,8 +119,8 @@ public class ProtocolHandler {
                 case "getRoom": {
                     try {
                         int roomNumber = parseIntFromRequest(request.getData());
-                        // La manera más eficiente es buscar la habitación directamente por ID,
-                        // y que el servicio de habitaciones la cargue con su Hotel asociado.
+                        //Buscar la habitación directamente por ID,
+                        // y roomService la cargue con su Hotel asociado
                         Room foundRoom = roomService.getRoomById(roomNumber); // Asumimos un nuevo método en RoomService
 
                         if (foundRoom != null) {
@@ -142,24 +136,22 @@ public class ProtocolHandler {
 
                 case "registerRoom": {
                     try {
-                        // El cliente debería enviar un objeto Room que ya tiene el hotelId establecido
-                        // Opcionalmente, podría enviar el objeto Hotel completo si se deserializa correctamente.
+                        // CONVIERTE DE JSON a ROOM
                         Room newRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
-
-                        // Es crucial que el `newRoom` tenga un `hotelId` válido.
-                        // Si el cliente envía solo el `roomNumber` y `hotelId`, o un `Hotel` parcial,
-                        // Gson lo manejará. La validación real se hace en `roomService.addRoom`.
                         boolean added = roomService.addRoom(newRoom);
                         if (added) {
-                            // Para devolver la habitación completa con su Hotel asociado,
-                            // podrías obtenerla de nuevo del servicio o asegurarse que addRoom la retorne completa
-                            // Por ahora, devolvemos `newRoom` que no tendrá el objeto Hotel en su interior
-                            // a menos que el cliente lo haya enviado y Gson lo haya deserializado.
-                            // Lo más seguro es recuperarla de nuevo.
                             Room addedRoomWithHotel = roomService.getRoomById(newRoom.getRoomNumber());
                             return new Response("201", "Habitación registrada con éxito", addedRoomWithHotel);
                         } else {
-                            return new Response("500", "No se pudo registrar la habitación (ver logs para detalles)", null);
+                            Room existingRoomCheck = roomService.getRoomById(newRoom.getRoomNumber());
+                            if (existingRoomCheck != null) {
+                                // Es un duplicado. Usamos el código de estado 409 Conflict.
+                                logger.warn("Intento de registrar habitación duplicada: {}", newRoom.getRoomNumber());
+                                return new Response("409", "El número de habitación " + newRoom.getRoomNumber() + " ya existe.", null);
+                            } else {
+                                logger.error("Error desconocido al registrar la habitación: {}", newRoom.getRoomNumber());
+                                return new Response("500", "No se pudo registrar la habitación (ver logs para detalles)", null);
+                            }
                         }
 
                     } catch (Exception e) {
@@ -172,7 +164,6 @@ public class ProtocolHandler {
                         Room updatedRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
                         boolean updated = roomService.updateRoom(updatedRoom);
                         if (updated) {
-                            // Para devolver la habitación actualizada con su Hotel asociado.
                             Room updatedRoomWithHotel = roomService.getRoomById(updatedRoom.getRoomNumber());
                             return new Response("200", "Habitación actualizada con éxito", updatedRoomWithHotel);
                         } else {
@@ -187,8 +178,6 @@ public class ProtocolHandler {
                 case "deleteRoom": {
                     try {
                         int roomNumber = parseIntFromRequest(request.getData());
-                        // roomService.deleteRoom() ya maneja la lógica de eliminar la habitación
-                        // y actualizar la lista del hotel en memoria.
                         boolean deleted = roomService.deleteRoom(roomNumber);
                         if (deleted) {
                             return new Response("200", "Habitación eliminada con éxito", null);
@@ -217,7 +206,6 @@ public class ProtocolHandler {
 
                 case "getFrontDeskClerk": {
                     try {
-                        // Asumo que findByEmployeeId ya maneja la conversión a String
                         String employeeId = String.valueOf(parseIntFromRequest(request.getData()));
                         FrontDeskClerk found = frontDeskClerkService.findByEmployeeId(employeeId);
                         if (found != null) {
@@ -240,8 +228,6 @@ public class ProtocolHandler {
             logger.error("Error handling request {}: {}", request.getAction(), e.getMessage());
             return new Response("500", "Internal Server Error: " + e.getMessage(), null);
         } finally {
-            // Considera si quieres cerrar los servicios aquí o en otro lugar más apropiado
-            // (ej. al apagar el servidor). Cerrarlos en cada request podría ser ineficiente.
             // hotelService.close();
             // roomService.close();
             // frontDeskClerkService.close();
@@ -254,8 +240,6 @@ public class ProtocolHandler {
         } else if (data instanceof Integer) {
             return (Integer) data;
         } else {
-            // Asegúrate de que el cliente siempre envíe un número para IDs.
-            // O podrías intentar parsear un String si el 'data' llega como String.
             try {
                 return Integer.parseInt(data.toString());
             } catch (NumberFormatException e) {

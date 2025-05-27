@@ -9,16 +9,13 @@ import java.util.Objects;
 
 public class Hotel implements Serializable {
 
-    @Expose // This field will be serialized
+    @Expose
     private int numHotel;
-    @Expose // This field will be serialized
+    @Expose
     private String hotelName;
-    @Expose // This field will be serialized
+    @Expose
     private String hotelLocation;
 
-    // Use @Expose for the rooms list if you want it serialized when serializing a Hotel.
-    // If you don't want the rooms list to be serialized WITH the hotel, remove @Expose here.
-    // For displaying rooms in MainInterfaceController, you DO want this.
     @Expose
     private List<Room> rooms;
 
@@ -26,24 +23,23 @@ public class Hotel implements Serializable {
         this.numHotel = numHotel;
         this.hotelName = hotelName;
         this.hotelLocation = hotelLocation;
-        this.rooms = new ArrayList<>(); // Initialize the list
+        this.rooms = new ArrayList<>(); //INICIALIZAR LA LIST
     }
 
     // Constructor without rooms (for initial creation)
     public Hotel(int numHotel, String hotelName, String hotelLocation, List<Room> rooms) {
-        this(numHotel, hotelName, hotelLocation); // Call existing constructor
+        this(numHotel, hotelName, hotelLocation); //LLAMADA AL CONSTRUCTOR
         if (rooms != null) {
             this.rooms = new ArrayList<>(rooms);
         }
     }
 
-    // Add a default constructor for Gson if you don't have one
+    //CONSTRUCTOR DEFAULT
     public Hotel() {
         this.rooms = new ArrayList<>();
     }
 
-    // Getters and Setters
-
+    //Getters and Setters
     public int getNumHotel() {
         return numHotel;
     }
@@ -81,15 +77,16 @@ public class Hotel implements Serializable {
             this.rooms = new ArrayList<>();
         }
         this.rooms.add(room);
-        room.setHotel(this); // Ensure bidirectionality
-        room.setHotelId(this.numHotel); // Ensure hotelId is set
+        room.setHotel(this);
+        room.setHotelId(this.numHotel); //SET el hotel id
     }
 
     public void removeRoom(Room room) {
         if (this.rooms != null) {
             this.rooms.remove(room);
-            room.setHotel(null); // Clear bidirectionality
-            room.setHotelId(-1); // Or a default invalid ID
+            //ANULA LA ASOCIACION
+            room.setHotel(null);
+            room.setHotelId(-1);
         }
     }
 

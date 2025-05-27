@@ -17,21 +17,20 @@ public class Utility {
 
             Stage stage = (Stage) anyNodeInScene.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setTitle("Hotel Booking"); // o cualquier título que quieras
+            stage.setTitle("Hotel Booking"); // o cualquier título
         } catch (IOException e) {
-            System.out.println("❌ Error loading " + fxmlFileName);
+            System.out.println("Error loading " + fxmlFileName);
             e.printStackTrace();
         }
     }
 
-    // Si quieres seguir usando el MDI también:
     public static void loadPage(String fxmlFileName, javafx.scene.layout.BorderPane bp) {
         try {
             FXMLLoader loader = new FXMLLoader(Utility.class.getResource("/" + fxmlFileName));
             Parent view = loader.load();
             bp.setCenter(view);
         } catch (IOException e) {
-            System.out.println("❌ Error loading center content: " + fxmlFileName);
+            System.out.println("Error loading center content: " + fxmlFileName);
             e.printStackTrace();
         }
     }
@@ -45,7 +44,7 @@ public class Utility {
             bp.setCenter(null);
             return loader.getController(); // Devuelve el controlador
         } catch (IOException e) {
-            System.out.println("❌ Error loading center content: " + fxmlFileName);
+            System.out.println("Error loading center content: " + fxmlFileName);
             e.printStackTrace();
             return null;
         }

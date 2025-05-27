@@ -21,16 +21,12 @@ public class Room implements Serializable {
     @Expose
     private RoomStyle style;
     @Expose
-    private List<String> imagesPaths; // Assuming this might be serialized later
+    private List<String> imagesPaths;
 
-    // This is the field that causes the circular reference.
-    // We *do not* want Gson to serialize the entire Hotel object when it's serializing a Room.
-    // We only want the hotelId. So, we DO NOT use @Expose here.
-    private transient Hotel hotel; // Mark as transient so it's ignored by default serialization
+    private transient Hotel hotel;
 
-    // This field will be serialized instead of the full Hotel object
     @Expose
-    private int hotelId; // Store the ID of the associated hotel
+    private int hotelId; //ID HOTEL PARA HACER ASOCIACION
 
     public Room(int roomNumber, double roomPrice, String detailedDescription, RoomStatus status, RoomStyle style, List<String> imagesPaths) {
         this.roomNumber = roomNumber;

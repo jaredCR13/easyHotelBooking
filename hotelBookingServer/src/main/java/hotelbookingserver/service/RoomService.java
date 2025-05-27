@@ -12,14 +12,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import java.util.concurrent.ConcurrentHashMap;
+
 public class RoomService {
     private static final Logger logger = LogManager.getLogger(RoomService.class);
-    private static final String ROOM_FILE = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2\\rooms.dat";
-    private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2\\hotels.dat"; // Ruta del archivo de hoteles
+    private static final String ROOM_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelRoomFiles\\rooms.dat";
+    private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelFiles\\hotels.dat"; // Ruta del archivo de hoteles
 
     private RoomData roomData;
     private HotelData hotelData; // Instancia de HotelData
 
+    
     public RoomService() {
         try {
             roomData = new RoomData(new File(ROOM_FILE));
@@ -37,8 +41,6 @@ public class RoomService {
      */
     public boolean addRoom(Room room) {
         try {
-            // Importante: Antes de guardar la habitación, asegúrate de que tenga un hotelId válido.
-            // Esto es crucial si la Room se crea sin un objeto Hotel directamente asociado.
             if (room.getHotel() != null) {
                 room.setHotelId(room.getHotel().getNumHotel());
             } else if (room.getHotelId() == -1) { // Si no tiene objeto Hotel ni ID, es un error o necesita ser establecido
@@ -53,6 +55,15 @@ public class RoomService {
                 return false;
             }
 
+            // --- INICIO DE LA VERIFICACIÓN DE DUPLICADOS ---
+            // Busca una habitación con el mismo roomNumber
+            Room existingRoom = roomData.findById(room.getRoomNumber());
+            if (existingRoom != null) {
+                logger.warn("Intento de agregar habitación duplicada. El número de habitación {} ya existe.", room.getRoomNumber());
+                return false; // Retorna false si ya existe una habitación con ese número
+            }
+
+            //HACE LA INSERCION
             roomData.insert(room);
             // Si la habitación se agrega exitosamente, también deberíamos añadirla al objeto Hotel en memoria
             // Esto no afecta el archivo, solo la coherencia de los objetos si se están usando en esta transacción
@@ -171,8 +182,7 @@ public class RoomService {
                         // associatedHotel.addRoom(foundRoom);
                     }
                 }
-                // ¡Ya no necesitas llamar a loadImagePathsForRoom ni setImagesPaths aquí!
-                // foundRoom.getImagesPaths() ya debería contener las rutas correctas.
+                //foundRoom.getImagesPaths() contiene las rutas
 
                 logger.info("Habitación {} cargada con {} imágenes desde RoomData.", foundRoom.getRoomNumber(), foundRoom.getImagesPaths().size());
                 // Opcional: Loguea las rutas para depurar
@@ -189,12 +199,6 @@ public class RoomService {
             throw new RuntimeException("Error al obtener habitación por ID", e);
         }
     }
-
-// *** ELIMINA COMPLETAMENTE estos dos métodos de RoomService ***
-// private List<String> loadImagePathsForRoom(int roomNumber) { ... }
-// private boolean isImageFile(File file) { ... }
-
-
 
     public void close() {
         try {

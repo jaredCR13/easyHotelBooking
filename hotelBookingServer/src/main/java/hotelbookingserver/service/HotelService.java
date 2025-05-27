@@ -13,8 +13,8 @@ import java.util.stream.Collectors; // Para facilitar la carga de habitaciones
 
 public class HotelService {
 
-    private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2\\hotels.dat";
-    private static final String ROOM_FILE = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2\\rooms.dat"; // Ruta del archivo de habitaciones
+    private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelFiles\\hotels.dat";
+    private static final String ROOM_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelRoomFiles\\rooms.dat"; // Ruta del archivo de habitaciones
 
     private HotelData hotelData;
     private RoomData roomData; // Instancia de RoomData para cargar habitaciones
@@ -33,17 +33,17 @@ public class HotelService {
             List<Hotel> hotels = hotelData.findAll();
             List<Room> allRooms = roomData.findAll(); // Cargar todas las habitaciones una vez
 
-            // Iterar sobre cada hotel y asignar sus habitaciones
+            //Recorrer cada hotel y asignar habitaciones
             for (Hotel hotel : hotels) {
-                // Filtrar las habitaciones que pertenecen a este hotel
+                //Filtrar las habitaciones que pertenecen a este hotel
                 List<Room> roomsForThisHotel = allRooms.stream()
                         .filter(room -> room.getHotelId() == hotel.getNumHotel())
                         .collect(Collectors.toList());
                 hotel.setRooms(roomsForThisHotel); // Asignar la lista de habitaciones al hotel
 
-                // Asegurar la relación bidireccional en memoria
+                //Realiza la asociacion
                 for (Room room : roomsForThisHotel) {
-                    room.setHotel(hotel); // Establecer la referencia del hotel en la habitación
+                    room.setHotel(hotel); //Se crea la referencia del hotel en la habitación
                 }
             }
             return hotels;
@@ -52,12 +52,10 @@ public class HotelService {
         }
     }
 
-    // ... (Métodos addHotel, updateHotel, deleteHotel se mantienen igual) ...
-
     public List<Hotel> addHotel(Hotel hotel) {
         try {
             hotelData.insert(hotel);
-            return getAllHotels(); // Se podría llamar a getAllHotels para reflejar los cambios con las habitaciones cargadas.
+            return getAllHotels(); // Refleja los cambios con las habitaciones cargadas.
         } catch (IOException e) {
             throw new RuntimeException("Error al agregar hotel", e);
         }
@@ -67,11 +65,8 @@ public class HotelService {
         try {
             boolean actualizado = hotelData.update(updatedHotel);
             if (actualizado) {
-                // Si la actualización es exitosa, se podría recargar el hotel con sus habitaciones
-                // Esto es solo si necesitas que el objeto retornado ya tenga las habitaciones cargadas
-                // Opcional: Podrías buscar el hotel actualizado y luego cargar sus habitaciones
-                // return hotelData.findById(updatedHotel.getNumHotel()); // Necesitarías un findById público en HotelService
-                return updatedHotel; // Retorna el objeto que ya tienes (sin habitaciones cargadas por defecto)
+                // Si la actualización es exitosa, se recarga el hotel con sus habitaciones
+                return updatedHotel; // Retorna el objeto (sin habitaciones cargadas por defecto)
             }
             return null;
         } catch (IOException e) {
@@ -81,8 +76,8 @@ public class HotelService {
 
     public boolean deleteHotel(int hotelNumber) {
         try {
-            // Consideración: Al eliminar un hotel, ¿qué pasa con sus habitaciones?
-            // Deberías eliminar también las habitaciones asociadas.
+            //Eliminar también las habitaciones asociadas.
+
             List<Room> allRooms = roomData.findAll();
             for (Room room : allRooms) {
                 if (room.getHotelId() == hotelNumber) {
@@ -98,9 +93,9 @@ public class HotelService {
     public void close() {
         try {
             hotelData.close();
-            roomData.close(); // Cerrar también el RoomData
+            roomData.close(); // Cerrar el RoomData
         } catch (IOException e) {
-            // Log o manejar
+            //TODO: MANEJAR EL ERROR
         }
     }
 }

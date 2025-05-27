@@ -32,8 +32,7 @@ public class RoomOptionsController {
 
     @FXML private ComboBox<RoomStatus> statusCombo;
     @FXML private ComboBox<RoomStyle> styleCombo;
-    @FXML private ComboBox<Hotel> hotelComboBox; // Ya tienes el ComboBox de Hoteles
-
+    @FXML private ComboBox<Hotel> hotelComboBox;
     @FXML private TableView<Room> roomRegister;
     @FXML private TableColumn<Room, Integer> roomNumberColumn;
     @FXML private TableColumn<Room, Double> priceColumn;
@@ -129,8 +128,6 @@ public class RoomOptionsController {
         actionColumn.setCellFactory(cellFactory);
     }
 
-    // En RoomOptionsController.java
-
     private void openModifyOnAction(Room room) {
         Request request = new Request("getRoom", room.getRoomNumber());
         Response response = ClientConnectionManager.sendRequest(request);
@@ -147,7 +144,7 @@ public class RoomOptionsController {
                 controller.setRoom(completeRoom);
             }
         } else {
-            mostrarAlerta("Error", "No se pudo cargar la información completa de la habitación.");
+            util.FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
         }
     }
 
@@ -161,7 +158,7 @@ public class RoomOptionsController {
 
     @FXML
     void registerRoomOnAction() {
-        RoomRegisterController controller = Utility.loadPage2("registerroom.fxml", bp);
+        RoomRegisterController controller = Utility.loadPage2("roominterface/registerroom.fxml", bp);
         if (controller != null) {
             controller.setParentBp(bp); // Pasa el BorderPane para poder volver atrás desde "Cancel"
             controller.setMainController(mainController);
@@ -193,7 +190,7 @@ public class RoomOptionsController {
             mainController.deleteRoom(room.getRoomNumber());
             loadRoomsIntoRegister();
         } catch (Exception e) {
-            mostrarAlerta("Error", "Ocurrió un error al eliminar el hotel.");
+            util.FXUtility.alert("Error", "Ocurrió un error al eliminar el hotel.");
         }
     }
 
@@ -204,15 +201,10 @@ public class RoomOptionsController {
             List<Room> rooms = new Gson().fromJson(new Gson().toJson(response.getData()), new TypeToken<List<Room>>() {}.getType());
             roomRegister.setItems(FXCollections.observableArrayList(rooms));
         } else {
-            mostrarAlerta("Error", "No se pudieron cargar las habitaciones.");
+            util.FXUtility.alert("Error", "No se pudieron cargar las habitaciones.");
             logger.error("Error al cargar habitaciones en la tabla: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }
 
-    private void mostrarAlerta(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titulo);
-        alert.setContentText(contenido);
-        alert.showAndWait();
-    }
+
 }

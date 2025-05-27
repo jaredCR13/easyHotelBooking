@@ -32,14 +32,14 @@ public class HotelConsultController {
         Map<String, Long> countByStyle = hotel.getRooms().stream()
                 .collect(Collectors.groupingBy(room -> room.getStyle().name(), Collectors.counting()));
 
-// Crear resumen
+        // Crear resumen
         StringBuilder summary = new StringBuilder("Total rooms by type: \n");
         for (String style : new String[]{"STANDARD", "DELUXE", "SUITE", "FAMILY"}) {
             long count = countByStyle.getOrDefault(style, 0L);
             summary.append(style).append(": ").append(count).append("\n");
         }
 
-// Mostrar en el Label
+        // Mostrar en el Label
         roomTypesSummary.setText(summary.toString());
     }
 

@@ -11,7 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage; // ¡IMPORTANTE! Importar Stage
+import javafx.stage.Stage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,7 +71,7 @@ public class MainInterfaceController {
                         controller.setMainController(this);
                 } else {
                         logger.error("No se pudo cargar hoteloptions.fxml o el controlador es null.");
-                        mostrarAlerta("Error", "No se pudo cargar la página de opciones de hotel.");
+                        util.FXUtility.alert("Error", "No se pudo cargar la página de opciones de hotel.");
                 }
         }
 
@@ -89,7 +89,7 @@ public class MainInterfaceController {
                 } else {
                         String message = response != null ? response.getMessage() : "Error desconocido al obtener hoteles";
                         logger.error("Error al obtener hoteles: {}", message);
-                        mostrarAlerta("Error", "Error al obtener hoteles: " + message);
+                        util.FXUtility.alert("Error", "Error al obtener hoteles: " + message);
                 }
         }
 
@@ -99,7 +99,7 @@ public class MainInterfaceController {
 
                 if ("201".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
                         logger.info("Hotel registrado exitosamente: {}", hotel);
-                        mostrarAlerta("Éxito", "Hotel registrado exitosamente.");
+                        util.FXUtility.alertInfo("Éxito", "Hotel registrado exitosamente.");
 
                         List<Hotel> updatedHotelList = gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<Hotel>>() {
                         }.getType());
@@ -110,7 +110,7 @@ public class MainInterfaceController {
                 } else {
                         String message = response != null ? response.getMessage() : "Error desconocido al registrar hotel";
                         logger.error("Error al registrar hotel: {}", message);
-                        mostrarAlerta("Error", "Error al registrar hotel: " + message);
+                        util.FXUtility.alert("Error", "Error al registrar hotel: " + message);
                 }
         }
 
@@ -138,11 +138,11 @@ public class MainInterfaceController {
                                 }
                         }
 
-                        mostrarAlerta("Información del Hotel", hotelInfo.toString());
+                        util.FXUtility.alertInfo("Información del Hotel", hotelInfo.toString());
                 } else {
                         String message = response != null ? response.getMessage() : "No se encontró el hotel";
                         logger.error("Error al consultar hotel: {}", message);
-                        mostrarAlerta("Error", message);
+                        util.FXUtility.alert("Error", message);
                 }
         }
 
@@ -154,7 +154,7 @@ public class MainInterfaceController {
                         mostrarAlerta("Éxito", "Hotel actualizado correctamente.");
                         loadHotelNames();
                 } else {
-                        mostrarAlerta("Error", "No se pudo actualizar el hotel: " + response.getMessage());
+                        util.FXUtility.alert("Error", "No se pudo actualizar el hotel: " + response.getMessage());
                 }
         }
 
@@ -163,10 +163,10 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
-                        mostrarAlerta("Éxito", "Hotel eliminado correctamente (y sus habitaciones asociadas).");
+                        util.FXUtility.alertInfo("Éxito", "Hotel eliminado correctamente (y sus habitaciones asociadas).");
                         loadHotelNames();
                 } else {
-                        mostrarAlerta("Error", "No se pudo eliminar el hotel: " + response.getMessage());
+                        util.FXUtility.alert("Error", "No se pudo eliminar el hotel: " + response.getMessage());
                 }
         }
 
@@ -192,19 +192,14 @@ public class MainInterfaceController {
                         }
                 } else {
                         logger.error("No se pudo cargar roomoptions.fxml o el controlador es null.");
-                        mostrarAlerta("Error", "No se pudo cargar la página de opciones de habitaciones.");
+                        util.FXUtility.alert("Error", "No se pudo cargar la página de opciones de habitaciones.");
                 }
         }
 
-        public void registerRoom(Room room) {
+        public Response registerRoom(Room room) {
                 Request request = new Request("registerRoom", room);
                 Response response = ClientConnectionManager.sendRequest(request);
-
-                if ("201".equalsIgnoreCase(response.getStatus())) {
-                        mostrarAlerta("Éxito", "Habitación registrada correctamente.");
-                } else {
-                        mostrarAlerta("Error", "No se pudo registrar la habitación: " + response.getMessage());
-                }
+                return response;
         }
 
         public void consultRoom(int roomNumber) {
@@ -231,9 +226,9 @@ public class MainInterfaceController {
                                 roomInfo.append("\nNo asociada a ningún hotel.\n");
                         }
 
-                        mostrarAlerta("Habitación encontrada", roomInfo.toString());
+                        util.FXUtility.alertInfo("Habitación encontrada", roomInfo.toString());
                 } else {
-                        mostrarAlerta("Error", "Habitación no encontrada: " + (response != null ? response.getMessage() : ""));
+                        util.FXUtility.alert("Error", "Habitación no encontrada: " + (response != null ? response.getMessage() : ""));
                 }
         }
 
@@ -242,9 +237,9 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
-                        mostrarAlerta("Éxito", "Habitación actualizada correctamente.");
+                        util.FXUtility.alertInfo("Éxito", "Habitación actualizada correctamente.");
                 } else {
-                        mostrarAlerta("Error", "No se pudo actualizar la habitación: " + response.getMessage());
+                        util.FXUtility.alert("Error", "No se pudo actualizar la habitación: " + response.getMessage());
                 }
         }
 
@@ -253,9 +248,9 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
-                        mostrarAlerta("Éxito", "Habitación eliminada correctamente.");
+                        util.FXUtility.alertInfo("Éxito", "Habitación eliminada correctamente.");
                 } else {
-                        mostrarAlerta("Error", "No se pudo eliminar la habitación: " + response.getMessage());
+                        util.FXUtility.alert("Error", "No se pudo eliminar la habitación: " + response.getMessage());
                 }
         }
 
@@ -269,7 +264,7 @@ public class MainInterfaceController {
                         controller.setMainController(this);
                 } else {
                         logger.error("No se pudo cargar frontdeskoptionsclerk.fxml o el controlador es null.");
-                        mostrarAlerta("Error", "No se pudo cargar la página de opciones de recepcionista.");
+                        util.FXUtility.alert("Error", "No se pudo cargar la página de opciones de recepcionista.");
                 }
         }
 
@@ -278,9 +273,9 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("201".equalsIgnoreCase(response.getStatus())) {
-                        mostrarAlerta("Éxito", "Recepcionista registrado correctamente.");
+                        util.FXUtility.alertInfo("Éxito", "Recepcionista registrado correctamente.");
                 } else {
-                        mostrarAlerta("Error", "No se pudo registrar el recepcionista: " + response.getMessage());
+                        util.FXUtility.alert("Error", "No se pudo registrar el recepcionista: " + response.getMessage());
                 }
         }
 
@@ -296,7 +291,7 @@ public class MainInterfaceController {
                                         "\nTeléfono: " + frontDeskClerk.getPhoneNumber() +
                                         "\nUsuario: " + frontDeskClerk.getUser());
                 } else {
-                        mostrarAlerta("Error", "Recepcionista no encontrado: " + (response != null ? response.getMessage() : ""));
+                        util.FXUtility.alert("Error", "Recepcionista no encontrado: " + (response != null ? response.getMessage() : ""));
                 }
         }
 }

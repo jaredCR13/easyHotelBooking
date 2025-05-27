@@ -1,10 +1,13 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomRegisterController;
 import hotelbookingcommon.domain.Hotel;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class HotelRegisterController {
 
@@ -16,6 +19,7 @@ public class HotelRegisterController {
     private TextField locationField;
 
     private MainInterfaceController mainController;
+    private static final Logger logger = LogManager.getLogger(RoomRegisterController.class);
 
     public HotelRegisterController() {
 
@@ -40,7 +44,11 @@ public class HotelRegisterController {
             // Cerrar ventana
             Stage stage = (Stage) hotelNumberField.getScene().getWindow();
             stage.close();
-        } catch (Exception e) {
+        }catch (NumberFormatException e) {
+            util.FXUtility.alert("Error", "Número de hotel debe ser numerico");
+            logger.error("Error de formato al registrar habitación: {}", e.getMessage());
+        }
+        catch (Exception e) {
             // Mostrar alerta si es necesario
         }
     }

@@ -19,16 +19,23 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
+
+
+import hotelbookingcommon.domain.*;
+
+import javafx.scene.control.*;
+
+
+import java.io.ByteArrayInputStream; // Necesitarás esta importación
+import java.io.File;
+import java.io.IOException;
+
 
 public class RoomRegisterController {
 
@@ -53,33 +60,28 @@ public class RoomRegisterController {
     @FXML
     private Button uploadButton;
 
-    private  List<String>imagePaths;
-
+    // Eliminar: private List<String>imagePaths; // Esto ya no se usará
     @FXML
     private FlowPane flowPane;
 
     private static final Logger logger = LogManager.getLogger(RoomRegisterController.class);
 
-
     private MainInterfaceController mainController;
     private RoomOptionsController roomOptionsController;
     private BorderPane parentBp;
-    // AÑADE TU PROPIA INSTANCIA DE GSON
     private final Gson gson = new Gson();
 
-    // AÑADE ESTA LISTA DE RUTAS DE IMAGEN (VACÍA AL INICIO)
-    private List<String> currentImagePaths = new ArrayList<>(); // Nueva lista para almacenar las rutas relativas del servidor
+    // Esta lista almacenará las rutas de imagen temporales devueltas por el servidor
+    private List<String> currentImagePaths = new ArrayList<>();
+
+    private Stage primaryStage; // Referencia al Stage para FileChooser y Alerts
 
     @FXML
-    public void initialize(){
-
+    public void initialize() {
         statusCombo.getItems().addAll(RoomStatus.values());
         styleCombo.getItems().addAll(RoomStyle.values());
-
-        // Cargar los hoteles disponibles en el ComboBox al inicializar
         loadHotelsIntoComboBox();
     }
-
 
     public void setParentBp(BorderPane parentBp) {
         this.parentBp = parentBp;
@@ -92,8 +94,6 @@ public class RoomRegisterController {
     public void setRoomOptionsController(RoomOptionsController roomOptionsController) {
         this.roomOptionsController = roomOptionsController;
     }
-    // Necesitas referencia al Stage para el FileChooser
-    private Stage primaryStage;
 
     public void setStage(Stage stage) {
         this.primaryStage = stage;
@@ -101,7 +101,6 @@ public class RoomRegisterController {
 
     @FXML
     private void onUploadImage() {
-        // Usa 'currentImagePaths' en lugar de 'imagePaths'
         if (currentImagePaths.size() >= 5) { // Limitar máximo 5 imágenes
             util.FXUtility.alertInfo("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación.");
             return;
@@ -116,57 +115,38 @@ public class RoomRegisterController {
         File selectedFile = fileChooser.showOpenDialog(primaryStage); // Usar primaryStage
         if (selectedFile != null) {
             try {
-                // 1. CONVERSIÓN CLAVE: Leer el archivo de imagen local a un arreglo de bytes
                 byte[] imageData = Files.readAllBytes(selectedFile.toPath());
                 logger.info("Imagen local leída a {} bytes.", imageData.length);
 
-                // ** IMPORTANTE: Antes de subir una imagen, la habitación debe tener un número.
-                // En un registro de habitación, el número es típicamente asignado al guardar,
-                // no al subir imágenes. Hay dos enfoques aquí:
-                // A) Subir la imagen *después* de que la habitación sea registrada (más simple, pero menos flexible UI).
-                // B) Subir la imagen y asociarla a un ID TEMPORAL, o asociarla al nombre de la habitación,
-                //    y luego en el servidor, cuando se guarde la habitación, reasignar las imágenes.
-                //
-                // Para simplificar, asumiremos que el roomNumberTf.getText() ya tiene un número
-                // válido que el usuario introdujo. Si no, necesitarías un flujo diferente
-                // (ej. guardar la habitación primero, luego permitir la subida de imágenes).
-                // Dado que ya tienes un campo roomNumberTf, lo usaremos.
+                // ** CAMBIO CLAVE AQUÍ: No necesitamos el roomNumber al subir la imagen.
+                // El servidor la guardará temporalmente o le asignará un ID.
+                // Podríamos usar un DTO más simple o enviar solo los bytes y el nombre.
+                // Asumiremos un nuevo tipo de acción "uploadTempRoomImage"
+                // y que el servidor nos devolverá la ruta temporal.
 
-                int roomNumber;
-                try {
-                    roomNumber = Integer.parseInt(roomNumberTf.getText());
-                } catch (NumberFormatException e) {
-                    util.FXUtility.alert("Error", "Por favor, introduce un número de habitación válido antes de subir imágenes.");
-                    logger.warn("Intento de subir imagen sin número de habitación válido.");
-                    return;
-                }
-
-
-                // 2. Crear el DTO para enviar al servidor
+                // ImageUploadDTO temporal o simplemente enviar bytes y nombre original
+                // Podrías crear un DTO específico para esto, ej. TempImageUploadDTO (fileName, imageData)
+                // O modificar ImageUploadDTO para que roomNumber sea opcional (ej. Integer) o usar 0/null si es temporal.
+                // Para simplificar, asumiremos que ImageUploadDTO puede manejar un roomNumber ficticio como 0
+                // y que el servidor sabe que es una imagen temporal si el roomNumber es 0.
                 ImageUploadDTO uploadDto = new ImageUploadDTO(
-                        roomNumber,                   // Número de la habitación actual (obtenido del campo)
+                        0,                             // Usar 0 o un valor especial para indicar que es temporal
                         selectedFile.getName(),       // Nombre original del archivo (para la extensión)
                         imageData                     // ¡Los bytes de la imagen!
                 );
 
-                // 3. Enviar la Request al servidor para subir la imagen
-                Request request = new Request("uploadRoomImage", uploadDto); // Acción: "uploadRoomImage"
+                Request request = new Request("uploadTempRoomImage", uploadDto); // Nueva acción para imágenes temporales
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
-                    util.FXUtility.alertInfo("Éxito", "Imagen subida exitosamente al servidor.");
-                    logger.info("Respuesta del servidor al subir imagen: {}", response.getMessage());
-
-                    // El servidor debería devolver la habitación actualizada con la nueva ruta de imagen
-                    // Deserializamos la habitación actualizada que viene en el campo 'data' de la respuesta
-                    Room updatedRoom = gson.fromJson(gson.toJson(response.getData()), Room.class);
-                    // Actualiza la lista local de paths con los paths de la habitación que el servidor acaba de actualizar
-                    currentImagePaths = new ArrayList<>(updatedRoom.getImagesPaths());
-
-                    logger.info("Habitación actualizada con los nuevos paths de imagen.");
+                    // El servidor debería devolver la ruta temporal o el ID de la imagen guardada
+                    String tempImagePath = gson.fromJson(gson.toJson(response.getData()), String.class);
+                    currentImagePaths.add(tempImagePath); // Añade la ruta temporal a la lista local
+                    util.FXUtility.alertInfo("Éxito", "Imagen subida temporalmente al servidor.");
+                    logger.info("Imagen temporal subida: {}", tempImagePath);
                     refreshImagesDisplay(); // Volver a cargar las imágenes (ahora se pedirán del servidor)
                 } else {
-                    logger.error("Error al subir la imagen al servidor: {}", response.getMessage());
+                    logger.error("Error al subir la imagen temporal al servidor: {}", response.getMessage());
                     util.FXUtility.alert("Error", "No se pudo subir la imagen: " + response.getMessage());
                 }
 
@@ -180,34 +160,31 @@ public class RoomRegisterController {
         }
     }
 
-
     private void refreshImagesDisplay() {
         flowPane.getChildren().clear();
 
-        // Usa 'currentImagePaths'
         if (currentImagePaths == null || currentImagePaths.isEmpty()) {
             logger.info("No hay imágenes para mostrar en esta habitación.");
             return;
         }
 
-        for (String serverImagePath : new ArrayList<>(currentImagePaths)) { // Iterar sobre las rutas relativas
+        for (String serverImagePath : new ArrayList<>(currentImagePaths)) {
             logger.info("Solicitando imagen al servidor para mostrar: {}", serverImagePath);
-            Request request = new Request("downloadRoomImage", serverImagePath);
+            Request request = new Request("downloadRoomImage", serverImagePath); // Misma acción de descarga
             Response response = ClientConnectionManager.sendRequest(request);
 
             if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
                 try {
                     byte[] imageData;
+                    // Manejo de la deserialización de bytes como antes
                     if (response.getData() instanceof List) {
                         List<Double> doubleList = gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<Double>>() {}.getType());
                         imageData = new byte[doubleList.size()];
                         for (int i = 0; i < doubleList.size(); i++) {
                             imageData[i] = doubleList.get(i).byteValue();
                         }
-                        logger.info("Convertido List<Double> a byte[] para mostrar imagen: {}", serverImagePath);
                     } else if (response.getData() instanceof byte[]) {
                         imageData = (byte[]) response.getData();
-                        logger.info("Recibido byte[] directamente para mostrar imagen: {}", serverImagePath);
                     } else {
                         logger.warn("Tipo de dato inesperado para imagen del servidor: {}. Saltando imagen {}.", response.getData().getClass().getName(), serverImagePath);
                         continue;
@@ -219,55 +196,33 @@ public class RoomRegisterController {
                     imageView.setFitWidth(200);
                     imageView.setFitHeight(150);
 
-                    // Lógica para eliminar la imagen (ahora debe comunicar al servidor)
+                    // Lógica para eliminar la imagen
                     imageView.setOnMouseClicked(event -> {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                         alert.setTitle("Confirmar Eliminación");
                         alert.setHeaderText(null);
                         alert.setContentText("¿Estás seguro de que quieres eliminar esta imagen?");
+                        if (this.primaryStage != null) { // Asegura que la alerta sea modal a esta ventana
+                            alert.initOwner(this.primaryStage);
+                        }
 
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == ButtonType.OK) {
-                            // Obtén el número de habitación actual del campo de texto
-                            int roomNumberToDeleteFrom;
-                            try {
-                                roomNumberToDeleteFrom = Integer.parseInt(roomNumberTf.getText());
-                            } catch (NumberFormatException e) {
-                                util.FXUtility.alert("Error", "Número de habitación inválido para eliminar imagen.");
-                                logger.error("Error al intentar eliminar imagen: número de habitación no válido.");
-                                return;
-                            }
+                            // Si es una imagen temporal, solo la eliminamos de la lista local
+                            // Si ya estuviera asociada a una habitación (en un flujo de modificación),
+                            // deberíamos enviar una solicitud al servidor para desasociarla.
+                            // Aquí, como estamos en un registro nuevo, solo manejamos la lista local.
 
-                            // 1. Obtener la habitación completa del servidor
-                            Request getRoomRequest = new Request("getRoom", roomNumberToDeleteFrom);
-                            Response getRoomResponse = ClientConnectionManager.sendRequest(getRoomRequest);
-
-                            if ("200".equalsIgnoreCase(getRoomResponse.getStatus()) && getRoomResponse.getData() != null) {
-                                Room roomToUpdate = gson.fromJson(gson.toJson(getRoomResponse.getData()), Room.class);
-                                if (roomToUpdate.getImagesPaths() != null) {
-                                    roomToUpdate.getImagesPaths().remove(serverImagePath); // Eliminar la ruta de la lista
-                                    logger.info("Ruta de imagen eliminada de la lista local de la habitación {}: {}", roomNumberToDeleteFrom, serverImagePath);
-
-                                    // 2. Enviar la habitación actualizada (sin esa ruta) al servidor para que la guarde en la DB
-                                    Request updateRoomRequest = new Request("updateRoom", roomToUpdate);
-                                    Response updateRoomResponse = ClientConnectionManager.sendRequest(updateRoomRequest);
-
-                                    if ("200".equalsIgnoreCase(updateRoomResponse.getStatus())) {
-                                        util.FXUtility.alertInfo("Éxito", "Imagen eliminada y habitación actualizada.");
-                                        logger.info("Habitación actualizada en el servidor después de eliminar imagen.");
-                                        currentImagePaths = new ArrayList<>(roomToUpdate.getImagesPaths()); // Actualiza la lista local de paths
-                                        refreshImagesDisplay(); // Refrescar la UI para reflejar el cambio
-                                    } else {
-                                        roomToUpdate.getImagesPaths().add(serverImagePath); // Revertir si hubo error en la actualización
-                                        util.FXUtility.alert("Error", "No se pudo actualizar la habitación en el servidor: " + updateRoomResponse.getMessage());
-                                        logger.error("Error al actualizar habitación en servidor tras eliminar imagen: {}", updateRoomResponse.getMessage());
-                                    }
-                                } else {
-                                    logger.warn("La lista de imágenes de la habitación {} es nula al intentar eliminar.", roomNumberToDeleteFrom);
-                                }
+                            // Aquí, la imagen *aún no* está asociada a una habitación persistida.
+                            // Solo necesitamos eliminarla de la lista `currentImagePaths`.
+                            // El servidor debe tener una forma de "limpiar" las imágenes temporales no usadas
+                            // o un método para eliminarlas explícitamente si se cancela el registro.
+                            if (currentImagePaths.remove(serverImagePath)) {
+                                util.FXUtility.alertInfo("Éxito", "Imagen eliminada de la lista.");
+                                logger.info("Imagen eliminada de la lista local: {}", serverImagePath);
+                                refreshImagesDisplay(); // Refrescar la UI
                             } else {
-                                util.FXUtility.alert("Error", "No se pudo obtener la habitación del servidor para eliminar imagen: " + getRoomResponse.getMessage());
-                                logger.error("Error al obtener habitación del servidor para eliminar imagen: {}", getRoomResponse.getMessage());
+                                util.FXUtility.alert("Error", "No se pudo encontrar la imagen para eliminar.");
                             }
                         }
                     });
@@ -308,23 +263,21 @@ public class RoomRegisterController {
                 return;
             }
 
-            // Pasa la lista de rutas de imagen (currentImagePaths)
+            // ** CAMBIO CLAVE AQUÍ: Asigna las rutas de las imágenes temporales a la habitación
             Room room = new Room(number, price, description, status, style, new ArrayList<>(currentImagePaths));
             room.setHotelId(selectedHotel.getNumHotel());
             room.setHotel(selectedHotel);
 
-            // Envía la solicitud al servidor para registrar la habitación
-            Request request = new Request("registerRoom", room);
+            Request request = new Request("registerRoom", room); // Esta acción ya existía
             Response response = ClientConnectionManager.sendRequest(request);
 
-            // Procesar la respuesta del servidor
             if ("201".equalsIgnoreCase(response.getStatus())) {
                 util.FXUtility.alertInfo("Éxito", "Habitación registrada correctamente.");
                 if (roomOptionsController != null) {
                     roomOptionsController.loadRoomsIntoRegister();
                 }
                 clearFields();
-                currentImagePaths.clear(); // Limpia la lista de imágenes después de un registro exitoso
+                // currentImagePaths ya se limpia en clearFields()
             } else if ("409".equalsIgnoreCase(response.getStatus())) {
                 util.FXUtility.alert("Error", response.getMessage());
                 logger.warn("Intento de registrar habitación duplicada: {}", number);
@@ -342,10 +295,20 @@ public class RoomRegisterController {
         }
     }
 
+    @FXML
     public void onCancel(ActionEvent event) {
         RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", parentBp);
-        controller.setMainController(mainController); // Muy importante
-        roomOptionsController.loadRoomsIntoRegister();
+        controller.setMainController(mainController);
+        // Pasa el Stage también si `RoomOptionsController` lo necesita
+        if (this.primaryStage != null) {
+            controller.setStage(this.primaryStage);
+        }
+        roomOptionsController.loadRoomsIntoRegister(); // Asegúrate de que esta línea sea necesaria y correcta
+        // ** Importante: Si el registro se cancela, debemos decirle al servidor que elimine las imágenes temporales
+        // que se hayan subido, para evitar basura en el servidor.
+        // Esto requeriría una nueva acción "deleteTempImages" y un DTO con la lista de paths.
+        // Por ahora, asumimos que el servidor limpiará imágenes temporales antiguas.
+        clearFields(); // Limpia la UI y la lista local
     }
 
     private void loadHotelsIntoComboBox() {
@@ -354,8 +317,6 @@ public class RoomRegisterController {
         if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
             List<Hotel> hotels = new Gson().fromJson(new Gson().toJson(response.getData()), new TypeToken<List<Hotel>>() {}.getType());
             hotelComboBox.setItems(FXCollections.observableArrayList(hotels));
-            // Importante: Necesitas un CellFactory si quieres que el ComboBox muestre el nombre del hotel
-            // en lugar del toString() por defecto de Hotel.
             hotelComboBox.setCellFactory(lv -> new ListCell<Hotel>() {
                 @Override
                 protected void updateItem(Hotel hotel, boolean empty) {
@@ -363,7 +324,6 @@ public class RoomRegisterController {
                     setText(empty ? "" : hotel.getHotelName() + " (" + hotel.getNumHotel() + ")");
                 }
             });
-            // Esto también se aplica al botón de selección (representation)
             hotelComboBox.setButtonCell(new ListCell<Hotel>() {
                 @Override
                 protected void updateItem(Hotel hotel, boolean empty) {
@@ -377,7 +337,6 @@ public class RoomRegisterController {
         }
     }
 
-
     private void clearFields(){
         hotelComboBox.getSelectionModel().clearSelection();
         statusCombo.getSelectionModel().clearSelection();
@@ -389,5 +348,4 @@ public class RoomRegisterController {
         currentImagePaths.clear(); // Limpia también la lista de rutas de imágenes
     }
 }
-
 

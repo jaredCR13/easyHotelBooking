@@ -44,15 +44,15 @@ public class MainInterfaceController {
         @FXML
         private DatePicker toDate;
 
-        // AÑADIR: Variable para el Stage principal
-        private Stage primaryStage;
+        // Ya tienes esta variable, ¡excelente!
+        private Stage stage;
 
         private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
         private Gson gson = new Gson();
 
-        // AÑADIR: Setter para el Stage principal
-        public void setPrimaryStage(Stage primaryStage) {
-                this.primaryStage = primaryStage;
+        // Este es el setter que recibes desde la clase 'Main', ¡perfecto!
+        public void setStage(Stage stage) { // Renombré 'setPrimaryStage' a 'setStage' por consistencia
+                this.stage = stage;
                 logger.info("Stage principal establecido en MainInterfaceController.");
         }
 
@@ -69,6 +69,13 @@ public class MainInterfaceController {
                 HotelOptionsController controller = Utility.loadPage2("hotelinterface/hoteloptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
+                        // **** ¡CAMBIO CLAVE AQUÍ! ****
+                        // Pasa el Stage principal al HotelOptionsController
+                        if (this.stage != null) {
+                                controller.setStage(this.stage); // Asegúrate de que HotelOptionsController tenga un método setStage(Stage stage)
+                        } else {
+                                logger.error("Error: stage es null en MainInterfaceController al cargar HotelOptionsController.");
+                        }
                 } else {
                         logger.error("No se pudo cargar hoteloptions.fxml o el controlador es null.");
                         util.FXUtility.alert("Error", "No se pudo cargar la página de opciones de hotel.");
@@ -174,6 +181,12 @@ public class MainInterfaceController {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle(title);
                 alert.setContentText(content);
+                // **** ¡CAMBIO CLAVE AQUÍ! ****
+                // Si la alerta necesita un propietario (para ser modal), debe saber cuál es.
+                // Solo haz esto si la alerta se muestra desde un método que no recibe ya un Stage.
+                if (this.stage != null) {
+                        alert.initOwner(this.stage);
+                }
                 alert.showAndWait();
         }
 
@@ -184,11 +197,11 @@ public class MainInterfaceController {
                 RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
-                        // ¡AÑADIR ESTA LÍNEA CLAVE!
-                        if (this.primaryStage != null) {
-                                controller.setStage(this.primaryStage); // Asegúrate de que RoomOptionsController tenga un setter setStage
+                        // **** ¡ESTA ES LA LÍNEA CLAVE QUE YA TENÍAS, PERFECTA! ****
+                        if (this.stage != null) {
+                                controller.setStage(this.stage); // Asegúrate de que RoomOptionsController tenga un setter setStage
                         } else {
-                                logger.error("Error: primaryStage es null en MainInterfaceController al cargar RoomOptionsController.");
+                                logger.error("Error: stage es null en MainInterfaceController al cargar RoomOptionsController.");
                         }
                 } else {
                         logger.error("No se pudo cargar roomoptions.fxml o el controlador es null.");
@@ -262,6 +275,13 @@ public class MainInterfaceController {
                 FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
+                        // **** ¡AÑADE ESTA LÍNEA CLAVE! ****
+                        // Pasa el Stage principal al FrontDeskClerkOptionsController
+                        if (this.stage != null) {
+                                controller.setStage(this.stage); // Asegúrate de que FrontDeskClerkOptionsController tenga un método setStage(Stage stage)
+                        } else {
+                                logger.error("Error: stage es null en MainInterfaceController al cargar FrontDeskClerkOptionsController.");
+                        }
                 } else {
                         logger.error("No se pudo cargar frontdeskoptionsclerk.fxml o el controlador es null.");
                         util.FXUtility.alert("Error", "No se pudo cargar la página de opciones de recepcionista.");
@@ -295,4 +315,3 @@ public class MainInterfaceController {
                 }
         }
 }
-

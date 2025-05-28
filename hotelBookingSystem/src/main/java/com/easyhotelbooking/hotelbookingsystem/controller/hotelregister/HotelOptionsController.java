@@ -69,6 +69,7 @@ public class HotelOptionsController {
         @FXML
         private TableColumn<Hotel, Void> hotelActionColumn;
 
+        private Stage stage;
         // Referencia al controlador de la aplicación principal (o un objeto que gestione la comunicación con el servidor)
         private MainInterfaceController mainController;
         private static final Logger logger = LogManager.getLogger(HotelOptionsController.class);
@@ -76,7 +77,9 @@ public class HotelOptionsController {
         public void setMainController(MainInterfaceController mainController) {
             this.mainController = mainController;
         }
-
+        public void setStage(Stage stage){
+            this.stage=stage;
+        }
         @FXML
         public void initialize(){
             numberHotelRegister.setCellValueFactory(data ->
@@ -256,10 +259,7 @@ public class HotelOptionsController {
             }
             hotelRegister.refresh();
         }
-
-
-
-    }
+}
 
 
 

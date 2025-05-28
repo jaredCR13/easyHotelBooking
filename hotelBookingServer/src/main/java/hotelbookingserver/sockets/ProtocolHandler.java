@@ -28,9 +28,8 @@ public class ProtocolHandler {
 
 
     private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2";
-    private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data" + File.separator + "images" + File.separator + "rooms" + File.separator;
-    private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data" + File.separator + "images" + File.separator + "temp_rooms" + File.separator;
-
+    private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data/images/rooms/";
+    private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data/images/temp_rooms/";
 
     public Response handle(Request request) {
         logger.debug("Handling request: {}", request.getAction());

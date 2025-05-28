@@ -26,13 +26,9 @@ public class ProtocolHandler {
 
     private final Gson gson = new Gson();
 
-    // Esta es la ruta base donde el servidor guardará físicamente las imágenes.
-    // Asegúrate de que esta ruta exista y sea accesible para tu servidor.
-    private static final String SERVER_FILE_STORAGE_ROOT = "C:" + File.separator + "Users" + File.separator + "XT" + File.separator + "Documents" + File.separator + "ProyectoProgra2";
 
-    // Prefijo de la ruta relativa para imágenes permanentes de habitaciones
+    private static final String SERVER_FILE_STORAGE_ROOT = "C:" + File.separator + "Users" + File.separator + "XT" + File.separator + "Documents" + File.separator + "ProyectoProgra2";
     private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data" + File.separator + "images" + File.separator + "rooms" + File.separator;
-    // Prefijo de la ruta relativa para imágenes temporales
     private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data" + File.separator + "images" + File.separator + "temp_rooms" + File.separator;
 
 
@@ -155,12 +151,11 @@ public class ProtocolHandler {
                     try {
                         Room newRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
 
-                        // --- NUEVA LÓGICA: Mover imágenes temporales a permanentes ---
                         List<String> finalImagePaths = new ArrayList<>();
                         if (newRoom.getImagesPaths() != null && !newRoom.getImagesPaths().isEmpty()) {
                             for (String tempPath : newRoom.getImagesPaths()) {
                                 Path sourcePath = Paths.get(SERVER_FILE_STORAGE_ROOT, tempPath);
-                                // Extrae el nombre del archivo de la ruta temporal (ej. "data/images/temp_rooms/uuid.jpg" -> "uuid.jpg")
+
                                 String fileName = sourcePath.getFileName().toString();
                                 Path destinationDirPath = Paths.get(SERVER_FILE_STORAGE_ROOT, ROOM_IMAGES_RELATIVE_PATH_PREFIX);
                                 Path destinationPath = destinationDirPath.resolve(fileName);
@@ -174,7 +169,7 @@ public class ProtocolHandler {
                             }
                         }
                         newRoom.setImagesPaths(finalImagePaths); // Asigna las nuevas rutas permanentes a la habitación
-                        // --- FIN NUEVA LÓGICA ---
+
 
                         boolean added = roomService.addRoom(newRoom);
                         if (added) {
@@ -217,8 +212,8 @@ public class ProtocolHandler {
                 case "deleteRoom": {
                     try {
                         int roomNumber = parseIntFromRequest(request.getData());
-                        // Opcional: Cuando eliminas una habitación, también deberías eliminar sus imágenes físicas.
-                        // Esto requiere obtener las rutas de las imágenes antes de eliminar la habitación de la DB.
+
+
                         Room roomToDelete = roomService.getRoomById(roomNumber);
                         boolean deleted = roomService.deleteRoom(roomNumber);
                         if (deleted) {
@@ -273,7 +268,7 @@ public class ProtocolHandler {
                 }
 
                 // =================== IMAGENES DE HABITACIONES =========================
-                // ***** NUEVO CASO PARA SUBIR IMÁGENES TEMPORALES *****
+
                 case "uploadTempRoomImage": {
                     logger.info("Recibida acción: uploadTempRoomImage");
                     try {
@@ -306,50 +301,44 @@ public class ProtocolHandler {
                         return new Response("500", "Error interno del servidor al subir imagen temporal.", null);
                     }
                 }
-                // ******************************************************
 
-                // TU CASO EXISTENTE para 'uploadRoomImage' es para cuando ya se tiene un número de habitación
-                // y se actualiza una habitación existente con nuevas imágenes.
-                // Si solo vas a usar el flujo de "uploadTempRoomImage" y luego "registerRoom" para añadir fotos,
-                // este "uploadRoomImage" podría no ser necesario o necesitaría una lógica diferente (ej. para añadir
-                // imágenes a una habitación ya existente sin pasar por el flujo de registro completo).
-                // Por ahora, lo dejaré como estaba, pero ten esto en cuenta.
+
                 case "uploadRoomImage": {
                     try {
-                        // 1. Deserializar el DTO que contiene los bytes de la imagen del cliente
+                        // Deserializa el DTO que contiene los bytes de la imagen del cliente
                         ImageUploadDTO uploadData = gson.fromJson(gson.toJson(request.getData()), ImageUploadDTO.class);
                         int roomNumber = uploadData.getRoomNumber();
                         byte[] imageData = uploadData.getImageData();
                         String originalFileName = uploadData.getFileName();
 
-                        // 2. Extraer la extensión del archivo original
+                        //Extrae la extensión del archivo original
                         String fileExtension = "";
                         int dotIndex = originalFileName.lastIndexOf('.');
                         if (dotIndex > 0 && dotIndex < originalFileName.length() - 1) {
                             fileExtension = originalFileName.substring(dotIndex + 1);
                         }
 
-                        // 3. Generar un nombre de archivo único para evitar colisiones
+                        //Genera un nombre de archivo único para evitar colisiones
                         String uniqueFileName = UUID.randomUUID().toString() + "." + fileExtension;
                         // Construye la ruta completa donde se guardará la imagen en el disco del servidor
-                        // Este caso es para subir a la carpeta PERMANENTE
+
                         Path serverImageDirPath = Paths.get(SERVER_FILE_STORAGE_ROOT, ROOM_IMAGES_RELATIVE_PATH_PREFIX);
                         Path serverFullImagePath = serverImageDirPath.resolve(uniqueFileName);
 
-                        // 4. Crear los directorios si no existen
+                        // Crear los directorios si no existen
                         Files.createDirectories(serverImageDirPath);
 
-                        // 5. Guardar los bytes de la imagen en el archivo físico del servidor
+                        // Guardar los bytes de la imagen en el archivo físico del servidor
                         Files.write(serverFullImagePath, imageData);
                         logger.info("Imagen guardada en el servidor (directo a permanente): {}", serverFullImagePath.toAbsolutePath());
 
-                        // 6. Actualizar la lista de rutas de la habitación en la base de datos
+                        //Actualizar la lista de rutas de la habitación en la base de datos
                         Room room = roomService.getRoomById(roomNumber); // Obtener la habitación de la DB
                         if (room != null) {
                             if (room.getImagesPaths() == null) {
                                 room.setImagesPaths(new ArrayList<>());
                             }
-                            // Añade la ruta RELATIVA que el cliente usará para pedir la imagen
+                            // Añade la ruta relativa que el cliente usará para pedir la imagen
                             String relativePermanentPath = ROOM_IMAGES_RELATIVE_PATH_PREFIX + uniqueFileName;
                             room.getImagesPaths().add(relativePermanentPath);
                             roomService.updateRoom(room); // Actualiza la habitación en la DB (vía RoomData)
@@ -373,16 +362,16 @@ public class ProtocolHandler {
 
                 case "downloadRoomImage": {
                     try {
-                        // 1. Obtener la ruta relativa de la imagen solicitada por el cliente
+                        //Obtiene la ruta relativa de la imagen solicitada por el cliente
                         String imageRelativePath = gson.fromJson(gson.toJson(request.getData()), String.class);
 
-                        // 2. Construir la ruta física completa en el disco del servidor
-                        // Es importante que la imagen pueda estar tanto en "rooms" como en "temp_rooms"
+                        //Construir la ruta física completa en el disco del servidor
+
                         Path serverFullImagePath = Paths.get(SERVER_FILE_STORAGE_ROOT).resolve(imageRelativePath);
 
                         logger.info("Cliente solicita descarga de imagen: {}. Buscando en: {}", imageRelativePath, serverFullImagePath.toAbsolutePath());
 
-                        // 3. Leer el archivo de imagen a bytes y enviarlos al cliente
+                        //Lee el archivo de imagen a bytes y enviarlos al cliente
                         if (Files.exists(serverFullImagePath)) {
                             byte[] imageData = Files.readAllBytes(serverFullImagePath);
                             logger.info("Imagen de {} bytes leída y lista para enviar al cliente.", imageData.length);

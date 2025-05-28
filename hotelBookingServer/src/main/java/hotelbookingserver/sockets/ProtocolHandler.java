@@ -7,9 +7,14 @@ import hotelbookingserver.service.HotelService;
 import hotelbookingserver.service.RoomService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import java.util.UUID;
 import java.util.List;
-import java.util.stream.Collectors; // Necesario para filtrar listas
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+
 
 public class ProtocolHandler {
     private static final Logger logger = LogManager.getLogger(ProtocolHandler.class);
@@ -19,6 +24,11 @@ public class ProtocolHandler {
 
     private final Gson gson = new Gson();
 
+    // Esta es la ruta base donde el servidor guardará físicamente las imágenes.
+    // Ajusta esta ruta según la estructura de tu proyecto en el servidor.
+    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\XT\\Documents\\ProyectoProgra2";
+    // El prefijo de la ruta relativa que se guardará en la DB y que el cliente usará para solicitar
+    private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data\\images\\rooms";
     public Response handle(Request request) {
         logger.debug("Handling request: {}", request.getAction());
         try {
@@ -219,9 +229,95 @@ public class ProtocolHandler {
                     }
                 }
 
+                // =================== IMAGENES DE HABITACIONES =========================
+                case "uploadRoomImage": {
+                    try {
+                        // 1. Deserializar el DTO que contiene los bytes de la imagen del cliente
+                        ImageUploadDTO uploadData = gson.fromJson(gson.toJson(request.getData()), ImageUploadDTO.class);
+                        int roomNumber = uploadData.getRoomNumber();
+                        byte[] imageData = uploadData.getImageData();
+                        String originalFileName = uploadData.getFileName();
+
+                        // 2. Extraer la extensión del archivo original
+                        String fileExtension = "";
+                        int dotIndex = originalFileName.lastIndexOf('.');
+                        if (dotIndex > 0 && dotIndex < originalFileName.length() - 1) {
+                            fileExtension = originalFileName.substring(dotIndex + 1);
+                        }
+
+                        // 3. Generar un nombre de archivo único para evitar colisiones
+                        String uniqueFileName = UUID.randomUUID().toString() + "." + fileExtension;
+                        // Construye la ruta completa donde se guardará la imagen en el disco del servidor
+                        Path serverImageDirPath = Paths.get(SERVER_FILE_STORAGE_ROOT, ROOM_IMAGES_RELATIVE_PATH_PREFIX);
+                        Path serverFullImagePath = serverImageDirPath.resolve(uniqueFileName);
+
+                        // 4. Crear los directorios si no existen
+                        Files.createDirectories(serverImageDirPath);
+
+                        // 5. Guardar los bytes de la imagen en el archivo físico del servidor
+                        Files.write(serverFullImagePath, imageData);
+                        logger.info("Imagen guardada en el servidor: {}", serverFullImagePath.toAbsolutePath());
+
+                        // 6. Actualizar la lista de rutas de la habitación en la base de datos
+                        Room room = roomService.getRoomById(roomNumber); // Obtener la habitación de la DB
+                        if (room != null) {
+                            if (room.getImagesPaths() == null) {
+                                room.setImagesPaths(new ArrayList<>());
+                            }
+                            // Añade la ruta RELATIVA que el cliente usará para pedir la imagen
+                            room.getImagesPaths().add(ROOM_IMAGES_RELATIVE_PATH_PREFIX + uniqueFileName);
+                            roomService.updateRoom(room); // Actualiza la habitación en la DB (vía RoomData)
+                            logger.info("Ruta de imagen '{}' añadida a la habitación {}", room.getImagesPaths().get(room.getImagesPaths().size() -1), roomNumber);
+
+                            // Devuelve la habitación actualizada para que el cliente tenga los nuevos paths
+                            return new Response("200", "Imagen subida y path guardado.", room);
+                        } else {
+                            logger.warn("Habitación {} no encontrada para asociar la imagen. Eliminando archivo: {}", roomNumber, serverFullImagePath.toAbsolutePath());
+                            Files.deleteIfExists(serverFullImagePath); // Elimina el archivo si la habitación no existe
+                            return new Response("404", "Habitación no encontrada para asociar la imagen.", null);
+                        }
+                    } catch (IOException e) {
+                        logger.error("Error de E/S al subir imagen al servidor: {}", e.getMessage(), e);
+                        return new Response("500", "Error de E/S al procesar la imagen en el servidor.", null);
+                    } catch (Exception e) {
+                        logger.error("Error inesperado al manejar 'uploadRoomImage': {}", e.getMessage(), e);
+                        return new Response("500", "Error interno del servidor al subir imagen.", null);
+                    }
+                }
+
+                case "downloadRoomImage": {
+                    try {
+                        // 1. Obtener la ruta relativa de la imagen solicitada por el cliente
+                        String imageRelativePath = gson.fromJson(gson.toJson(request.getData()), String.class);
+
+                        // 2. Construir la ruta física completa en el disco del servidor
+                        Path serverFullImagePath = Paths.get(SERVER_FILE_STORAGE_ROOT).resolve(imageRelativePath);
+
+                        logger.info("Cliente solicita descarga de imagen: {}. Buscando en: {}", imageRelativePath, serverFullImagePath.toAbsolutePath());
+
+                        // 3. Leer el archivo de imagen a bytes y enviarlos al cliente
+                        if (Files.exists(serverFullImagePath)) {
+                            byte[] imageData = Files.readAllBytes(serverFullImagePath); // <- ¡Lee el archivo a bytes!
+                            logger.info("Imagen de {} bytes leída y lista para enviar al cliente.", imageData.length);
+                            return new Response("200", "Imagen enviada.", imageData); // <- ¡Envía los bytes!
+                        } else {
+                            logger.warn("Imagen no encontrada en el servidor: {}", serverFullImagePath.toAbsolutePath());
+                            return new Response("404", "Imagen no encontrada en el servidor.", null);
+                        }
+                    } catch (IOException e) {
+                        logger.error("Error de E/S al leer imagen del servidor para enviar: {}", e.getMessage(), e);
+                        return new Response("500", "Error de E/S al enviar imagen desde el servidor.", null);
+                    } catch (Exception e) {
+                        logger.error("Error inesperado al manejar 'downloadRoomImage': {}", e.getMessage(), e);
+                        return new Response("500", "Error interno del servidor al descargar imagen.", null);
+                    }
+                }
+
+
                 default:
                     logger.warn("Acción no reconocida: {}", request.getAction());
                     return new Response("400", "Acción no reconocida: " + request.getAction(), null);
+
             }
 
         } catch (Exception e) {
@@ -232,6 +328,7 @@ public class ProtocolHandler {
             // roomService.close();
             // frontDeskClerkService.close();
         }
+
     }
 
     private int parseIntFromRequest(Object data) {

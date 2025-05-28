@@ -22,7 +22,7 @@ public class RoomData {
     private static final int IMAGE_PATH_SIZE = 512; // bytes per image path
     private static final int IMAGES_SIZE = MAX_IMAGES * IMAGE_PATH_SIZE;
 
-    // Nuevo tamaño total del registro
+
     private static final int RECORD_SIZE = ROOM_NUMBER_SIZE + ROOM_PRICE_SIZE + DESCRIPTION_SIZE + STATUS_SIZE + STYLE_SIZE + HOTEL_ID_SIZE + IMAGES_SIZE;
 
     public RoomData(File file) throws FileNotFoundException {

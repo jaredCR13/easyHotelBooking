@@ -50,8 +50,8 @@ public class MainInterfaceController {
         private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
         private Gson gson = new Gson();
 
-        // Este es el setter que recibes desde la clase 'Main', ¡perfecto!
-        public void setStage(Stage stage) { // Renombré 'setPrimaryStage' a 'setStage' por consistencia
+
+        public void setStage(Stage stage) {
                 this.stage = stage;
                 logger.info("Stage principal establecido en MainInterfaceController.");
         }
@@ -69,12 +69,11 @@ public class MainInterfaceController {
                 HotelOptionsController controller = Utility.loadPage2("hotelinterface/hoteloptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
-                        // **** ¡CAMBIO CLAVE AQUÍ! ****
-                        // Pasa el Stage principal al HotelOptionsController
+
                         if (this.stage != null) {
-                                controller.setStage(this.stage); // Asegúrate de que HotelOptionsController tenga un método setStage(Stage stage)
+                                controller.setStage(this.stage);
                         } else {
-                                logger.error("Error: stage es null en MainInterfaceController al cargar HotelOptionsController.");
+
                         }
                 } else {
                         logger.error("No se pudo cargar hoteloptions.fxml o el controlador es null.");
@@ -197,11 +196,11 @@ public class MainInterfaceController {
                 RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
-                        // **** ¡ESTA ES LA LÍNEA CLAVE QUE YA TENÍAS, PERFECTA! ****
+
                         if (this.stage != null) {
-                                controller.setStage(this.stage); // Asegúrate de que RoomOptionsController tenga un setter setStage
+                                controller.setStage(this.stage);
                         } else {
-                                logger.error("Error: stage es null en MainInterfaceController al cargar RoomOptionsController.");
+
                         }
                 } else {
                         logger.error("No se pudo cargar roomoptions.fxml o el controlador es null.");
@@ -275,10 +274,9 @@ public class MainInterfaceController {
                 FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
-                        // **** ¡AÑADE ESTA LÍNEA CLAVE! ****
-                        // Pasa el Stage principal al FrontDeskClerkOptionsController
+
                         if (this.stage != null) {
-                                controller.setStage(this.stage); // Asegúrate de que FrontDeskClerkOptionsController tenga un método setStage(Stage stage)
+                                controller.setStage(this.stage);
                         } else {
                                 logger.error("Error: stage es null en MainInterfaceController al cargar FrontDeskClerkOptionsController.");
                         }

@@ -27,7 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.Optional; // Importar para Alert.showAndWait() con botones
+import java.util.Optional;
 import hotelbookingcommon.domain.ImageUploadDTO;
 
 
@@ -123,19 +123,19 @@ public class ModifyRoomController {
             return;
         }
 
-        // Iterar sobre las rutas que vienen del servidor (ej. "images/rooms/unique_id.jpg")
+
         for (String serverImagePath : new ArrayList<>(currentRoom.getImagesPaths())) {
             logger.info("Solicitando imagen al servidor para mostrar: {}", serverImagePath);
-            // 1. Enviar una Request al servidor para descargar los bytes de la imagen
-            Request request = new Request("downloadRoomImage", serverImagePath); // Acción: "downloadRoomImage"
+            // Enviar una Request al servidor para descargar los bytes de la imagen
+            Request request = new Request("downloadRoomImage", serverImagePath);
             Response response = ClientConnectionManager.sendRequest(request);
 
             if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
                 try {
                     byte[] imageData;
-                    // 2. Manejar la deserialización de Gson: byte[] a menudo llega como List<Double>
+                    // Manejar la deserialización de Gson: byte[] a menudo llega como List<Double>
                     if (response.getData() instanceof List) {
-                        // Si Gson lo deserializó como List<Double>, lo convertimos de nuevo a byte[]
+
                         List<Double> doubleList = new Gson().fromJson(new Gson().toJson(response.getData()), new TypeToken<List<Double>>() {}.getType());
                         imageData = new byte[doubleList.size()];
                         for (int i = 0; i < doubleList.size(); i++) {
@@ -143,22 +143,22 @@ public class ModifyRoomController {
                         }
                         logger.info("Convertido List<Double> a byte[] para mostrar imagen: {}", serverImagePath);
                     } else if (response.getData() instanceof byte[]) {
-                        // Si por alguna razón Gson logró deserializar directamente a byte[]
+
                         imageData = (byte[]) response.getData();
                         logger.info("Recibido byte[] directamente para mostrar imagen: {}", serverImagePath);
                     } else {
                         logger.warn("Tipo de dato inesperado para imagen del servidor: {}. Saltando imagen {}.", response.getData().getClass().getName(), serverImagePath);
-                        continue; // Saltar a la siguiente imagen si el tipo no es el esperado
+                        continue;
                     }
 
-                    // 3. Crear la Image de JavaFX desde el array de bytes
+                    //Crear la Image de JavaFX desde el array de bytes
                     Image img = new Image(new ByteArrayInputStream(imageData), 200, 150, true, true);
                     ImageView imageView = new ImageView(img);
                     imageView.setPreserveRatio(true);
                     imageView.setFitWidth(200);
                     imageView.setFitHeight(150);
 
-                    // Lógica para eliminar la imagen (ahora debe comunicar al servidor)
+                    // Lógica para eliminar la imagen
                     imageView.setOnMouseClicked(event -> {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                         alert.setTitle("Confirmar Eliminación");
@@ -167,20 +167,20 @@ public class ModifyRoomController {
 
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == ButtonType.OK) {
-                            // 4. Eliminar la ruta de la imagen de la lista local
+                            // Eliminar la ruta de la imagen de la lista local
                             currentRoom.getImagesPaths().remove(serverImagePath);
                             logger.info("Ruta de imagen eliminada de la lista local: {}", serverImagePath);
 
-                            // 5. Enviar la habitación actualizada (sin esa ruta) al servidor para que la guarde en la DB
-                            // Asumimos que tu servidor ya maneja la acción "updateRoom"
+                            //Enviar la habitación actualizada (sin esa ruta) al servidor para que la guarde en la DB
+
                             Request updateRoomRequest = new Request("updateRoom", currentRoom);
                             Response updateRoomResponse = ClientConnectionManager.sendRequest(updateRoomRequest);
 
                             if ("200".equalsIgnoreCase(updateRoomResponse.getStatus())) {
                                 logger.info("Habitación actualizada en el servidor después de eliminar imagen.");
-                                refreshImagesDisplay(); // Refrescar la UI para reflejar el cambio
+                                refreshImagesDisplay(); //Refrescar la interfaz para reflejar el cambio
                             } else {
-                                // Si la actualización falla, podrías considerar volver a añadir la imagen a la lista local
+
                                 currentRoom.getImagesPaths().add(serverImagePath); // Revertir si hubo error
                                 util.FXUtility.alert("Error", "No se pudo actualizar la habitación en el servidor: " + updateRoomResponse.getMessage());
                                 logger.error("Error al actualizar habitación en servidor tras eliminar imagen: {}", updateRoomResponse.getMessage());
@@ -200,8 +200,7 @@ public class ModifyRoomController {
             }
         }
     }
-    // En ModifyRoomController.java
-// ...
+
     @FXML
     void onUploadImage(ActionEvent event) {
         if (currentRoom == null || currentRoom.getImagesPaths().size() >= 5) {
@@ -218,18 +217,18 @@ public class ModifyRoomController {
         File selectedFile = fileChooser.showOpenDialog(primaryStage);
         if (selectedFile != null) {
             try {
-                // 1. CONVERSIÓN CLAVE: Leer el archivo de imagen local a un arreglo de bytes
+
                 byte[] imageData = Files.readAllBytes(selectedFile.toPath());
                 logger.info("Imagen local leída a {} bytes.", imageData.length);
 
-                // 2. Crear el DTO para enviar al servidor
+                // Crear el DTO para enviar al servidor
                 ImageUploadDTO uploadDto = new ImageUploadDTO(
-                        currentRoom.getRoomNumber(), // Número de la habitación actual
-                        selectedFile.getName(),       // Nombre original del archivo (para la extensión)
-                        imageData                     // ¡Los bytes de la imagen!
+                        currentRoom.getRoomNumber(),
+                        selectedFile.getName(),
+                        imageData
                 );
 
-                // 3. Enviar la Request al servidor para subir la imagen
+                //Enviar la Request al servidor para subir la imagen
                 Request request = new Request("uploadRoomImage", uploadDto); // Acción: "uploadRoomImage"
                 Response response = ClientConnectionManager.sendRequest(request);
 
@@ -237,13 +236,13 @@ public class ModifyRoomController {
                     util.FXUtility.alertInfo("Éxito", "Imagen subida exitosamente al servidor.");
                     logger.info("Respuesta del servidor al subir imagen: {}", response.getMessage());
 
-                    // 4. El servidor debería devolver la habitación actualizada con la nueva ruta de imagen
-                    // Deserializamos la habitación actualizada que viene en el campo 'data' de la respuesta
+                    //El servidor debería devolver la habitación actualizada con la nueva ruta de imagen
+
                     Room updatedRoom = gson.fromJson(gson.toJson(response.getData()), Room.class);
                     currentRoom.setImagesPaths(updatedRoom.getImagesPaths()); // Actualiza la lista local de paths
 
                     logger.info("Habitación actualizada con los nuevos paths de imagen.");
-                    refreshImagesDisplay(); // Volver a cargar las imágenes (ahora se pedirán del servidor)
+                    refreshImagesDisplay(); // Volver a cargar las imágenes
                 } else {
                     logger.error("Error al subir la imagen al servidor: {}", response.getMessage());
                     util.FXUtility.alert("Error", "No se pudo subir la imagen: " + response.getMessage());
@@ -258,10 +257,6 @@ public class ModifyRoomController {
             }
         }
 
-        // --- ¡Elimina este método! Ya no es necesario si las imágenes se manejan en el servidor ---
-        // private String copyImageToAppDirectory(File sourceFile) throws IOException { ... }
-
-        // ... (resto de tu clase: onCancel, onModify, loadHotelsIntoComboBox, clearFields) ...
     }
 
 

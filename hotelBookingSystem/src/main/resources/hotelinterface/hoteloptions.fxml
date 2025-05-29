@@ -12,22 +12,26 @@
 
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.layout.Region?>
 <BorderPane fx:id="bp" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController">
 
     <!-- Sección superior azul -->
     <top>
+        <VBox spacing="0">
         <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
             <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Hotel Options" />
 
-
             <!-- Sección de botones -->
             <HBox alignment="TOP_LEFT" spacing="10">
-                <Button fx:id="registerButton" onAction="#registerHotelOnAction" prefWidth="100" text="Register Hotel" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
-                <Button fx:id="goBack" layoutX="40.0" layoutY="110.0" onAction="#goBackOnAction" prefWidth="120" text="Go back" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
+                <Button fx:id="registerButton" onAction="#registerHotelOnAction" prefWidth="100" text="Register Hotel" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
+                <Button fx:id="goBack" layoutX="40.0" layoutY="110.0" onAction="#goBackOnAction" prefWidth="120" text="Go back" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
             </HBox>
         </VBox>
 
-    </top>
+        <!-- Línea decorativa -->
+        <Region prefHeight="10" style="-fx-background-color: #3985d8;" VBox.vgrow="NEVER"/>
+    </VBox>
+</top>
 
         <!-- Sección del TableView -->
     <center>

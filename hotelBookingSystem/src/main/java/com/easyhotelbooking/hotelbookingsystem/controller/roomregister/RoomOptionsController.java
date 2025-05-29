@@ -18,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,10 +27,7 @@ import java.util.List;
 public class RoomOptionsController {
 
     @FXML private BorderPane bp;
-
     @FXML private Button goBack;
-
-
     @FXML private ComboBox<RoomStatus> statusCombo;
     @FXML private ComboBox<RoomStyle> styleCombo;
     @FXML private ComboBox<Hotel> hotelComboBox;
@@ -41,6 +39,9 @@ public class RoomOptionsController {
     @FXML private TableColumn<Room, RoomStyle> styleColumn;
     @FXML private TableColumn<Room, Integer> hotelIdColumn; // Nueva columna para mostrar el ID del hotel
     @FXML private TableColumn<Room, Void> actionColumn;
+    @FXML private TextField quickSearchField;
+    @FXML private ComboBox<Hotel> quickHotelCombo;
+
     private static final Logger logger = LogManager.getLogger(RoomOptionsController.class);
 
     private MainInterfaceController mainController;
@@ -73,8 +74,23 @@ public class RoomOptionsController {
         hotelIdColumn.setCellValueFactory(new PropertyValueFactory<>("hotelId"));
 
         addButtonsToRoomTable(); // <-- aquí
+        loadHotelsIntoQuickCombo();
 
+        quickHotelCombo.setConverter(new StringConverter<Hotel>() {
+        public String toString(Hotel hotel) {
+            return hotel != null ? hotel.getHotelName() : "";
+        }
+
+        @Override
+        public Hotel fromString(String string) {
+            return quickHotelCombo.getItems().stream()
+                    .filter(h -> h.getHotelName().equals(string))
+                    .findFirst()
+                    .orElse(null);
+        }
+        });
     }
+
 
 
     private void addButtonsToRoomTable() {
@@ -192,6 +208,61 @@ public class RoomOptionsController {
         } catch (Exception e) {
             util.FXUtility.alert("Error", "Ocurrió un error al eliminar el hotel.");
         }
+    }
+
+    private void loadHotelsIntoQuickCombo() {
+        Request request = new Request("getHotels", null);
+        Response response = ClientConnectionManager.sendRequest(request);
+
+        if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+            List<Hotel> hotelList = new Gson().fromJson(
+                    new Gson().toJson(response.getData()),
+                    new TypeToken<List<Hotel>>() {}.getType()
+            );
+            quickHotelCombo.getItems().clear();
+            quickHotelCombo.getItems().addAll(hotelList);
+        } else {
+            util.FXUtility.alert("Error", "No se pudieron cargar los hoteles para búsqueda rápida.");
+        }
+    }
+
+    @FXML
+    private void onQuickSearch() {
+        String roomText = quickSearchField.getText().trim();
+        Hotel selectedHotel = quickHotelCombo.getValue();
+
+        if (roomText.isEmpty() || selectedHotel == null) {
+            util.FXUtility.alert("Campos vacíos", "Por favor ingrese el número de habitación y seleccione un hotel.");
+            return;
+        }
+
+        try {
+            int roomNumber = Integer.parseInt(roomText);
+            Request request = new Request("getRoom", roomNumber);
+            Response response = ClientConnectionManager.sendRequest(request);
+
+            if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                Room room = new Gson().fromJson(new Gson().toJson(response.getData()), Room.class);
+
+                if (room.getHotelId() == selectedHotel.getNumHotel()) {
+                    roomRegister.setItems(FXCollections.observableArrayList(room)); // Solo esa
+                } else {
+                    util.FXUtility.alert("Habitación no encontrada", "La habitación no pertenece al hotel seleccionado.");
+                }
+            } else {
+                util.FXUtility.alert("Habitación no ha sido encontrada", "No existe una habitación con ese número.");
+            }
+
+        } catch (NumberFormatException e) {
+            util.FXUtility.alert("Formato inválido", "El número de habitación debe ser un número entero.");
+        }
+    }
+
+    @FXML
+    void onClearSearch() {
+        quickSearchField.clear();
+        quickHotelCombo.setValue(null);
+        loadRoomsIntoRegister(); // vuelve a cargar todos
     }
 
     public void loadRoomsIntoRegister() {

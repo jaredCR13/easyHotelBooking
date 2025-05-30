@@ -6,6 +6,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class FXUtility {
 
@@ -43,6 +44,21 @@ public class FXUtility {
         TextInputDialog dialog = new TextInputDialog(title);
         dialog.setHeaderText(header);
         return dialog;
+    }
+
+    public static boolean confirm(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null); // No header text for simple confirmation
+        alert.setContentText(message);
+
+        // Opcional: puedes personalizar los botones, por defecto son OK y CANCEL
+        // alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        // Si el resultado está presente y es ButtonType.OK (o ButtonType.YES si lo personalizaste)
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 
 }

@@ -3,7 +3,7 @@ package hotelbookingcommon.domain;
 
 import java.io.Serializable;
 
-public class Request implements Serializable {
+public class Request{
     private String action;
     private Object data;
 

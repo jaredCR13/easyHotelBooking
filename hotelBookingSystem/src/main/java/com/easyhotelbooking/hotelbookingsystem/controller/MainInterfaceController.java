@@ -180,9 +180,6 @@ public class MainInterfaceController {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle(title);
                 alert.setContentText(content);
-                // **** ¡CAMBIO CLAVE AQUÍ! ****
-                // Si la alerta necesita un propietario (para ser modal), debe saber cuál es.
-                // Solo haz esto si la alerta se muestra desde un método que no recibe ya un Stage.
                 if (this.stage != null) {
                         alert.initOwner(this.stage);
                 }

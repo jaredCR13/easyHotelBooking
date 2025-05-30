@@ -26,7 +26,7 @@ public class Room implements Serializable {
     private transient Hotel hotel;
 
     @Expose
-    private int hotelId; //ID HOTEL PARA HACER ASOCIACION
+    private int hotelId;
 
     public Room(int roomNumber, double roomPrice, String detailedDescription, RoomStatus status, RoomStyle style, List<String> imagesPaths) {
         this.roomNumber = roomNumber;
@@ -35,16 +35,14 @@ public class Room implements Serializable {
         this.status = status;
         this.style = style;
         this.imagesPaths = imagesPaths != null ? new ArrayList<>(imagesPaths) : new ArrayList<>();
-        this.hotelId = -1; // Default to no hotel associated
+        this.hotelId = -1;
     }
 
-    // Constructor with hotelId (for loading from data layer)
     public Room(int roomNumber, double roomPrice, String detailedDescription, RoomStatus status, RoomStyle style, List<String> imagesPaths, int hotelId) {
         this(roomNumber, roomPrice, detailedDescription, status, style, imagesPaths);
         this.hotelId = hotelId;
     }
 
-    // Add a default constructor for Gson if you don't have one
     public Room() {
         this.imagesPaths = new ArrayList<>();
         this.hotelId = -1;
@@ -100,15 +98,10 @@ public class Room implements Serializable {
         this.imagesPaths = imagesPaths;
     }
 
-    // *** IMPORTANT for breaking circular reference ***
-    // This getter is for the actual Hotel object in memory.
-    // It should *not* be serialized by Gson.
     public Hotel getHotel() {
         return hotel;
     }
 
-    // This setter is used to link the Room to a Hotel object in memory.
-    // It is called when associating a room with a hotel in the service layer.
     public void setHotel(Hotel hotel) {
         this.hotel = hotel;
     }
@@ -129,7 +122,7 @@ public class Room implements Serializable {
                 ", detailedDescription='" + detailedDescription + '\'' +
                 ", status=" + status +
                 ", style=" + style +
-                ", hotelId=" + hotelId + // Display hotelId here
+                ", hotelId=" + hotelId +
                 '}';
     }
 

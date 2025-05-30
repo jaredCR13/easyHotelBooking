@@ -35,7 +35,6 @@ public class FXUtility {
         alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE); //no estoy seguro si es necesario
         alert.getDialogPane().setMinWidth(400); //no estoy seguro si es necesario
         alert.setHeaderText(header);
-        //alert.setContentText(header);
         return alert;
     }
 
@@ -49,15 +48,9 @@ public class FXUtility {
     public static boolean confirm(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
-        alert.setHeaderText(null); // No header text for simple confirmation
+        alert.setHeaderText(null);
         alert.setContentText(message);
-
-        // Opcional: puedes personalizar los botones, por defecto son OK y CANCEL
-        // alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-
         Optional<ButtonType> result = alert.showAndWait();
-
-        // Si el resultado está presente y es ButtonType.OK (o ButtonType.YES si lo personalizaste)
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 

@@ -17,12 +17,12 @@ public class HotelService {
     private static final String ROOM_FILE = "C:\\Users\\Lexis\\Documents\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelRoomFiles\\rooms.dat"; // Ruta del archivo de habitaciones
 
     private HotelData hotelData;
-    private RoomData roomData; // Instancia de RoomData para cargar habitaciones
+    private RoomData roomData;
 
     public HotelService() {
         try {
             hotelData = new HotelData(new File(HOTEL_FILE));
-            roomData = new RoomData(new File(ROOM_FILE)); // Inicializar RoomData
+            roomData = new RoomData(new File(ROOM_FILE));
         } catch (IOException e) {
             throw new RuntimeException("Error al abrir archivos de hoteles o habitaciones", e);
         }
@@ -35,15 +35,14 @@ public class HotelService {
 
             //Recorrer cada hotel y asignar habitaciones
             for (Hotel hotel : hotels) {
-                //Filtrar las habitaciones que pertenecen a este hotel
                 List<Room> roomsForThisHotel = allRooms.stream()
                         .filter(room -> room.getHotelId() == hotel.getNumHotel())
                         .collect(Collectors.toList());
-                hotel.setRooms(roomsForThisHotel); // Asignar la lista de habitaciones al hotel
+                hotel.setRooms(roomsForThisHotel);
 
                 //Realiza la asociacion
                 for (Room room : roomsForThisHotel) {
-                    room.setHotel(hotel); //Se crea la referencia del hotel en la habitación
+                    room.setHotel(hotel);
                 }
             }
             return hotels;
@@ -65,8 +64,7 @@ public class HotelService {
         try {
             boolean actualizado = hotelData.update(updatedHotel);
             if (actualizado) {
-                // Si la actualización es exitosa, se recarga el hotel con sus habitaciones
-                return updatedHotel; // Retorna el objeto (sin habitaciones cargadas por defecto)
+                return updatedHotel;
             }
             return null;
         } catch (IOException e) {

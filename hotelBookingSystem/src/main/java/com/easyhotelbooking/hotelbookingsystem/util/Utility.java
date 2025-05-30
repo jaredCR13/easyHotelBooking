@@ -17,7 +17,7 @@ public class Utility {
 
             Stage stage = (Stage) anyNodeInScene.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setTitle("Hotel Booking"); // o cualquier título
+            stage.setTitle("Hotel Booking");
         } catch (IOException e) {
             System.out.println("Error loading " + fxmlFileName);
             e.printStackTrace();

@@ -38,7 +38,6 @@ public class ProtocolHandler {
 
                 // =================== HOTEL =========================
                 case "getHotels": {
-                    // hotelService.getAllHotels() ya carga las habitaciones asociadas
                     List<Hotel> hotels = hotelService.getAllHotels();
                     logger.debug("Retrieved {} hotels", hotels.size());
                     return new Response("200", "Hoteles cargados", hotels);
@@ -47,8 +46,6 @@ public class ProtocolHandler {
                 case "getHotel": {
                     try {
                         int hotelNumber = parseIntFromRequest(request.getData());
-                        // hotelService.getAllHotels() carga las asociaciones
-                        // Buscamos directamente en la lista completa
                         List<Hotel> hoteles = hotelService.getAllHotels();
                         Hotel foundHotel = hoteles.stream()
                                 .filter(h -> h.getNumHotel() == hotelNumber)
@@ -69,8 +66,6 @@ public class ProtocolHandler {
                 case "registerHotel": {
                     try {
                         Hotel newHotel = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
-                        // Cuando se registra un hotel, su lista de habitaciones estará vacía
-                        // Las habitaciones se annaden a través de registerRoom
                         List<Hotel> updatedHotels = hotelService.addHotel(newHotel);
                         logger.info("Hotel registrado: {}", newHotel);
                         return new Response("201", "Hotel registrado con éxito", updatedHotels);
@@ -83,12 +78,8 @@ public class ProtocolHandler {
                 case "updateHotel": {
                     try {
                         Hotel updated = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
-                        //hotelService.updateHotel() solo actualiza los campos básicos del Hotel
-                        //'updated' contendrá la lista de habitaciones que venía del cliente,
                         Hotel result = hotelService.updateHotel(updated);
                         if (result != null) {
-                            //Devuelve el objeto que se actualizo
-                            //se obtiene la ista completa
                             List<Hotel> allHotels = hotelService.getAllHotels();
                             Hotel fullUpdatedHotel = allHotels.stream()
                                     .filter(h -> h.getNumHotel() == result.getNumHotel())
@@ -107,7 +98,6 @@ public class ProtocolHandler {
                 case "deleteHotel": {
                     try {
                         int number = parseIntFromRequest(request.getData());
-                        // hotelService.deleteHotel() elimina las habitaciones asociadas
                         boolean deleted = hotelService.deleteHotel(number);
                         if (deleted) {
                             return new Response("200", "Hotel eliminado", null);
@@ -122,7 +112,6 @@ public class ProtocolHandler {
 
                 // =================== ROOMS =========================
                 case "getRooms": {
-                    // roomService.getAllRooms() carga el objeto Hotel asociado
                     List<Room> rooms = roomService.getAllRooms();
                     logger.debug("Habitaciones cargadas: {}", rooms.size());
                     return new Response("200", "Habitaciones cargadas", rooms);
@@ -131,9 +120,7 @@ public class ProtocolHandler {
                 case "getRoom": {
                     try {
                         int roomNumber = parseIntFromRequest(request.getData());
-                        //Buscar la habitación directamente por ID,
-                        // y roomService la cargue con su Hotel asociado
-                        Room foundRoom = roomService.getRoomById(roomNumber); // Asumimos un nuevo método en RoomService
+                        Room foundRoom = roomService.getRoomById(roomNumber);
 
                         if (foundRoom != null) {
                             return new Response("200", "Habitación encontrada", foundRoom);
@@ -187,7 +174,6 @@ public class ProtocolHandler {
 
                     } catch (Exception e) {
                         logger.error("Error al registrar habitación", e);
-                        // Considera revertir el movimiento de imágenes si falla el registro de la habitación
                         return new Response("500", "Error interno al registrar habitación: " + e.getMessage(), null);
                     }
                 }
@@ -278,14 +264,14 @@ public class ProtocolHandler {
                         String fileExtension = "";
                         int dotIndex = originalFileName.lastIndexOf('.');
                         if (dotIndex > 0) {
-                            fileExtension = originalFileName.substring(dotIndex); // Incluye el punto
+                            fileExtension = originalFileName.substring(dotIndex);
                         }
                         String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
 
                         Path tempDirPath = Paths.get(SERVER_FILE_STORAGE_ROOT, TEMP_IMAGES_RELATIVE_PATH_PREFIX);
                         Path tempFilePath = tempDirPath.resolve(uniqueFileName);
 
-                        Files.createDirectories(tempDirPath); // Crea el directorio temporal si no existe
+                        Files.createDirectories(tempDirPath);
                         Files.write(tempFilePath, imageData);
 
                         String relativePathToClient = TEMP_IMAGES_RELATIVE_PATH_PREFIX + uniqueFileName;
@@ -399,9 +385,6 @@ public class ProtocolHandler {
             logger.error("Error handling request {}: {}", request.getAction(), e.getMessage());
             return new Response("500", "Internal Server Error: " + e.getMessage(), null);
         } finally {
-            // hotelService.close();
-            // roomService.close();
-            // frontDeskClerkService.close();
         }
 
     }

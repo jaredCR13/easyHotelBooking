@@ -29,6 +29,7 @@ public class HotelModifyController {
         numberHotel.setText(String.valueOf(hotel.getNumHotel()));
         nameHotel.setText(hotel.getHotelName());
         locationHotel.setText(hotel.getHotelLocation());
+        numberHotel.setEditable(false);
     }
 
     @FXML

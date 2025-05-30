@@ -36,7 +36,7 @@
 
         <!-- Busqueda rápida -->
         <HBox fx:id="quickSearchBox" spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 0 0 10 0;">
-            <Label text="Room Number:" style="-fx-text-fill: #333;" />
+            <Label text="Quick Search:" style="-fx-text-fill: #333;" />
             <TextField fx:id="quickSearchField" promptText="Enter room number" prefWidth="150" />
             <Label text="Hotel:" style="-fx-text-fill: #333;" />
             <ComboBox fx:id="quickHotelCombo" promptText="Select hotel" prefWidth="200" />

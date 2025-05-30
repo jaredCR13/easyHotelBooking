@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import hotelbookingcommon.domain.Hotel;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -25,52 +26,30 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class HotelOptionsController {
 
-        @FXML
-        private BorderPane bp;
-
-        @FXML
-        private Button consultButton;
-
-        @FXML
-        private TextField hotelNumberField;
-
-        @FXML
-        private TextField locationField;
-
-        @FXML
-        private Button modifyButton;
-
-        @FXML
-        private TextField nameField;
+    @FXML private BorderPane bp;
+    @FXML private Button consultButton;
+    @FXML private TextField hotelNumberField;
+    @FXML private TextField locationField;
+    @FXML private Button modifyButton;
+    @FXML private TextField nameField;
+    @FXML private Button removeButton;
+    @FXML private Button goBack;
+    @FXML private TableView<Hotel> hotelRegister;
+    @FXML private TableColumn<Hotel, Integer> numberHotelRegister;
+    @FXML private TableColumn<Hotel, String>  nameHotelRegister;
+    @FXML private TableColumn<Hotel, String> locationHotelRegister;
+    @FXML private TableColumn<Hotel, Void> hotelActionColumn;
+    @FXML private TextField quickSearchField;
+    private ScheduledExecutorService scheduler;
 
 
-
-        @FXML
-        private Button removeButton;
-
-        @FXML
-        private Button goBack;
-
-        @FXML
-        private TableView<Hotel> hotelRegister;
-
-        @FXML
-        private TableColumn<Hotel, Integer> numberHotelRegister;
-
-        @FXML
-        private TableColumn<Hotel, String>  nameHotelRegister;
-
-        @FXML
-        private TableColumn<Hotel, String> locationHotelRegister;
-
-        @FXML
-        private TableColumn<Hotel, Void> hotelActionColumn;
-
-        private Stage stage;
-        // Referencia al controlador de la aplicación principal (o un objeto que gestione la comunicación con el servidor)
+    private Stage stage;
         private MainInterfaceController mainController;
         private static final Logger logger = LogManager.getLogger(HotelOptionsController.class);
 
@@ -169,7 +148,7 @@ public class HotelOptionsController {
             Parent root = loader.load();
 
             HotelRegisterController registrerController = loader.getController();
-            registrerController.setMainController(mainController); // Importante
+            registrerController.setMainController(mainController);
 
             Stage stage = new Stage();
             stage.setTitle("Register Hotel");
@@ -243,12 +222,42 @@ public class HotelOptionsController {
         void removeHotelOnAction(Hotel hotel) {
             try {
                 mainController.deleteHotel(hotel.getNumHotel());
-                util.FXUtility.alertInfo("Éxito", "Hotel eliminado correctamente.");
                 loadHotelsIntoRegister();
             } catch (Exception e) {
-                util.FXUtility.alert("Error", "Ocurrió un error al eliminar el hotel.");
+                mostrarAlertaError("Error", "Ocurrió un error al eliminar el hotel.");
             }
         }
+
+    @FXML
+    private void onQuickHotelSearch() {
+        String input = quickSearchField.getText().trim();
+        if (input.isEmpty()) {
+            mostrarAlertaError("Error", "Por favor ingrese un número de hotel.");
+            return;
+        }
+
+        try {
+            int hotelNumber = Integer.parseInt(input);
+            Request request = new Request("getHotel", hotelNumber);
+            Response response = ClientConnectionManager.sendRequest(request);
+
+            if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                Hotel foundHotel = new Gson().fromJson(new Gson().toJson(response.getData()), Hotel.class);
+                hotelRegister.getItems().clear();
+                hotelRegister.getItems().add(foundHotel);
+            } else {
+                mostrarAlertaError("Error", "Hotel no ha sido encontrado.");
+            }
+        } catch (NumberFormatException e) {
+            mostrarAlertaError("Error", "El número de hotel debe ser un número entero.");
+        }
+    }
+
+    @FXML
+    private void onClearSearch() {
+        quickSearchField.clear();
+        loadHotelsIntoRegister();
+    }
 
         private void loadHotelsIntoRegister() {
             Request request = new Request("getHotels", null);
@@ -259,6 +268,31 @@ public class HotelOptionsController {
             }
             hotelRegister.refresh();
         }
+
+    //Actaulización en tiempo real con intervalo de tiempo para el uso de servidor en diferentes computadoras
+    public void startPolling() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> loadHotelsIntoRegister());
+        }, 0, 2, TimeUnit.SECONDS); // cada 2 segundos se actualiza
+    }
+
+    public void stopPolling() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+    }
+
+    private void mostrarAlertaError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+
+        if (this.stage != null) {
+            alert.initOwner(this.stage);
+        }
+        alert.showAndWait();
+    }
 }
 
 

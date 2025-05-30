@@ -34,21 +34,15 @@ public class RoomService {
         }
     }
 
-    /**
-     * Agrega una nueva habitación al archivo.
-     * Antes de agregar, verifica si el hotel al que se asocia existe.
-     * Se asegura que la habitación tenga el ID del hotel establecido.
-     */
     public boolean addRoom(Room room) {
         try {
             if (room.getHotel() != null) {
                 room.setHotelId(room.getHotel().getNumHotel());
-            } else if (room.getHotelId() == -1) { // Si no tiene objeto Hotel ni ID, es un error o necesita ser establecido
+            } else if (room.getHotelId() == -1) {
                 logger.error("Error al agregar habitación: La habitación no tiene un hotel asociado (ni objeto ni ID).");
                 return false;
             }
 
-            // Opcional: Verificar que el hotelId realmente exista en el sistema
             Hotel associatedHotel = hotelData.findById(room.getHotelId());
             if (associatedHotel == null) {
                 logger.error("Error al agregar habitación: El hotel con ID {} no existe.", room.getHotelId());
@@ -65,10 +59,8 @@ public class RoomService {
 
             //HACE LA INSERCION
             roomData.insert(room);
-            // Si la habitación se agrega exitosamente, también deberíamos añadirla al objeto Hotel en memoria
-            // Esto no afecta el archivo, solo la coherencia de los objetos si se están usando en esta transacción
             if (associatedHotel != null) {
-                associatedHotel.addRoom(room); // Asegura que la lista de rooms del hotel se actualice en memoria
+                associatedHotel.addRoom(room);
             }
 
             logger.info("Habitación agregada: {}", room);
@@ -79,9 +71,6 @@ public class RoomService {
         }
     }
 
-    /**
-     * Devuelve todas las habitaciones, cargando también sus objetos Hotel asociados.
-     */
     public List<Room> getAllRooms() {
         try {
             List<Room> rooms = roomData.findAll();
@@ -90,13 +79,12 @@ public class RoomService {
 
             for (Room room : rooms) {
                 // Buscar el hotel asociado por ID
-                // Usamos un stream para buscar en la lista allHotels cargada
                 allHotels.stream()
                         .filter(hotel -> hotel.getNumHotel() == room.getHotelId())
                         .findFirst()
                         .ifPresent(hotel -> {
-                            room.setHotel(hotel); // Establecer la referencia al objeto Hotel
-                            hotel.addRoom(room); // Asegurar bidireccionalidad (si el hotel aún no la tiene)
+                            room.setHotel(hotel);
+                            hotel.addRoom(room);
                         });
             }
             return rooms;
@@ -106,17 +94,12 @@ public class RoomService {
         }
     }
 
-    /**
-     * Actualiza una habitación existente, asegurando que su hotelId sea consistente.
-     */
     public boolean updateRoom(Room room) {
         try {
-            // Asegúrate de que el hotelId esté establecido antes de la actualización
             if (room.getHotel() != null) {
                 room.setHotelId(room.getHotel().getNumHotel());
             }
 
-            // Opcional: Verificar que el hotelId realmente exista si se ha cambiado
             if (room.getHotelId() != -1) {
                 Hotel associatedHotel = hotelData.findById(room.getHotelId());
                 if (associatedHotel == null) {
@@ -139,23 +122,17 @@ public class RoomService {
         }
     }
 
-    /**
-     * Elimina una habitación por su número.
-     * Consideración: Si se elimina una habitación, también se debería eliminar de la lista de habitaciones de su hotel asociado en memoria si el hotel está cargado.
-     */
     public boolean deleteRoom(int roomNumber) {
         try {
-            // Opcional: Obtener la habitación antes de eliminarla para saber a qué hotel pertenecía
             Room roomToDelete = roomData.findById(roomNumber);
             boolean deleted = roomData.delete(roomNumber);
 
             if (deleted) {
                 logger.info("Habitación eliminada con número: {}", roomNumber);
-                // Si la habitación se eliminó y conocíamos su hotel, eliminarla también del objeto Hotel en memoria
                 if (roomToDelete != null && roomToDelete.getHotelId() != -1) {
                     Hotel associatedHotel = hotelData.findById(roomToDelete.getHotelId());
                     if (associatedHotel != null) {
-                        associatedHotel.removeRoom(roomToDelete); // Actualiza el objeto Hotel en memoria
+                        associatedHotel.removeRoom(roomToDelete);
                     }
                 }
             } else {
@@ -170,22 +147,17 @@ public class RoomService {
 
     public Room getRoomById(int roomNumber) {
         try {
-            Room foundRoom = roomData.findById(roomNumber); // <-- Aquí se carga la habitación con sus imágenes desde rooms.dat
+            Room foundRoom = roomData.findById(roomNumber);
 
             if (foundRoom != null) {
-                // Cargar el Hotel asociado (esto sí es correcto)
                 if (foundRoom.getHotelId() != -1) {
                     Hotel associatedHotel = hotelData.findById(foundRoom.getHotelId());
                     if (associatedHotel != null) {
                         foundRoom.setHotel(associatedHotel);
-                        // Opcional: Asegurar bidireccionalidad si es necesario para el Hotel en memoria
-                        // associatedHotel.addRoom(foundRoom);
                     }
                 }
-                //foundRoom.getImagesPaths() contiene las rutas
 
                 logger.info("Habitación {} cargada con {} imágenes desde RoomData.", foundRoom.getRoomNumber(), foundRoom.getImagesPaths().size());
-                // Opcional: Loguea las rutas para depurar
                 foundRoom.getImagesPaths().forEach(path -> logger.info("  - Ruta de imagen: {}", path));
 
             } else {
@@ -203,9 +175,9 @@ public class RoomService {
     public void close() {
         try {
             roomData.close();
-            hotelData.close(); // Cerrar también el HotelData
+            hotelData.close();
         } catch (IOException e) {
-            // Log o manejar
+
         }
     }
 }

@@ -36,6 +36,16 @@
         <!-- Sección del TableView -->
     <center>
         <VBox spacing="20" style="-fx-padding: 30;">
+
+            <!-- Busqueda rápida -->
+            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 30 0 30;">
+                <Label text="Quick Search:" style="-fx-font-weight: bold; -fx-text-fill: #333;" />
+                <TextField fx:id="quickSearchField" promptText="Hotel Number" prefWidth="120"/>
+                <Button text="🔍" onAction="#onQuickHotelSearch" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
+                <Button text="Clear" onAction="#onClearSearch" style="-fx-background-color: #6c757d; -fx-text-fill: white;" />
+            </HBox>
+
+            <!-- Sección del TableView -->
             <TableView fx:id="hotelRegister" prefHeight="300" prefWidth="560">
                 <columns>
                     <TableColumn fx:id="numberHotelRegister" text="Number" prefWidth="100"/>

@@ -26,7 +26,7 @@ public class ClientHandler implements Runnable {
     public void run() {
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true) // Use OutputStreamWriter
+                PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true)
         ) {
             String line;
             while ((line = in.readLine()) != null) {
@@ -38,7 +38,6 @@ public class ClientHandler implements Runnable {
                     out.println(resJson);
                     logger.debug("Enviado al cliente {}: {}", socket.getInetAddress(), resJson);
                 } catch (JsonParseException e) {
-                    // Handle JSON parsing errors
                     Response errorResponse = new Response("ERROR", "Invalid JSON request", null);
                     String errorJson = gson.toJson(errorResponse);
                     out.println(errorJson);

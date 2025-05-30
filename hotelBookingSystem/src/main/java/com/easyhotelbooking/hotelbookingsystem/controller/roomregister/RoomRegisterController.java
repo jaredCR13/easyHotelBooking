@@ -110,7 +110,7 @@ public class RoomRegisterController {
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
 
-        File selectedFile = fileChooser.showOpenDialog(primaryStage); // Usar primaryStage
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
         if (selectedFile != null) {
             try {
                 byte[] imageData = Files.readAllBytes(selectedFile.toPath());
@@ -242,7 +242,6 @@ public class RoomRegisterController {
                 return;
             }
 
-            // ** CAMBIO CLAVE AQUÍ: Asigna las rutas de las imágenes temporales a la habitación
             Room room = new Room(number, price, description, status, style, new ArrayList<>(currentImagePaths));
             room.setHotelId(selectedHotel.getNumHotel());
             room.setHotel(selectedHotel);
@@ -256,7 +255,6 @@ public class RoomRegisterController {
                     roomOptionsController.loadRoomsIntoRegister();
                 }
                 clearFields();
-                // currentImagePaths ya se limpia en clearFields()
             } else if ("409".equalsIgnoreCase(response.getStatus())) {
                 util.FXUtility.alert("Error", response.getMessage());
                 logger.warn("Intento de registrar habitación duplicada: {}", number);
@@ -278,7 +276,6 @@ public class RoomRegisterController {
     public void onCancel(ActionEvent event) {
         RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", parentBp);
         controller.setMainController(mainController);
-        // Pasa el Stage también si `RoomOptionsController` lo necesita
         if (this.primaryStage != null) {
             controller.setStage(this.primaryStage);
         }

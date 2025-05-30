@@ -23,18 +23,16 @@ public class Hotel implements Serializable {
         this.numHotel = numHotel;
         this.hotelName = hotelName;
         this.hotelLocation = hotelLocation;
-        this.rooms = new ArrayList<>(); //INICIALIZAR LA LIST
+        this.rooms = new ArrayList<>();
     }
 
-    // Constructor without rooms (for initial creation)
     public Hotel(int numHotel, String hotelName, String hotelLocation, List<Room> rooms) {
-        this(numHotel, hotelName, hotelLocation); //LLAMADA AL CONSTRUCTOR
+        this(numHotel, hotelName, hotelLocation);
         if (rooms != null) {
             this.rooms = new ArrayList<>(rooms);
         }
     }
 
-    //CONSTRUCTOR DEFAULT
     public Hotel() {
         this.rooms = new ArrayList<>();
     }
@@ -78,7 +76,7 @@ public class Hotel implements Serializable {
         }
         this.rooms.add(room);
         room.setHotel(this);
-        room.setHotelId(this.numHotel); //SET el hotel id
+        room.setHotelId(this.numHotel);
     }
 
     public void removeRoom(Room room) {

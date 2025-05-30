@@ -6,6 +6,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,12 +18,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RoomOptionsController {
 
@@ -41,11 +46,13 @@ public class RoomOptionsController {
     @FXML private TableColumn<Room, Void> actionColumn;
     @FXML private TextField quickSearchField;
     @FXML private ComboBox<Hotel> quickHotelCombo;
+    private ScheduledExecutorService scheduler;
 
     private static final Logger logger = LogManager.getLogger(RoomOptionsController.class);
 
     private MainInterfaceController mainController;
     private Stage currentStage;
+    private Window stage;
 
     public void setStage(Stage stage) {
         this.currentStage = stage;
@@ -57,8 +64,7 @@ public class RoomOptionsController {
 
     public void setMainController(MainInterfaceController mainController) {
         this.mainController = mainController;
-        // Se llama loadRoomsIntoRegister() solo una vez al cargar el controlador
-        // para que la tabla se llene con datos
+
         loadRoomsIntoRegister();
     }
 
@@ -73,7 +79,7 @@ public class RoomOptionsController {
         styleColumn.setCellValueFactory(new PropertyValueFactory<>("style"));
         hotelIdColumn.setCellValueFactory(new PropertyValueFactory<>("hotelId"));
 
-        addButtonsToRoomTable(); // <-- aquí
+        addButtonsToRoomTable();
         loadHotelsIntoQuickCombo();
 
         quickHotelCombo.setConverter(new StringConverter<Hotel>() {
@@ -176,7 +182,7 @@ public class RoomOptionsController {
     void registerRoomOnAction() {
         RoomRegisterController controller = Utility.loadPage2("roominterface/registerroom.fxml", bp);
         if (controller != null) {
-            controller.setParentBp(bp); // Pasa el BorderPane para poder volver atrás desde "Cancel"
+            controller.setParentBp(bp);
             controller.setMainController(mainController);
             controller.setRoomOptionsController(this);
         }
@@ -206,7 +212,7 @@ public class RoomOptionsController {
             mainController.deleteRoom(room.getRoomNumber());
             loadRoomsIntoRegister();
         } catch (Exception e) {
-            util.FXUtility.alert("Error", "Ocurrió un error al eliminar el hotel.");
+            mostrarAlertaError("Error", "Ocurrió un error al eliminar el hotel.");
         }
     }
 
@@ -222,7 +228,7 @@ public class RoomOptionsController {
             quickHotelCombo.getItems().clear();
             quickHotelCombo.getItems().addAll(hotelList);
         } else {
-            util.FXUtility.alert("Error", "No se pudieron cargar los hoteles para búsqueda rápida.");
+            mostrarAlertaError("Error", "No se pudieron cargar los hoteles para búsqueda rápida.");
         }
     }
 
@@ -232,7 +238,7 @@ public class RoomOptionsController {
         Hotel selectedHotel = quickHotelCombo.getValue();
 
         if (roomText.isEmpty() || selectedHotel == null) {
-            util.FXUtility.alert("Campos vacíos", "Por favor ingrese el número de habitación y seleccione un hotel.");
+            mostrarAlertaError("Error", "Por favor ingrese el número de habitación y seleccione un hotel.");
             return;
         }
 
@@ -245,16 +251,16 @@ public class RoomOptionsController {
                 Room room = new Gson().fromJson(new Gson().toJson(response.getData()), Room.class);
 
                 if (room.getHotelId() == selectedHotel.getNumHotel()) {
-                    roomRegister.setItems(FXCollections.observableArrayList(room)); // Solo esa
+                    roomRegister.setItems(FXCollections.observableArrayList(room));
                 } else {
-                    util.FXUtility.alert("Habitación no encontrada", "La habitación no pertenece al hotel seleccionado.");
+                    mostrarAlertaError("Error", "La habitación no pertenece al hotel seleccionado.");
                 }
             } else {
-                util.FXUtility.alert("Habitación no ha sido encontrada", "No existe una habitación con ese número.");
+                mostrarAlertaError("Error", "No existe una habitación con ese número.");
             }
 
         } catch (NumberFormatException e) {
-            util.FXUtility.alert("Formato inválido", "El número de habitación debe ser un número entero.");
+            mostrarAlertaError("Error", "El número de habitación debe ser un número entero.");
         }
     }
 
@@ -262,20 +268,44 @@ public class RoomOptionsController {
     void onClearSearch() {
         quickSearchField.clear();
         quickHotelCombo.setValue(null);
-        loadRoomsIntoRegister(); // vuelve a cargar todos
+        loadRoomsIntoRegister();
     }
 
     public void loadRoomsIntoRegister() {
-        Request request = new Request("getRooms", null); // Asegúrate de que el endpoint sea "getRooms"
+        Request request = new Request("getRooms", null);
         Response response = ClientConnectionManager.sendRequest(request);
         if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
             List<Room> rooms = new Gson().fromJson(new Gson().toJson(response.getData()), new TypeToken<List<Room>>() {}.getType());
             roomRegister.setItems(FXCollections.observableArrayList(rooms));
         } else {
-            util.FXUtility.alert("Error", "No se pudieron cargar las habitaciones.");
+            mostrarAlertaError("Error", "No se pudieron cargar las habitaciones.");
             logger.error("Error al cargar habitaciones en la tabla: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }
 
+    //Actaulización en tiempo real con intervalo de tiempo para el uso de servidor en diferentes computadoras
+    public void startPolling() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> loadRoomsIntoRegister());
+        }, 0, 2, TimeUnit.SECONDS); // cada 2 segundos se actualiza
+    }
+
+    public void stopPolling() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+    }
+
+    private void mostrarAlertaError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+
+        if (this.stage != null) {
+            alert.initOwner(this.stage);
+        }
+        alert.showAndWait();
+    }
 
 }

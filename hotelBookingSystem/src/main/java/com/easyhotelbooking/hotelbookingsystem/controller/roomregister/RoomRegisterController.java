@@ -1,7 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
 
-import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
@@ -19,17 +19,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.io.*;
+
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-
-
-import hotelbookingcommon.domain.*;
-
-import javafx.scene.control.*;
 
 
 import java.io.ByteArrayInputStream; // Necesitarás esta importación

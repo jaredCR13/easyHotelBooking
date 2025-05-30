@@ -1,6 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
-import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomRegisterController;
 import hotelbookingcommon.domain.Hotel;
 import javafx.fxml.FXML;

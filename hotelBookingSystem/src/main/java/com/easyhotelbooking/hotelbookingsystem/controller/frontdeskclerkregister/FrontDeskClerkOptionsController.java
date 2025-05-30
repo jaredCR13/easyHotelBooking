@@ -1,9 +1,9 @@
-package com.easyhotelbooking.hotelbookingsystem.controller;
+package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister;
 
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import hotelbookingcommon.domain.FrontDeskClerk;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;

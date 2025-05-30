@@ -1,5 +1,6 @@
-package com.easyhotelbooking.hotelbookingsystem.controller;
+package com.easyhotelbooking.hotelbookingsystem.controller.maininterface;
 
+import com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;

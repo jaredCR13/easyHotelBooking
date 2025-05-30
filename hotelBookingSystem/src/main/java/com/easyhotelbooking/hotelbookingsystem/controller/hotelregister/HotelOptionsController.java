@@ -1,7 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
 
-import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 //import com.easyhotelbooking.hotelbookingsystem.util.FxUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;

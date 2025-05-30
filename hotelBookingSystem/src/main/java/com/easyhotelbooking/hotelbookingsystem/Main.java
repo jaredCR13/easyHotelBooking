@@ -1,6 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem;
 
-import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

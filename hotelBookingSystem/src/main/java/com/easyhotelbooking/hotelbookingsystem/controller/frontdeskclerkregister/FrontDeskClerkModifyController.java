@@ -2,6 +2,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregiste
 
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -103,7 +104,7 @@ public class FrontDeskClerkModifyController {
         Hotel selectedHotel = hotelCombo.getSelectionModel().getSelectedItem();
 
         if (id.isEmpty() || name.isEmpty() || lastName.isEmpty() || phone.isEmpty() || user.isEmpty() || password.isEmpty() || role == null || selectedHotel==null) {
-            util.FXUtility.alert("Error", "Todos los campos son obligatorios.");
+            FXUtility.alert("Error", "Todos los campos son obligatorios.");
             return;
         }
 
@@ -145,7 +146,7 @@ public class FrontDeskClerkModifyController {
                 }
             });
         } else {
-            util.FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
+            FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
             logger.error("Error al cargar hoteles para ComboBox: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }

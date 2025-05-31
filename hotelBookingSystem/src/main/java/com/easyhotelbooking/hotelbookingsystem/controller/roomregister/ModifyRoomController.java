@@ -2,6 +2,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -178,7 +179,7 @@ public class ModifyRoomController {
                             } else {
 
                                 currentRoom.getImagesPaths().add(serverImagePath); // Revertir si hubo error
-                                util.FXUtility.alert("Error", "No se pudo actualizar la habitación en el servidor: " + updateRoomResponse.getMessage());
+                                FXUtility.alert("Error", "No se pudo actualizar la habitación en el servidor: " + updateRoomResponse.getMessage());
                                 logger.error("Error al actualizar habitación en servidor tras eliminar imagen: {}", updateRoomResponse.getMessage());
                             }
                         }
@@ -187,12 +188,12 @@ public class ModifyRoomController {
                     flowPane.getChildren().add(imageView);
                 } catch (Exception e) {
                     logger.error("Error al procesar la imagen descargada del servidor: {}", serverImagePath, e);
-                    util.FXUtility.alert("Error", "No se pudo cargar una imagen desde el servidor: " + serverImagePath + " - " + e.getMessage());
+                    FXUtility.alert("Error", "No se pudo cargar una imagen desde el servidor: " + serverImagePath + " - " + e.getMessage());
                 }
             } else {
                 logger.warn("No se pudo descargar la imagen del servidor: {}. Estado: {}, Mensaje: {}",
                         serverImagePath, response.getStatus(), response.getMessage());
-                util.FXUtility.alert("Advertencia", "No se pudo descargar una imagen desde el servidor: " + serverImagePath + " - " + response.getMessage());
+                FXUtility.alert("Advertencia", "No se pudo descargar una imagen desde el servidor: " + serverImagePath + " - " + response.getMessage());
             }
         }
     }
@@ -200,7 +201,7 @@ public class ModifyRoomController {
     @FXML
     void onUploadImage(ActionEvent event) {
         if (currentRoom == null || currentRoom.getImagesPaths().size() >= 5) {
-            util.FXUtility.alertInfo("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación. Elimina alguna para añadir más.");
+            FXUtility.alertInfo("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación. Elimina alguna para añadir más.");
             return;
         }
 
@@ -229,7 +230,7 @@ public class ModifyRoomController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
-                    util.FXUtility.alertInfo("Éxito", "Imagen subida exitosamente al servidor.");
+                    FXUtility.alertInfo("Éxito", "Imagen subida exitosamente al servidor.");
                     logger.info("Respuesta del servidor al subir imagen: {}", response.getMessage());
 
                     //El servidor debería devolver la habitación actualizada con la nueva ruta de imagen
@@ -241,15 +242,15 @@ public class ModifyRoomController {
                     refreshImagesDisplay(); // Volver a cargar las imágenes
                 } else {
                     logger.error("Error al subir la imagen al servidor: {}", response.getMessage());
-                    util.FXUtility.alert("Error", "No se pudo subir la imagen: " + response.getMessage());
+                    FXUtility.alert("Error", "No se pudo subir la imagen: " + response.getMessage());
                 }
 
             } catch (IOException e) {
                 logger.error("Error de E/S al leer la imagen o al enviarla al servidor: {}", e.getMessage(), e);
-                util.FXUtility.alert("Error", "No se pudo procesar la imagen para subir: " + e.getMessage());
+                FXUtility.alert("Error", "No se pudo procesar la imagen para subir: " + e.getMessage());
             } catch (Exception e) {
                 logger.error("Error inesperado en onUploadImage: {}", e.getMessage(), e);
-                util.FXUtility.alert("Error", "Ocurrió un error inesperado al subir la imagen.");
+                FXUtility.alert("Error", "Ocurrió un error inesperado al subir la imagen.");
             }
         }
 
@@ -274,7 +275,7 @@ public class ModifyRoomController {
             Hotel selectedHotel = hotelComboBox.getSelectionModel().getSelectedItem();
 
             if (priceTf.getText().isEmpty() || description.isEmpty() || selectedHotel == null) {
-                util.FXUtility.alert("Error", "Por favor, complete todos los campos y seleccione un hotel.");
+                FXUtility.alert("Error", "Por favor, complete todos los campos y seleccione un hotel.");
                 return;
             }
 
@@ -282,7 +283,7 @@ public class ModifyRoomController {
             RoomStyle style = styleCombo.getValue();
 
             if (status == null || style == null) {
-                util.FXUtility.alert("Error", "Seleccione estado y estilo de la habitación.");
+                FXUtility.alert("Error", "Seleccione estado y estilo de la habitación.");
                 return;
             }
 
@@ -296,15 +297,15 @@ public class ModifyRoomController {
                 roomOptionsController.loadRoomsIntoRegister();
             }
 
-            util.FXUtility.alertInfo("Éxito", "Habitación modificada correctamente.");
+            FXUtility.alertInfo("Éxito", "Habitación modificada correctamente.");
             onCancel(event);
 
         } catch (NumberFormatException e) {
-            util.FXUtility.alert("Error", "Precio inválido.");
+            FXUtility.alert("Error", "Precio inválido.");
             logger.error("Error de formato al modificar habitación: {}", e.getMessage(), e);
         } catch (Exception e) {
             logger.error("Error al modificar habitación: {}", e.getMessage(), e);
-            util.FXUtility.alert("Error", "Error al modificar habitación: " + e.getMessage());
+            FXUtility.alert("Error", "Error al modificar habitación: " + e.getMessage());
         }
     }
 
@@ -329,7 +330,7 @@ public class ModifyRoomController {
                 }
             });
         } else {
-            util.FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
+            FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
             logger.error("Error al cargar hoteles para ComboBox en ModifyRoom: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }

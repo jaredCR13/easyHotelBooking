@@ -3,6 +3,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregiste
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomConsultController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -139,7 +140,7 @@ public class FrontDeskClerkOptionsController {
                 controller.setOptionsController(this); // si necesitas volver aquí
             }
         } catch (Exception e) {
-            util.FXUtility.alert("Error", "No se pudo abrir la pantalla de registro.");
+            FXUtility.alert("Error", "No se pudo abrir la pantalla de registro.");
             e.printStackTrace();
         }
 

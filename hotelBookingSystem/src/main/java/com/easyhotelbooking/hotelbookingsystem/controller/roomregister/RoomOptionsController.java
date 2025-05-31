@@ -2,6 +2,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -172,7 +173,7 @@ public class RoomOptionsController {
                 controller.setRoom(completeRoom);
             }
         } else {
-            util.FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
+            FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
         }
     }
 

@@ -1,4 +1,4 @@
-package util;
+package com.easyhotelbooking.hotelbookingsystem.util;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -22,11 +22,12 @@ public class FXUtility {
     }
 
     public static Alert alert(String title, String header){
-        Alert myalert = new Alert(Alert.AlertType.NONE);
-        myalert.setAlertType(Alert.AlertType.ERROR);
-        myalert.setTitle(title);
-        myalert.setHeaderText(header);
-        return myalert;
+        Alert alert = new Alert(Alert.AlertType.NONE);
+        alert.setAlertType(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.showAndWait();
+        return alert;
     }
 
     public static Alert alertInfo(String title, String header){
@@ -35,6 +36,7 @@ public class FXUtility {
         alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE); //no estoy seguro si es necesario
         alert.getDialogPane().setMinWidth(400); //no estoy seguro si es necesario
         alert.setHeaderText(header);
+        alert.showAndWait();
         return alert;
     }
 

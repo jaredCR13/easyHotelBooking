@@ -2,6 +2,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -172,7 +173,7 @@ public class RoomOptionsController {
                 controller.setRoom(completeRoom);
             }
         } else {
-            util.FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
+            FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
         }
     }
 
@@ -248,6 +249,7 @@ public class RoomOptionsController {
 
             if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
                 Room room = new Gson().fromJson(new Gson().toJson(response.getData()), Room.class);
+                FXUtility.alertInfo("Búsqueda Exitosa", "Habitacion encontrada: ");
 
                 if (room.getHotelId() == selectedHotel.getNumHotel()) {
                     roomRegister.setItems(FXCollections.observableArrayList(room));
@@ -276,6 +278,7 @@ public class RoomOptionsController {
         if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
             List<Room> rooms = new Gson().fromJson(new Gson().toJson(response.getData()), new TypeToken<List<Room>>() {}.getType());
             roomRegister.setItems(FXCollections.observableArrayList(rooms));
+            addButtonsToRoomTable();
         } else {
             mostrarAlertaError("Error", "No se pudieron cargar las habitaciones.");
             logger.error("Error al cargar habitaciones en la tabla: {}", response != null ? response.getMessage() : "Desconocido");

@@ -47,7 +47,7 @@ public class FrontDeskClerkRegisterController {
             this.optionsController = optionsController;
         }
 
-            
+
 
 
         @FXML

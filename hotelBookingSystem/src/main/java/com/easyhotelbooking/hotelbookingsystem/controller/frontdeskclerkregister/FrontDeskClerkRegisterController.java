@@ -65,7 +65,7 @@ public class FrontDeskClerkRegisterController {
                 return;
             }
 
-            FrontDeskClerk clerk = new FrontDeskClerk(id, name, lastName, password, user, phone, -1);
+            FrontDeskClerk clerk = new FrontDeskClerk(id, name, lastName, password, user, phone,role );
             //clerk.setRole(role);
             mainController.registerFrontDeskClerk(clerk);
 

@@ -1,6 +1,7 @@
 package hotelbookingserver.datamanager;
 
 import hotelbookingcommon.domain.FrontDeskClerk;
+import hotelbookingcommon.domain.FrontDeskClerkRole;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -9,16 +10,17 @@ import java.util.List;
 public class FrontDeskClerkData {
     private RandomAccessFile raf;
 
-    private static final int EMPLOYEE_ID_SIZE = 20;  // String
-    private static final int NAME_SIZE = 30;         // String
-    private static final int LAST_NAME_SIZE = 30;    // String
-    private static final int PASSWORD_SIZE = 30;     // String
-    private static final int USER_SIZE = 30;         // String
-    private static final int PHONE_NUMBER_SIZE = 15; // String
+    private static final int EMPLOYEE_ID_SIZE = 20;
+    private static final int NAME_SIZE = 30;
+    private static final int LAST_NAME_SIZE = 30;
+    private static final int PASSWORD_SIZE = 30;
+    private static final int USER_SIZE = 30;
+    private static final int PHONE_NUMBER_SIZE = 15;
+    private static final int ROLE_SIZE = 20;         // Nuevo campo
     private static final int HOTEL_ID_SIZE = 4;      // int
 
     private static final int RECORD_SIZE = EMPLOYEE_ID_SIZE + NAME_SIZE + LAST_NAME_SIZE +
-            PASSWORD_SIZE + USER_SIZE + PHONE_NUMBER_SIZE + HOTEL_ID_SIZE;
+            PASSWORD_SIZE + USER_SIZE + PHONE_NUMBER_SIZE + ROLE_SIZE + HOTEL_ID_SIZE;
 
     public FrontDeskClerkData(File file) throws FileNotFoundException {
         raf = new RandomAccessFile(file, "rw");
@@ -47,6 +49,7 @@ public class FrontDeskClerkData {
         raf.write(toFixedBytes(clerk.getPassword(), PASSWORD_SIZE));
         raf.write(toFixedBytes(clerk.getUser(), USER_SIZE));
         raf.write(toFixedBytes(clerk.getPhoneNumber(), PHONE_NUMBER_SIZE));
+        raf.write(toFixedBytes(clerk.getFrontDeskClerkRole().name(), ROLE_SIZE)); // Nuevo
         raf.writeInt(clerk.getHotelId());
     }
 
@@ -61,9 +64,11 @@ public class FrontDeskClerkData {
             String password = readFixedString(PASSWORD_SIZE);
             String user = readFixedString(USER_SIZE);
             String phoneNumber = readFixedString(PHONE_NUMBER_SIZE);
+            String roleStr = readFixedString(ROLE_SIZE); // Nuevo
             int hotelId = raf.readInt();
 
-            FrontDeskClerk clerk = new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber, hotelId);
+            FrontDeskClerkRole role = FrontDeskClerkRole.valueOf(roleStr);
+            FrontDeskClerk clerk = new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber, role, hotelId);
             clerks.add(clerk);
         }
 
@@ -82,10 +87,12 @@ public class FrontDeskClerkData {
             String password = readFixedString(PASSWORD_SIZE);
             String user = readFixedString(USER_SIZE);
             String phoneNumber = readFixedString(PHONE_NUMBER_SIZE);
+            String roleStr = readFixedString(ROLE_SIZE); // Nuevo
             int hotelId = raf.readInt();
 
             if (employeeId.equals(employeeIdToFind)) {
-                return new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber, hotelId);
+                FrontDeskClerkRole role = FrontDeskClerkRole.valueOf(roleStr);
+                return new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber, role, hotelId);
             }
         }
 

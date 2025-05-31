@@ -18,20 +18,23 @@ public class FrontDeskClerk implements Serializable {
     @Expose
     private String phoneNumber;
     private transient Hotel hotel;
-
+    @Expose
+    private FrontDeskClerkRole frontDeskClerkRole;
     @Expose
     private int hotelId;
 
-    public FrontDeskClerk(String employeeId, String name, String lastName, String password, String user, String phoneNumber) {
+    public FrontDeskClerk(String employeeId, String name, String lastName, String password, String user, String phoneNumber, FrontDeskClerkRole frontDeskClerkRole) {
         this.employeeId = employeeId;
         this.name = name;
         this.lastName = lastName;
         this.password = password;
         this.user = user;
         this.phoneNumber = phoneNumber;
+        this.frontDeskClerkRole=frontDeskClerkRole;
     }
 
-    public FrontDeskClerk(String employeeId, String name, String lastName, String password, String user, String phoneNumber, int hotelId) {
+
+    public FrontDeskClerk(String employeeId, String name, String lastName, String password, String user, String phoneNumber, FrontDeskClerkRole frontDeskClerkRole,int hotelId) {
         this.employeeId = employeeId;
         this.name = name;
         this.lastName = lastName;
@@ -39,6 +42,15 @@ public class FrontDeskClerk implements Serializable {
         this.user = user;
         this.phoneNumber = phoneNumber;
         this.hotelId = hotelId;
+        this.frontDeskClerkRole=frontDeskClerkRole;
+    }
+
+    public FrontDeskClerkRole getFrontDeskClerkRole() {
+        return frontDeskClerkRole;
+    }
+
+    public void setFrontDeskClerkRole(FrontDeskClerkRole frontDeskClerkRole) {
+        this.frontDeskClerkRole = frontDeskClerkRole;
     }
 
     public Hotel getHotel() {

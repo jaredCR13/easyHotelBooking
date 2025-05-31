@@ -4,6 +4,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 //import com.easyhotelbooking.hotelbookingsystem.util.FxUtility;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.Hotel;
@@ -50,33 +51,33 @@ public class HotelOptionsController {
 
 
     private Stage stage;
-        private MainInterfaceController mainController;
-        private static final Logger logger = LogManager.getLogger(HotelOptionsController.class);
+    private MainInterfaceController mainController;
+    private static final Logger logger = LogManager.getLogger(HotelOptionsController.class);
 
-        public void setMainController(MainInterfaceController mainController) {
-            this.mainController = mainController;
-        }
-        public void setStage(Stage stage){
-            this.stage=stage;
-        }
+    public void setMainController(MainInterfaceController mainController) {
+        this.mainController = mainController;
+    }
+    public void setStage(Stage stage){
+        this.stage=stage;
+    }
 
-        @FXML
-        public void initialize(){
-            numberHotelRegister.setCellValueFactory(data ->
-                    new SimpleIntegerProperty(data.getValue().getNumHotel()).asObject());
+    @FXML
+    public void initialize(){
+        numberHotelRegister.setCellValueFactory(data ->
+                new SimpleIntegerProperty(data.getValue().getNumHotel()).asObject());
 
-            nameHotelRegister.setCellValueFactory(data ->
-                    new SimpleStringProperty(data.getValue().getHotelName()));
-            locationHotelRegister.setCellValueFactory(data ->
-                    new SimpleStringProperty(data.getValue().getHotelLocation()));
+        nameHotelRegister.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().getHotelName()));
+        locationHotelRegister.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().getHotelLocation()));
 
-            loadHotelsIntoRegister();
-            addButtonsToTableView();
+        loadHotelsIntoRegister();
+        addButtonsToTableView();
 
-            //Elimina una columna vacía que se crea sola en el TableView
-            hotelRegister.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // 3
+        //Elimina una columna vacía que se crea sola en el TableView
+        hotelRegister.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // 3
 
-        }
+    }
 
     //Botones dentro de la TableView
 
@@ -105,11 +106,14 @@ public class HotelOptionsController {
                         modify.setOnAction(event -> {
                             Hotel hotel = getTableView().getItems().get(getIndex());
                             openModifyHotel(hotel);
+                            // Refresh the table after potential modification
+                            loadHotelsIntoRegister(); // Added this line
                         });
 
                         remove.setOnAction(event -> {
                             Hotel hotel = getTableView().getItems().get(getIndex());
                             removeHotelOnAction(hotel);
+                            // The alert for removal is handled in MainInterfaceController
                         });
                     }
 
@@ -131,19 +135,20 @@ public class HotelOptionsController {
     }
 
 
-        @FXML
-        void goBackOnAction() {
-            Utility.loadFullView("maininterface.fxml", goBack);
-        }
+    @FXML
+    void goBackOnAction() {
+        Utility.loadFullView("maininterface.fxml", goBack);
+    }
 
 
-        // Registrar en ventana emergente
-        @FXML
-        void registerHotelOnAction() {
-            openRegisterHotel();
-        }
+    // Registrar en ventana emergente
+    @FXML
+    void registerHotelOnAction() {
+        openRegisterHotel();
+        // Alert for registration is handled in MainInterfaceController
+    }
 
-        public void openRegisterHotel() {
+    public void openRegisterHotel() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/hotelinterface/hotelregister.fxml"));
             Parent root = loader.load();
@@ -159,43 +164,46 @@ public class HotelOptionsController {
 
             loadHotelsIntoRegister(); // Refresca la tabla al cerrar
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error al abrir ventana de registro de hotel: {}", e.getMessage(), e);
+            mostrarAlertaError("Error", "Ocurrió un error al intentar abrir el formulario de registro de hotel.");
         }
     }
 
 
     //Consultar Hoteles en ventana emergente
 
-        void consultHotelOnAction(Hotel hotel) {
-            openConsultHotel(hotel);
+    void consultHotelOnAction(Hotel hotel) {
+        openConsultHotel(hotel);
+        // Alert for consultation is handled in MainInterfaceController
+    }
+
+    private void openConsultHotel(Hotel hotel) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hotelinterface/hotelconsult.fxml"));
+            Parent root = loader.load();
+
+            HotelConsultController consultController = loader.getController();
+            consultController.setHotel(hotel);
+
+            Stage stage = new Stage();
+            stage.setTitle("Consult Hotel");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        } catch (Exception e) {
+            logger.error("Error al abrir ventana de consulta de hotel: {}", e.getMessage(), e);
+            mostrarAlertaError("Error", "Ocurrió un error al intentar abrir el formulario de consulta de hotel.");
         }
+    }
 
-        private void openConsultHotel(Hotel hotel) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/hotelinterface/hotelconsult.fxml"));
-                Parent root = loader.load();
+    // Modificar en ventana emergente
 
-                HotelConsultController consultController = loader.getController();
-                consultController.setHotel(hotel);
-
-                Stage stage = new Stage();
-                stage.setTitle("Consult Hotel");
-                stage.setScene(new Scene(root));
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.showAndWait();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Modificar en ventana emergente
-
-        void modifyHotelOnAction(Hotel hotel) {
-            openModifyHotel(hotel);
-            loadHotelsIntoRegister();
-
-        }
+    void modifyHotelOnAction(Hotel hotel) {
+        openModifyHotel(hotel);
+        loadHotelsIntoRegister(); // Ensure table is refreshed after modification
+        // Alert for modification is handled in MainInterfaceController
+    }
 
     private void openModifyHotel(Hotel hotel) {
         try {
@@ -212,28 +220,31 @@ public class HotelOptionsController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            loadHotelsIntoRegister();
+            loadHotelsIntoRegister(); // Also refresh here in case the modal closes without a successful update
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error al abrir ventana de modificación de hotel: {}", e.getMessage(), e);
+            mostrarAlertaError("Error", "Ocurrió un error al intentar abrir el formulario de modificación de hotel.");
         }
     }
 
-        @FXML
-        void removeHotelOnAction(Hotel hotel) {
-            try {
-                mainController.deleteHotel(hotel.getNumHotel());
-                loadHotelsIntoRegister();
-            } catch (Exception e) {
-                mostrarAlertaError("Error", "Ocurrió un error al eliminar el hotel.");
-            }
+    @FXML
+    void removeHotelOnAction(Hotel hotel) {
+        try {
+            // The actual alert for success/failure is handled in MainInterfaceController.deleteHotel
+            mainController.deleteHotel(hotel.getNumHotel());
+            loadHotelsIntoRegister(); // Refresh table after deletion attempt
+        } catch (Exception e) {
+            logger.error("Error al intentar eliminar hotel: {}", e.getMessage(), e);
+            mostrarAlertaError("Error", "Ocurrió un error al eliminar el hotel.");
         }
+    }
 
     @FXML
     private void onQuickHotelSearch() {
         String input = quickSearchField.getText().trim();
         if (input.isEmpty()) {
-            mostrarAlertaError("Error", "Por favor ingrese un número de hotel.");
+            mostrarAlertaError("Error de búsqueda", "Por favor ingrese un número de hotel para buscar.");
             return;
         }
 
@@ -246,11 +257,16 @@ public class HotelOptionsController {
                 Hotel foundHotel = new Gson().fromJson(new Gson().toJson(response.getData()), Hotel.class);
                 hotelRegister.getItems().clear();
                 hotelRegister.getItems().add(foundHotel);
+                // Informational alert for successful search
+                FXUtility.alertInfo("Búsqueda Exitosa", "Hotel encontrado: " + foundHotel.getHotelName());
             } else {
-                mostrarAlertaError("Error", "Hotel no ha sido encontrado.");
+                mostrarAlertaError("Hotel No Encontrado", "No existe un hotel con el número: " + hotelNumber + ".");
             }
         } catch (NumberFormatException e) {
-            mostrarAlertaError("Error", "El número de hotel debe ser un número entero.");
+            mostrarAlertaError("Error de Entrada", "El número de hotel debe ser un número entero válido.");
+        } catch (Exception e) {
+            logger.error("Error inesperado en la búsqueda rápida de hotel: {}", e.getMessage(), e);
+            mostrarAlertaError("Error Interno", "Ocurrió un error inesperado durante la búsqueda del hotel.");
         }
     }
 
@@ -258,17 +274,22 @@ public class HotelOptionsController {
     private void onClearSearch() {
         quickSearchField.clear();
         loadHotelsIntoRegister();
+        // Informational alert for clearing search
+        FXUtility.alertInfo("Búsqueda Limpiada", "Se han mostrado todos los hoteles nuevamente.");
     }
 
-        private void loadHotelsIntoRegister() {
-            Request request = new Request("getHotels", null);
-            Response response = ClientConnectionManager.sendRequest(request);
-            if ("200".equalsIgnoreCase(response.getStatus())) {
-                List<Hotel> hotels = new Gson().fromJson(new Gson().toJson(response.getData()), new com.google.gson.reflect.TypeToken<List<Hotel>>(){}.getType());
-                hotelRegister.setItems(javafx.collections.FXCollections.observableArrayList(hotels));
-            }
-            hotelRegister.refresh();
+    private void loadHotelsIntoRegister() {
+        Request request = new Request("getHotels", null);
+        Response response = ClientConnectionManager.sendRequest(request);
+        if ("200".equalsIgnoreCase(response.getStatus())) {
+            List<Hotel> hotels = new Gson().fromJson(new Gson().toJson(response.getData()), new com.google.gson.reflect.TypeToken<List<Hotel>>(){}.getType());
+            hotelRegister.setItems(javafx.collections.FXCollections.observableArrayList(hotels));
+        } else {
+            logger.error("Error al cargar hoteles en el registro: {}", response != null ? response.getMessage() : "Respuesta nula");
+            mostrarAlertaError("Error de Carga", "No se pudieron cargar los hoteles en la tabla. " + (response != null ? response.getMessage() : ""));
         }
+        hotelRegister.refresh();
+    }
 
     //Actaulización en tiempo real con intervalo de tiempo para el uso de servidor en diferentes computadoras
     public void startPolling() {
@@ -281,6 +302,7 @@ public class HotelOptionsController {
     public void stopPolling() {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();
+            logger.info("Polling de hoteles detenido.");
         }
     }
 

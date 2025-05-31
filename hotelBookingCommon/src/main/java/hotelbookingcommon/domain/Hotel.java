@@ -1,4 +1,4 @@
-// In hotelbookingcommon.domain.Hotel
+
 package hotelbookingcommon.domain;
 
 import com.google.gson.annotations.Expose; // Import this!

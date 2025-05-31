@@ -1,14 +1,26 @@
 package hotelbookingcommon.domain;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 
 public class FrontDeskClerk implements Serializable {
+    @Expose
     private String employeeId;
+    @Expose
     private String name;
+    @Expose
     private String lastName;
+    @Expose
     private String password;
+    @Expose
     private String user;
+    @Expose
     private String phoneNumber;
+    private transient Hotel hotel;
+
+    @Expose
+    private int hotelId;
 
     public FrontDeskClerk(String employeeId, String name, String lastName, String password, String user, String phoneNumber) {
         this.employeeId = employeeId;
@@ -17,6 +29,32 @@ public class FrontDeskClerk implements Serializable {
         this.password = password;
         this.user = user;
         this.phoneNumber = phoneNumber;
+    }
+
+    public FrontDeskClerk(String employeeId, String name, String lastName, String password, String user, String phoneNumber, int hotelId) {
+        this.employeeId = employeeId;
+        this.name = name;
+        this.lastName = lastName;
+        this.password = password;
+        this.user = user;
+        this.phoneNumber = phoneNumber;
+        this.hotelId = hotelId;
+    }
+
+    public Hotel getHotel() {
+        return hotel;
+    }
+
+    public void setHotel(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public int getHotelId() {
+        return hotelId;
+    }
+
+    public void setHotelId(int hotelId) {
+        this.hotelId = hotelId;
     }
 
     public String getEmployeeId() {

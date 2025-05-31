@@ -228,19 +228,26 @@ public class ProtocolHandler {
                 case "registerFrontDeskClerk": {
                     try {
                         FrontDeskClerk frontDeskClerk = gson.fromJson(gson.toJson(request.getData()), FrontDeskClerk.class);
-                        List<FrontDeskClerk> updatedFrontDeskClerkList = frontDeskClerkService.addFrontDesk(frontDeskClerk);
-                        logger.info("Recepcionista registrado: {}", frontDeskClerk);
-                        return new Response("201", "Recepcionista registrado con éxito", updatedFrontDeskClerkList);
+                        boolean success = frontDeskClerkService.addClerk(frontDeskClerk);
+
+                        if (success) {
+                            logger.info("Recepcionista registrado: {}", frontDeskClerk);
+                            return new Response("201", "Recepcionista registrado con éxito", frontDeskClerk);
+                        } else {
+                            logger.warn("No se pudo registrar el recepcionista: {}", frontDeskClerk);
+                            return new Response("400", "No se pudo registrar el recepcionista (posible duplicado o error de hotel)", null);
+                        }
                     } catch (Exception e) {
                         logger.error("Error al registrar recepcionista", e);
                         return new Response("500", "Error interno al registrar recepcionista", null);
                     }
                 }
 
+
                 case "getFrontDeskClerk": {
                     try {
                         String employeeId = String.valueOf(parseIntFromRequest(request.getData()));
-                        FrontDeskClerk found = frontDeskClerkService.findByEmployeeId(employeeId);
+                        FrontDeskClerk found = frontDeskClerkService.getClerkById(employeeId);
                         if (found != null) {
                             return new Response("200", "Recepcionista encontrado", found);
                         } else {

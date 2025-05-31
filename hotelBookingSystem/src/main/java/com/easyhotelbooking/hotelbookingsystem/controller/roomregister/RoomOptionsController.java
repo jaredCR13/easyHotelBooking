@@ -123,7 +123,6 @@ public class RoomOptionsController {
 
                         modify.setOnAction(event -> {
                             Room room = getTableView().getItems().get(getIndex());
-                            // Rellenar campos para modificación
                             openModifyOnAction(room);
                         });
 
@@ -150,6 +149,13 @@ public class RoomOptionsController {
         actionColumn.setCellFactory(cellFactory);
     }
 
+
+
+    @FXML
+    void goBackOnAction() {
+        Utility.loadFullView("maininterface.fxml", goBack);
+    }
+
     private void openModifyOnAction(Room room) {
         Request request = new Request("getRoom", room.getRoomNumber());
         Response response = ClientConnectionManager.sendRequest(request);
@@ -168,14 +174,6 @@ public class RoomOptionsController {
         } else {
             util.FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
         }
-    }
-
-
-
-
-    @FXML
-    void goBackOnAction() {
-        Utility.loadFullView("maininterface.fxml", goBack);
     }
 
     @FXML
@@ -206,6 +204,7 @@ public class RoomOptionsController {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void removeRoomOnAction(Room room){
         try {

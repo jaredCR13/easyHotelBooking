@@ -29,11 +29,11 @@
         </VBox>
 
         <!-- Línea decorativa -->
-        <Region prefHeight="10" style="-fx-background-color: #3985d8;" VBox.vgrow="NEVER"/>
-    </VBox>
-</top>
+            <Region prefHeight="10" style="-fx-background-color: #3985d8;" VBox.vgrow="NEVER"/>
+        </VBox>
+    </top>
 
-        <!-- Sección del TableView -->
+
     <center>
         <VBox spacing="20" style="-fx-padding: 30;">
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="bp" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkOptionsController">
+
+    <!-- Sección superior azul -->
+    <top>
+        <VBox spacing="0">
+        <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
+            <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Front Desk Clerk Options" />
+
+            <!-- Sección de botones -->
+            <HBox alignment="TOP_LEFT" spacing="10">
+                <Button fx:id="registerButton" onAction="#openRegisterFrontDeskClerkOnAction" text="Register" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
+                <Button fx:id="goBack" onAction="#goBackOnAction" text="Go Back" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
+            </HBox>
+        </VBox>
+
+            <!-- Línea decorativa -->
+            <Region prefHeight="10" style="-fx-background-color: #3985d8;" VBox.vgrow="NEVER"/>
+        </VBox>
+    </top>
+
+    <!-- Sección del TableView -->
+    <center>
+        <VBox spacing="20" style="-fx-padding: 30;">
+            <TableView fx:id="frontDeskTable" prefHeight="300" prefWidth="560">
+                <columns>
+                    <TableColumn fx:id="employeeIdColumn" text="Employee ID" prefWidth="120" />
+                    <TableColumn fx:id="nameColumn" text="Name" prefWidth="150" />
+                    <TableColumn fx:id="lastNameColumn" text="Last Name" prefWidth="150" />
+                    <TableColumn fx:id="phoneColumn" text="Phone" prefWidth="120" />
+                    <TableColumn fx:id="userColumn" text="Username" prefWidth="130" />
+                    <TableColumn fx:id="hotelIdColumn" text="Hotel ID" prefWidth="100" />
+                    <TableColumn fx:id="actionColumn" text="Actions" prefWidth="200" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+</BorderPane>
+

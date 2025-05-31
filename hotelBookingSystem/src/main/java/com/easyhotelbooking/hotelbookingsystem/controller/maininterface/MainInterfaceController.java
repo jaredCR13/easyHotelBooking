@@ -269,7 +269,7 @@ public class MainInterfaceController {
 
         @FXML
         void frontDeskClerkOptionsOnAction() {
-                FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkoptions.fxml", bp);
+                FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
 

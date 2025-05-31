@@ -59,6 +59,7 @@ public class HotelOptionsController {
         public void setStage(Stage stage){
             this.stage=stage;
         }
+
         @FXML
         public void initialize(){
             numberHotelRegister.setCellValueFactory(data ->

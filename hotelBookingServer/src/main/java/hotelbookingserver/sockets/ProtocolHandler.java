@@ -232,7 +232,7 @@ public class ProtocolHandler {
 
                         if (success) {
                             logger.info("Recepcionista registrado: {}", frontDeskClerk);
-                            return new Response("201", "Recepcionista registrado con éxito", frontDeskClerk);
+                            return new Response("200", "Recepcionista registrado con éxito", frontDeskClerk);
                         } else {
                             logger.warn("No se pudo registrar el recepcionista: {}", frontDeskClerk);
                             return new Response("400", "No se pudo registrar el recepcionista (posible duplicado o error de hotel)", null);
@@ -244,18 +244,13 @@ public class ProtocolHandler {
                 }
 
 
-                case "getFrontDeskClerk": {
+                case "getClerks": {
                     try {
-                        String employeeId = String.valueOf(parseIntFromRequest(request.getData()));
-                        FrontDeskClerk found = frontDeskClerkService.getClerkById(employeeId);
-                        if (found != null) {
-                            return new Response("200", "Recepcionista encontrado", found);
-                        } else {
-                            return new Response("404", "Recepcionista no encontrado", null);
-                        }
+                        List<FrontDeskClerk> clerks = frontDeskClerkService.getAllClerks();
+                        return new Response("200", "Recepcionistas cargados correctamente", clerks);
                     } catch (Exception e) {
-                        logger.error("Error al consultar recepcionista", e);
-                        return new Response("500", "Error interno al consultar recepcionista", null);
+                        logger.error("Error al obtener recepcionistas", e);
+                        return new Response("500", "Error interno al obtener recepcionistas", null);
                     }
                 }
 

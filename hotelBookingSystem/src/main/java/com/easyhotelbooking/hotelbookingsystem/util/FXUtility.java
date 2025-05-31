@@ -21,21 +21,21 @@ public class FXUtility {
         }
     }
 
-    public static Alert alert(String title, String header){
+    public static void alert(String title, String header){
         Alert myalert = new Alert(Alert.AlertType.NONE);
         myalert.setAlertType(Alert.AlertType.ERROR);
         myalert.setTitle(title);
         myalert.setHeaderText(header);
-        return myalert;
+        myalert.show();
     }
 
-    public static Alert alertInfo(String title, String header){
+    public static void alertInfo(String title, String header){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE); //no estoy seguro si es necesario
         alert.getDialogPane().setMinWidth(400); //no estoy seguro si es necesario
         alert.setHeaderText(header);
-        return alert;
+        alert.show();
     }
 
 

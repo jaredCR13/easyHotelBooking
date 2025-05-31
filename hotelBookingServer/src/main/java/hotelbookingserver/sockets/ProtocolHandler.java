@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.UUID;
 import java.util.List;
-import java.io.File; // Importa File
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +26,7 @@ public class ProtocolHandler {
     private final Gson gson = new Gson();
 
 
-    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2";
+    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\XT\\Documents\\ProyectoProgra2";
     private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data/images/rooms/";
     private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data/images/temp_rooms/";
 
@@ -232,7 +231,7 @@ public class ProtocolHandler {
 
                         if (success) {
                             logger.info("Recepcionista registrado: {}", frontDeskClerk);
-                            return new Response("200", "Recepcionista registrado con éxito", frontDeskClerk);
+                            return new Response("201", "Recepcionista registrado con éxito", frontDeskClerk);
                         } else {
                             logger.warn("No se pudo registrar el recepcionista: {}", frontDeskClerk);
                             return new Response("400", "No se pudo registrar el recepcionista (posible duplicado o error de hotel)", null);
@@ -253,6 +252,40 @@ public class ProtocolHandler {
                         return new Response("500", "Error interno al obtener recepcionistas", null);
                     }
                 }
+                case "deleteFrontDeskClerk": {
+                    try {
+                        String employeeId = (String)request.getData();
+
+                        //FrontDeskClerk clerkToDelete = frontDeskClerkService.getClerkById(employeeId);
+                        boolean deleted = frontDeskClerkService.deleteClerk(employeeId);
+
+                        if (deleted) {
+                            return new Response("200", "Recepcionista eliminado con éxito", null);
+                        } else {
+                            return new Response("404", "Recepcionista no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar recepcionista", e);
+                        return new Response("500", "Error interno al eliminar recepcionista", null);
+                    }
+                }
+                case "updateClerk": {
+                    try {
+                        FrontDeskClerk clerkToUpdate = gson.fromJson(gson.toJson(request.getData()), FrontDeskClerk.class);
+                        boolean updated = frontDeskClerkService.updateClerk(clerkToUpdate);
+                        if (updated) {
+                            FrontDeskClerk updatedClerk = frontDeskClerkService.getClerkById(clerkToUpdate.getEmployeeId());
+                            return new Response("200", "Recepcionista actualizado con éxito", updatedClerk);
+                        } else {
+                            return new Response("404", "Recepcionista no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error procesando updateClerk", e);
+                        return new Response("500", "Error interno al actualizar recepcionista", null);
+                    }
+                }
+
+
 
                 // =================== IMAGENES DE HABITACIONES =========================
 

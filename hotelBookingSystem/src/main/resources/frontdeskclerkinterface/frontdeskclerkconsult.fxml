@@ -1,14 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="frontdeskclerkinterface.Frontdeskclerkconsult"
-            prefHeight="400.0" prefWidth="600.0">
+<VBox spacing="15" alignment="CENTER" style="-fx-padding: 20;"
+      xmlns="http://javafx.com/javafx/23.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkConsultController">
 
-</AnchorPane>
+    <Label text="Front Desk Clerk Information" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+    <GridPane hgap="15" vgap="15">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+            <ColumnConstraints minWidth="250"/>
+        </columnConstraints>
+
+        <rowConstraints>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+            <RowConstraints valignment="CENTER"/>
+        </rowConstraints>
+
+        <Label text="Employee ID:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="employeeIdLabel" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Label fx:id="nameLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Last Name:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <Label fx:id="lastNameLabel" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Phone:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <Label fx:id="phoneLabel" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <Label fx:id="usernameLabel" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+        <Label text="Role:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+        <Label fx:id="roleLabel" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+        <Label text="Hotel ID:" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+        <Label fx:id="hotelIdLabel" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+    </GridPane>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Button text="Go Back" onAction="#onClose" prefWidth="100" style="-fx-background-color: #dc3545; -fx-text-fill: white;" />
+    </HBox>
+</VBox>
+

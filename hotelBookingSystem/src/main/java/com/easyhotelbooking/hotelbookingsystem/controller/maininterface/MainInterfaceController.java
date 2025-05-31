@@ -289,7 +289,8 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("201".equalsIgnoreCase(response.getStatus())) {
-                        util.FXUtility.alertInfo("Éxito", "Recepcionista registrado correctamente.");
+                       util.FXUtility.alertInfo("Éxito", "Recepcionista registrado correctamente.");
+
                 } else {
                         util.FXUtility.alert("Error", "No se pudo registrar el recepcionista: " + response.getMessage());
                 }
@@ -308,6 +309,26 @@ public class MainInterfaceController {
                                         "\nUsuario: " + frontDeskClerk.getUser());
                 } else {
                         util.FXUtility.alert("Error", "Recepcionista no encontrado: " + (response != null ? response.getMessage() : ""));
+                }
+        }
+        public void deleteFrontDeskClerk(FrontDeskClerk frontDeskClerk){
+                Request request= new Request("deleteFrontDeskClerk",frontDeskClerk.getEmployeeId());
+                Response response= ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus())) {
+                        util.FXUtility.alertInfo("Éxito", "FrontDeskClerk "+frontDeskClerk.getEmployeeId()+" eliminado correctamente.");
+                } else {
+                        util.FXUtility.alert("Error", "No se pudo eliminar el frontDeskClerk: " + response.getMessage());
+                }
+        }
+        public void updateClerk(FrontDeskClerk frontDeskClerk) {
+                Request request = new Request("updateClerk", frontDeskClerk);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus())) {
+                        util.FXUtility.alertInfo("Éxito", "FrontDeskClerk actualizado correctamente.");
+                } else {
+                        util.FXUtility.alert("Error", "No se pudo actualizar el frontDeskClerk: " + response.getMessage());
                 }
         }
 }

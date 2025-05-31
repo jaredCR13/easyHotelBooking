@@ -1,6 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.ModifyRoomController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomConsultController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
@@ -83,8 +84,8 @@ public class FrontDeskClerkOptionsController {
         lastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         userColumn.setCellValueFactory(new PropertyValueFactory<>("user"));
         phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
-        //roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
-
+        roleColumn.setCellValueFactory(new PropertyValueFactory<>("frontDeskClerkRole"));
+        hotelIdColumn.setCellValueFactory(new PropertyValueFactory<>("hotelId"));
         addButtonsToTable();
         loadFrontDeskClerkIntoRegister();
     }
@@ -106,11 +107,12 @@ public class FrontDeskClerkOptionsController {
                     openConsultFrontDeskClerk(clerk);
                 });
                 modify.setOnAction(e -> {
-
+                    FrontDeskClerk clerk = getTableView().getItems().get(getIndex());
+                    openModifytFrontDeskClerk(clerk);
                 });
                 remove.setOnAction(e -> {
                     FrontDeskClerk clerk = getTableView().getItems().get(getIndex());
-                    //removeClerk(clerk);
+                    removetFrontDeskClerkOnAction(clerk);
                 });
             }
 
@@ -132,7 +134,7 @@ public class FrontDeskClerkOptionsController {
     @FXML
     void openRegisterFrontDeskClerkOnAction() {
         try {
-            FrontDeskClerkRegisterController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkregisteroptions.fxml", bp);
+            FrontDeskClerkRegisterController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkregister.fxml", bp);
             if (controller != null) {
                 controller.setMainController(mainController);
                 controller.setParentBp(bp); // para poder regresar después
@@ -147,21 +149,50 @@ public class FrontDeskClerkOptionsController {
 
     //Consultar Recepcionistas
     private void openConsultFrontDeskClerk(FrontDeskClerk clerk) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/frontdeskclerkinterface/frontdeskclerkconsult.fxml"));
+            Parent root = loader.load();
 
+            FrontDeskClerkConsultController consultController = loader.getController();
+            consultController.setClerk(clerk);
+
+            Stage stage = new Stage();
+            stage.setTitle("Consult Room");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //Modificar Recepcionistas
     private void openModifytFrontDeskClerk(FrontDeskClerk clerk) {
+        FrontDeskClerkModifyController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkmodify.fxml", bp);
 
+        if (controller != null) {
+            controller.setParentBp(bp);
+            controller.setMainController(mainController);
+            controller.setFrontDeskClerk(clerk);
+            controller.setOptionsController(this); // <- IMPORTANTE si quieres recargar luego
+        }
     }
 
     //Eliminar Recepcionistas
     //@Override
     void removetFrontDeskClerkOnAction(FrontDeskClerk clerk) {
 
+        try {
+            mainController.deleteFrontDeskClerk(clerk);
+            loadFrontDeskClerkIntoRegister();
+        } catch (Exception e) {
+            mostrarAlertaError("Error", "Ocurrió un error al eliminar el hotel.");
+        }
+
     }
 
-    private void loadFrontDeskClerkIntoRegister() {
+    public void loadFrontDeskClerkIntoRegister() {
         Request request = new Request("getClerks", null);
         Response response = ClientConnectionManager.sendRequest(request);
         if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {

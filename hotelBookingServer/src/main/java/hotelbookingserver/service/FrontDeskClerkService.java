@@ -95,7 +95,7 @@ public class FrontDeskClerkService {
                 }
             }
 
-            boolean updated = clerkData.update(clerk);
+            boolean updated = clerkData.updateClerk(clerk);
             if (updated) {
                 logger.info("Recepcionista actualizado: {}", clerk);
             } else {
@@ -110,21 +110,21 @@ public class FrontDeskClerkService {
 
     public boolean deleteClerk(String employeeId) {
         try {
-            FrontDeskClerk clerkToDelete = clerkData.findById(employeeId);
             boolean deleted = clerkData.delete(employeeId);
 
             if (deleted) {
                 logger.info("Recepcionista eliminado con ID: {}", employeeId);
             } else {
-                logger.warn("No se encontró recepcionista para eliminar: {}", employeeId);
+                logger.warn("No se encontró recepcionista para eliminar con ID: {}", employeeId);
             }
 
             return deleted;
         } catch (IOException e) {
-            logger.error("Error al eliminar recepcionista: {}", e.getMessage());
+            logger.error("Error al eliminar recepcionista con ID {}: {}", employeeId, e.getMessage());
             return false;
         }
     }
+
 
     public FrontDeskClerk getClerkById(String employeeId) {
         try {

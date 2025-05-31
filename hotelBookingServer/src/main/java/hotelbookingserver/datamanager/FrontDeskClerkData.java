@@ -99,7 +99,7 @@ public class FrontDeskClerkData {
         return null;
     }
 
-    public boolean update(FrontDeskClerk updatedClerk) throws IOException {
+    public boolean updateClerk(FrontDeskClerk updatedClerk) throws IOException {
         List<FrontDeskClerk> clerks = findAll();
         boolean updated = false;
 

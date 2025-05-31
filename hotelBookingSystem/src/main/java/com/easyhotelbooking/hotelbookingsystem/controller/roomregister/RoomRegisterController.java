@@ -241,7 +241,8 @@ public class RoomRegisterController {
             room.setHotelId(selectedHotel.getNumHotel());
             room.setHotel(selectedHotel);
 
-            Request request = new Request("registerRoom", room); // Esta acción ya existía
+
+            Request request = new Request("registerRoom", room);
             Response response = ClientConnectionManager.sendRequest(request);
 
             if ("201".equalsIgnoreCase(response.getStatus())) {

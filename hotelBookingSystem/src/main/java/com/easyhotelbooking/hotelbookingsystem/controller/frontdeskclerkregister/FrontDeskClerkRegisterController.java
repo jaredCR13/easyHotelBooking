@@ -1,6 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import hotelbookingcommon.domain.FrontDeskClerk;
 import hotelbookingcommon.domain.FrontDeskClerkRole;
@@ -61,7 +62,7 @@ public class FrontDeskClerkRegisterController {
             FrontDeskClerkRole role = roleCombo.getValue();
 
             if (id.isEmpty() || name.isEmpty() || lastName.isEmpty() || phone.isEmpty() || user.isEmpty() || password.isEmpty() || role == null) {
-                util.FXUtility.alert("Error", "Todos los campos son obligatorios.");
+                FXUtility.alert("Error", "Todos los campos son obligatorios.");
                 return;
             }
 

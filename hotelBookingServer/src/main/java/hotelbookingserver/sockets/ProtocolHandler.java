@@ -136,6 +136,13 @@ public class ProtocolHandler {
                     try {
                         Room newRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
 
+                        Room existingRoomInHotel = roomService.getRoomByHotelAndRoomNumber(newRoom.getRoomNumber(), newRoom.getHotelId());
+
+                        if (existingRoomInHotel != null) {
+                            logger.warn("Intento de registrar habitación duplicada con número {} en el hotel {}. Ya existe.", newRoom.getRoomNumber(), newRoom.getHotelId());
+                            return new Response("409", "El número de habitación " + newRoom.getRoomNumber() + " ya existe en el hotel " + newRoom.getHotelId() + ".", null);
+                        }
+
                         List<String> finalImagePaths = new ArrayList<>();
                         if (newRoom.getImagesPaths() != null && !newRoom.getImagesPaths().isEmpty()) {
                             for (String tempPath : newRoom.getImagesPaths()) {
@@ -158,17 +165,11 @@ public class ProtocolHandler {
 
                         boolean added = roomService.addRoom(newRoom);
                         if (added) {
-                            Room addedRoomWithHotel = roomService.getRoomById(newRoom.getRoomNumber());
+                            Room addedRoomWithHotel = roomService.getRoomByHotelAndRoomNumber(newRoom.getRoomNumber(), newRoom.getHotelId());
                             return new Response("201", "Habitación registrada con éxito", addedRoomWithHotel);
                         } else {
-                            Room existingRoomCheck = roomService.getRoomById(newRoom.getRoomNumber());
-                            if (existingRoomCheck != null) {
-                                logger.warn("Intento de registrar habitación duplicada: {}", newRoom.getRoomNumber());
-                                return new Response("409", "El número de habitación " + newRoom.getRoomNumber() + " ya existe.", null);
-                            } else {
-                                logger.error("Error desconocido al registrar la habitación: {}", newRoom.getRoomNumber());
-                                return new Response("500", "No se pudo registrar la habitación (ver logs para detalles)", null);
-                            }
+                            logger.error("Error desconocido al registrar la habitación: {}", newRoom.getRoomNumber());
+                            return new Response("500", "No se pudo registrar la habitación (ver logs para detalles)", null);
                         }
 
                     } catch (Exception e) {

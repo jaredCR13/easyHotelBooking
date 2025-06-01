@@ -59,5 +59,6 @@ public class HotelRegisterController {
         Stage stage = (Stage) hotelNumberField.getScene().getWindow();
         stage.close();
     }
+
 }
 

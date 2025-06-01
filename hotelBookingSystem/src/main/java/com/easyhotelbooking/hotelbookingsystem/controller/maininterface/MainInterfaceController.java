@@ -13,7 +13,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.HBox; // Import HBox
+import javafx.scene.layout.VBox; // Import VBox
+import javafx.stage.Popup;     // Import Popup
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,45 +27,98 @@ import java.util.stream.Collectors;
 
 public class MainInterfaceController {
 
-        @FXML
-        private ComboBox<?> clientCombo;
+        // Removed @FXML private ComboBox<?> clientCombo;
 
-        @FXML
-        private BorderPane bp;
-        @FXML
-        private StackPane contentPane;
+        @FXML private BorderPane bp;
+        @FXML private StackPane contentPane;
+        @FXML private DatePicker fromDate;
+        @FXML private ComboBox<String> hotelCombo;
+        @FXML private Button searchButton;
+        // New FXML for the button that will trigger the spinner popup
+        @FXML private Button clientSelectorButton;
 
-        @FXML
-        private DatePicker fromDate;
 
-        @FXML
-        private ComboBox<String> hotelCombo;
+        @FXML private TextArea textArea; // This seems unused, consider removing it if not needed.
 
-        @FXML
-        private Button searchButton;
-
-        @FXML
-        private TextArea textArea;
-
-        @FXML
-        private DatePicker toDate;
-
-        // Ya tienes esta variable, ¡excelente!
         private Stage stage;
 
         private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
         private Gson gson = new Gson();
 
+        // New fields for the spinners and the popup
+        private Spinner<Integer> adultsSpinner;
+        private Spinner<Integer> childrenSpinner;
+        private Popup spinnerPopup;
 
         public void setStage(Stage stage) {
                 this.stage = stage;
                 logger.info("Stage principal establecido en MainInterfaceController.");
         }
 
-
         @FXML
         public void initialize() {
                 loadHotelNames();
+                initializeSpinnersAndPopup(); // Initialize the spinners and popup here
+
+                // ACTION PARA EL SELECTOR
+                clientSelectorButton.setOnAction(event -> {
+                        if (spinnerPopup != null && spinnerPopup.isShowing()) {
+                                spinnerPopup.hide();
+                        } else {
+                                showSpinnerPopup();
+                        }
+                });
+                updateClientSelectorButtonText(); // Set initial text for the button
+        }
+
+        private void initializeSpinnersAndPopup() {
+                // CREAMOS LOS SPINNERS
+                adultsSpinner = new Spinner<>();
+                SpinnerValueFactory<Integer> adultsValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 1);
+                adultsSpinner.setValueFactory(adultsValueFactory);
+
+                childrenSpinner = new Spinner<>();
+                SpinnerValueFactory<Integer> childrenValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 10, 0);
+                childrenSpinner.setValueFactory(childrenValueFactory);
+
+                // VBOX PARA SPINNERS Y LABELS
+                VBox content = new VBox(10); // 10 is spacing
+                content.setStyle("-fx-background-color: white; -fx-padding: 15px; -fx-border-color: lightgray; -fx-border-width: 1px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 2);");
+
+                HBox adultsRow = new HBox(5, new Label("Adults:"), adultsSpinner);
+                HBox childrenRow = new HBox(5, new Label("Children:"), childrenSpinner);
+
+                Button doneButton = new Button("Done");
+                doneButton.setOnAction(event -> {
+                        if (spinnerPopup != null) {
+                                spinnerPopup.hide();
+                                updateClientSelectorButtonText(); // Update button text after closing popup
+                        }
+                });
+
+                content.getChildren().addAll(adultsRow, childrenRow, doneButton);
+
+                //CREA EL POP UP Y SETTEA EL CONTENIDO
+                spinnerPopup = new Popup();
+                spinnerPopup.getContent().add(content);
+                spinnerPopup.setAutoHide(true); // Hide popup when clicking outside
+        }
+
+        private void showSpinnerPopup() {
+                if (spinnerPopup != null) {
+                        //COORDENADAS PARA EL POP UP
+                        Window ownerWindow = clientSelectorButton.getScene().getWindow();
+                        double x = ownerWindow.getX() + clientSelectorButton.localToScene(0, 0).getX() + clientSelectorButton.getScene().getX();
+                        double y = ownerWindow.getY() + clientSelectorButton.localToScene(0, 0).getY() + clientSelectorButton.getScene().getY() + clientSelectorButton.getHeight();
+
+                        spinnerPopup.show(ownerWindow, x, y);
+                }
+        }
+
+        private void updateClientSelectorButtonText() {
+                int adults = adultsSpinner.getValue();
+                int children = childrenSpinner.getValue();
+                clientSelectorButton.setText(adults + " Adult" + (adults > 1 ? "s" : "") + ", " + children + " Child" + (children > 1 ? "ren" : ""));
         }
 
         // =================== HOTEL CRUD =========================
@@ -75,7 +132,7 @@ public class MainInterfaceController {
                         if (this.stage != null) {
                                 controller.setStage(this.stage);
                         } else {
-
+                                logger.error("Error: stage es null en MainInterfaceController al cargar HotelOptionsController.");
                         }
                 } else {
                         logger.error("No se pudo cargar hoteloptions.fxml o el controlador es null.");
@@ -146,11 +203,11 @@ public class MainInterfaceController {
                                 }
                         }
 
-                       FXUtility.alertInfo("Información del Hotel", hotelInfo.toString());
+                        FXUtility.alertInfo("Información del Hotel", hotelInfo.toString());
                 } else {
                         String message = response != null ? response.getMessage() : "No se encontró el hotel";
                         logger.error("Error al consultar hotel: {}", message);
-                       FXUtility.alert("Error", message);
+                        FXUtility.alert("Error", message);
                 }
         }
 
@@ -174,7 +231,7 @@ public class MainInterfaceController {
                         FXUtility.alertInfo("Éxito", "Hotel eliminado correctamente (y sus habitaciones asociadas).");
                         loadHotelNames();
                 } else {
-                       FXUtility.alert("Error", "No se pudo eliminar el hotel: " + response.getMessage());
+                        FXUtility.alert("Error", "No se pudo eliminar el hotel: " + response.getMessage());
                 }
         }
 
@@ -199,11 +256,11 @@ public class MainInterfaceController {
                         if (this.stage != null) {
                                 controller.setStage(this.stage);
                         } else {
-
+                                logger.error("Error: stage es null en MainInterfaceController al cargar RoomOptionsController.");
                         }
                 } else {
                         logger.error("No se pudo cargar roomoptions.fxml o el controlador es null.");
-                       FXUtility.alert("Error", "No se pudo cargar la página de opciones de habitaciones.");
+                        FXUtility.alert("Error", "No se pudo cargar la página de opciones de habitaciones.");
                 }
         }
 
@@ -239,7 +296,7 @@ public class MainInterfaceController {
 
                         FXUtility.alertInfo("Habitación encontrada", roomInfo.toString());
                 } else {
-                       FXUtility.alert("Error", "Habitación no encontrada: " + (response != null ? response.getMessage() : ""));
+                        FXUtility.alert("Error", "Habitación no encontrada: " + (response != null ? response.getMessage() : ""));
                 }
         }
 
@@ -248,7 +305,7 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
-                       FXUtility.alertInfo("Éxito", "Habitación actualizada correctamente.");
+                        FXUtility.alertInfo("Éxito", "Habitación actualizada correctamente.");
                 } else {
                         FXUtility.alert("Error", "No se pudo actualizar la habitación: " + response.getMessage());
                 }
@@ -290,7 +347,7 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("201".equalsIgnoreCase(response.getStatus())) {
-                      FXUtility.alertInfo("Éxito", "Recepcionista registrado correctamente.");
+                        FXUtility.alertInfo("Éxito", "Recepcionista registrado correctamente.");
 
                 } else {
                         FXUtility.alert("Error", "No se pudo registrar el recepcionista: " + response.getMessage());
@@ -309,7 +366,7 @@ public class MainInterfaceController {
                                         "\nTeléfono: " + frontDeskClerk.getPhoneNumber() +
                                         "\nUsuario: " + frontDeskClerk.getUser());
                 } else {
-                       FXUtility.alert("Error", "Recepcionista no encontrado: " + (response != null ? response.getMessage() : ""));
+                        FXUtility.alert("Error", "Recepcionista no encontrado: " + (response != null ? response.getMessage() : ""));
                 }
         }
         public void deleteFrontDeskClerk(FrontDeskClerk frontDeskClerk){
@@ -319,7 +376,7 @@ public class MainInterfaceController {
                 if ("200".equalsIgnoreCase(response.getStatus())) {
                         FXUtility.alertInfo("Éxito", "FrontDeskClerk "+frontDeskClerk.getEmployeeId()+" eliminado correctamente.");
                 } else {
-                       FXUtility.alert("Error", "No se pudo eliminar el frontDeskClerk: " + response.getMessage());
+                        FXUtility.alert("Error", "No se pudo eliminar el frontDeskClerk: " + response.getMessage());
                 }
         }
         public void updateClerk(FrontDeskClerk frontDeskClerk) {
@@ -327,9 +384,21 @@ public class MainInterfaceController {
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
-                       FXUtility.alertInfo("Éxito", "FrontDeskClerk actualizado correctamente.");
+                        FXUtility.alertInfo("Éxito", "FrontDeskClerk actualizado correctamente.");
                 } else {
                         FXUtility.alert("Error", "No se pudo actualizar el frontDeskClerk: " + response.getMessage());
                 }
+        }
+
+
+        //============= BARRA BUSQUEDA ============
+
+        //TODO
+        @FXML
+        private void onSearchButtonAction() {
+                // Retrieve spinner values when the search button is clicked
+                int adults = adultsSpinner.getValue();
+                int children = childrenSpinner.getValue();
+
         }
 }

@@ -1,9 +1,9 @@
 package hotelbookingserver.service;
 
-import hotelbookingcommon.domain.Hotel; // Necesitarás Hotel para buscar el hotel asociado
+import hotelbookingcommon.domain.Hotel;
 import hotelbookingcommon.domain.Room;
 import hotelbookingserver.datamanager.RoomData;
-import hotelbookingserver.datamanager.HotelData; // Importar HotelData para buscar hoteles
+import hotelbookingserver.datamanager.HotelData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,9 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RoomService {
     private static final Logger logger = LogManager.getLogger(RoomService.class);
@@ -21,13 +20,12 @@ public class RoomService {
     private static final String HOTEL_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\hotels.dat";
 
     private RoomData roomData;
-    private HotelData hotelData; // Instancia de HotelData
+    private HotelData hotelData;
 
-    
     public RoomService() {
         try {
             roomData = new RoomData(new File(ROOM_FILE));
-            hotelData = new HotelData(new File(HOTEL_FILE)); // Inicializar HotelData
+            hotelData = new HotelData(new File(HOTEL_FILE));
         } catch (IOException e) {
             logger.error("Error al abrir archivo de habitaciones o hoteles: {}", e.getMessage());
             throw new RuntimeException("No se pudo inicializar RoomData o HotelData", e);
@@ -49,16 +47,22 @@ public class RoomService {
                 return false;
             }
 
-            // --- INICIO DE LA VERIFICACIÓN DE DUPLICADOS ---
-            // Busca una habitación con el mismo roomNumber
-            Room existingRoom = roomData.findById(room.getRoomNumber());
-            if (existingRoom != null) {
-                logger.warn("Intento de agregar habitación duplicada. El número de habitación {} ya existe.", room.getRoomNumber());
-                return false; // Retorna false si ya existe una habitación con ese número
+            // --- VERIFICACIÓN DUPLICADOS ---
+            // Obtener todas las habitaciones para el hotel específico y verificar si  existe roomNumber
+            List<Room> roomsInThisHotel = roomData.findAll().stream()
+                    .filter(r -> r.getHotelId() == room.getHotelId())
+                    .collect(Collectors.toList());
+
+            boolean roomExistsInThisHotel = roomsInThisHotel.stream()
+                    .anyMatch(r -> r.getRoomNumber() == room.getRoomNumber());
+
+            if (roomExistsInThisHotel) {
+                logger.warn("Intento de agregar habitación duplicada. El número de habitación {} ya existe en el hotel {}.", room.getRoomNumber(), room.getHotelId());
+                return false; // Retorna false si ya existe una habitación con ese número en este hotel
             }
 
-            //HACE LA INSERCION
             roomData.insert(room);
+
             if (associatedHotel != null) {
                 associatedHotel.addRoom(room);
             }
@@ -74,17 +78,18 @@ public class RoomService {
     public List<Room> getAllRooms() {
         try {
             List<Room> rooms = roomData.findAll();
-            // Cargar todos los hoteles una vez para optimizar las búsquedas
             List<Hotel> allHotels = hotelData.findAll();
 
             for (Room room : rooms) {
-                // Buscar el hotel asociado por ID
                 allHotels.stream()
                         .filter(hotel -> hotel.getNumHotel() == room.getHotelId())
                         .findFirst()
                         .ifPresent(hotel -> {
                             room.setHotel(hotel);
-                            hotel.addRoom(room);
+                            // Solo añadir la habitación al hotel si aún no está en su lista
+                            if (!hotel.getRooms().contains(room)) {
+                                hotel.addRoom(room);
+                            }
                         });
             }
             return rooms;
@@ -108,7 +113,6 @@ public class RoomService {
                 }
             }
 
-
             boolean updated = roomData.update(room);
             if (updated) {
                 logger.info("Habitación actualizada: {}", room);
@@ -124,7 +128,7 @@ public class RoomService {
 
     public boolean deleteRoom(int roomNumber) {
         try {
-            Room roomToDelete = roomData.findById(roomNumber);
+            Room roomToDelete = roomData.findById(roomNumber); // Find by ID, not just roomNumber
             boolean deleted = roomData.delete(roomNumber);
 
             if (deleted) {
@@ -145,9 +149,9 @@ public class RoomService {
         }
     }
 
-    public Room getRoomById(int roomNumber) {
+    public Room getRoomById(int roomNumber) { // This method still gets a room by its *unique* room number
         try {
-            Room foundRoom = roomData.findById(roomNumber);
+            Room foundRoom = roomData.findById(roomNumber); // Assuming findById still finds a unique room.
 
             if (foundRoom != null) {
                 if (foundRoom.getHotelId() != -1) {
@@ -172,12 +176,32 @@ public class RoomService {
         }
     }
 
+    /**
+     * Retrieves a room by its room number and the hotel it belongs to.
+     * This method is crucial for ensuring uniqueness within a hotel.
+     * @param roomNumber The number of the room.
+     * @param hotelId The ID of the hotel the room belongs to.
+     * @return The Room object if found, otherwise null.
+     */
+    public Room getRoomByHotelAndRoomNumber(int roomNumber, int hotelId) {
+        try {
+            return roomData.findAll().stream()
+                    .filter(room -> room.getRoomNumber() == roomNumber && room.getHotelId() == hotelId)
+                    .findFirst()
+                    .orElse(null);
+        } catch (IOException e) {
+            logger.error("Error al obtener habitación por número y hotel: {}", e.getMessage());
+            throw new RuntimeException("Error al obtener habitación por número y hotel", e);
+        }
+    }
+
+
     public void close() {
         try {
             roomData.close();
             hotelData.close();
         } catch (IOException e) {
-
+            logger.error("Error al cerrar archivos de habitaciones o hoteles: {}", e.getMessage());
         }
     }
 }

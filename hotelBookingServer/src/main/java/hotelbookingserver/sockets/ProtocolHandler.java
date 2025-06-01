@@ -26,7 +26,7 @@ public class ProtocolHandler {
     private final Gson gson = new Gson();
 
 
-    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\XT\\Documents\\ProyectoProgra2";
+    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data";
     private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data/images/rooms/";
     private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data/images/temp_rooms/";
 
@@ -240,6 +240,22 @@ public class ProtocolHandler {
                     } catch (Exception e) {
                         logger.error("Error al registrar recepcionista", e);
                         return new Response("500", "Error interno al registrar recepcionista", null);
+                    }
+                }
+
+                case "getFrontDeskClerk": {
+                    try {
+                        String employeeId = request.getData().toString();
+                        FrontDeskClerk found = frontDeskClerkService.getClerkById(employeeId);
+
+                        if (found != null) {
+                            return new Response("200", "Recepcionista encontrado", found);
+                        } else {
+                            return new Response("404", "Recepcionista no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al consultar recepcionista", e);
+                        return new Response("500", "Error interno al consultar recepcionista", null);
                     }
                 }
 

@@ -13,8 +13,8 @@ import java.util.stream.Collectors; // Para facilitar la carga de habitaciones
 
 public class HotelService {
 
-    private static final String HOTEL_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\hotels.dat";
-    private static final String ROOM_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\rooms.dat";
+    private static final String HOTEL_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\hotels.dat";
+    private static final String ROOM_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\rooms.dat";
 
     private HotelData hotelData;
     private RoomData roomData;

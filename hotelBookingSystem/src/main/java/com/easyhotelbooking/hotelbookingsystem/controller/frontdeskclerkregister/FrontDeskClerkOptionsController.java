@@ -9,6 +9,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.FrontDeskClerk;
+import hotelbookingcommon.domain.Hotel;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
 import javafx.application.Platform;
@@ -25,6 +26,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,6 +62,10 @@ public class FrontDeskClerkOptionsController {
     @FXML private TableColumn<FrontDeskClerk, String> hotelIdColumn;
     @FXML private TableColumn<FrontDeskClerk, String> roleColumn;
     @FXML private TableColumn<FrontDeskClerk, Void> actionColumn;
+    @FXML private TextField quickSearchField;
+    @FXML private Button quickSearchButton;
+    @FXML private Button clearSearchButton;
+    @FXML private ComboBox<Hotel> hotelComboBox;
     private ScheduledExecutorService scheduler;
 
 
@@ -89,6 +95,21 @@ public class FrontDeskClerkOptionsController {
         hotelIdColumn.setCellValueFactory(new PropertyValueFactory<>("hotelId"));
         addButtonsToTable();
         loadFrontDeskClerkIntoRegister();
+        loadHotelsIntoQuickCombo();
+
+        hotelComboBox.setConverter(new StringConverter<Hotel>() {
+        public String toString(Hotel hotel) {
+            return hotel != null ? hotel.getHotelName() : "";
+        }
+
+        @Override
+        public Hotel fromString(String string) {
+            return hotelComboBox.getItems().stream()
+                    .filter(h -> h.getHotelName().equals(string))
+                    .findFirst()
+                    .orElse(null);
+        }
+    });
     }
 
     private void addButtonsToTable() {
@@ -193,6 +214,46 @@ public class FrontDeskClerkOptionsController {
 
     }
 
+    @FXML
+    private void onQuickSearch() {
+        String id = quickSearchField.getText().trim();
+        Hotel selectedHotel = hotelComboBox.getValue();
+
+        if (id.isEmpty() || selectedHotel == null) {
+            mostrarAlertaError("Error", "Debe ingresar el ID y seleccionar un hotel.");
+            return;
+        }
+
+        try{
+        Request request = new Request("getFrontDeskClerk", id); // Usa el ID directamente
+        Response response = ClientConnectionManager.sendRequest(request);
+
+        if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+            FrontDeskClerk found = new Gson().fromJson(
+                    new Gson().toJson(response.getData()),
+                    FrontDeskClerk.class
+            );
+
+            if (found.getHotelId() == selectedHotel.getNumHotel()) {
+                frontDeskTable.setItems(FXCollections.observableArrayList(found));
+            } else {
+                mostrarAlertaError("No coincide", "El recepcionista no pertenece al hotel seleccionado.");
+            }
+            } else {
+                mostrarAlertaError("No encontrado", "No se encontró el recepcionista.");
+            }
+        } catch (NumberFormatException e) {
+            mostrarAlertaError("Error", "El ID del recepcionista debe ser un número entero.");
+        }
+    }
+
+    @FXML
+    private void onClearSearch() {
+        quickSearchField.clear();
+        hotelComboBox.getSelectionModel().clearSelection();
+        loadFrontDeskClerkIntoRegister();
+    }
+
     public void loadFrontDeskClerkIntoRegister() {
         Request request = new Request("getClerks", null);
         Response response = ClientConnectionManager.sendRequest(request);
@@ -201,6 +262,22 @@ public class FrontDeskClerkOptionsController {
             frontDeskTable.setItems(FXCollections.observableArrayList(clerks));
         } else {
             mostrarAlertaError("Error", "No se pudieron cargar los recepcionistas.");
+        }
+    }
+
+    private void loadHotelsIntoQuickCombo() {
+        Request request = new Request("getHotels", null);
+        Response response = ClientConnectionManager.sendRequest(request);
+
+        if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+            List<Hotel> hotelList = new Gson().fromJson(
+                    new Gson().toJson(response.getData()),
+                    new TypeToken<List<Hotel>>() {}.getType()
+            );
+            hotelComboBox.getItems().clear();
+            hotelComboBox.getItems().addAll(hotelList);
+        } else {
+            mostrarAlertaError("Error", "No se pudieron cargar los hoteles para búsqueda rápida.");
         }
     }
 

@@ -90,7 +90,7 @@ public class FrontDeskClerkData {
             String roleStr = readFixedString(ROLE_SIZE); // Nuevo
             int hotelId = raf.readInt();
 
-            if (employeeId.equals(employeeIdToFind)) {
+            if (employeeId.equalsIgnoreCase(employeeIdToFind)) {
                 FrontDeskClerkRole role = FrontDeskClerkRole.valueOf(roleStr);
                 return new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber, role, hotelId);
             }

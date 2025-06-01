@@ -13,9 +13,8 @@ import java.util.List;
 
 public class FrontDeskClerkService {
     private static final Logger logger = LogManager.getLogger(FrontDeskClerkService.class);
-    private static final String FRONT_DESK_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\frontdeskclerks.dat";
-    private static final String HOTEL_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\hotels.dat";
-
+    private static final String FRONT_DESK_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\frontdeskclerks.dat";
+    private static final String HOTEL_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\hotels.dat";
 
     private FrontDeskClerkData clerkData;
     private HotelData hotelData;

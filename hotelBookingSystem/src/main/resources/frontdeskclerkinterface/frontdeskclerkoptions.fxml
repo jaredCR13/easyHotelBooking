@@ -26,6 +26,17 @@
     <!-- Sección del TableView -->
     <center>
         <VBox spacing="20" style="-fx-padding: 30;">
+
+            <!-- Busqueda Rápida -->
+            <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_LEFT">
+                <Label text="Quick Search:" style="-fx-font-weight: bold; -fx-text-fill: #333;" />
+                <TextField fx:id="quickSearchField" promptText="Employee ID" prefWidth="120"/>
+                <Label text="Hotel:" />
+                <ComboBox fx:id="hotelComboBox" promptText="Select Hotel" />
+                <Button text="🔍" onAction="#onQuickSearch" style="-fx-background-color: #007bff; -fx-text-fill: white;" />
+                <Button text="Clear" onAction="#onClearSearch" style="-fx-background-color: #dc3545; -fx-text-fill: white;" />
+            </HBox>
+
             <TableView fx:id="frontDeskTable" prefHeight="300" prefWidth="560">
                 <columns>
                     <TableColumn fx:id="employeeIdColumn" text="Employee ID" prefWidth="120" />

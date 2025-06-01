@@ -32,12 +32,11 @@
          </MenuBar>
             <Label style="-fx-font-size: 24px; -fx-text-fill: white; -fx-padding: 15 0 0 20;" text="Find your next stay" />
 
-                        <HBox alignment="CENTER_LEFT" prefHeight="89.0" prefWidth="900.0" spacing="10" style="-fx-padding: 0 0 20 20;">
+            <HBox alignment="CENTER_LEFT" prefHeight="89.0" prefWidth="900.0" spacing="10" style="-fx-padding: 0 0 20 20;">
                 <ComboBox fx:id="hotelCombo" prefWidth="150" promptText="Select Hotel" />
                 <DatePicker fx:id="fromDate" />
                 <DatePicker fx:id="toDate" />
-                <ComboBox fx:id="clientCombo" prefWidth="150" promptText="Who" />
-                <Button fx:id="searchButton" prefWidth="40" text="🔍" />
+                <Button fx:id="clientSelectorButton" prefWidth="150" text="Who" /> <Button fx:id="searchButton" prefWidth="40" text="🔍" />
             </HBox>
         </VBox>
     </top>

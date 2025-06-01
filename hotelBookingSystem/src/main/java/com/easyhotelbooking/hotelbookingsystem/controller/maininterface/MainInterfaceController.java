@@ -276,8 +276,6 @@ public class MainInterfaceController {
 
                         if (this.stage != null) {
                                 controller.setStage(this.stage);
-                        } else {
-                                logger.error("Error: stage es null en MainInterfaceController al cargar FrontDeskClerkOptionsController.");
                         }
                 } else {
                         logger.error("No se pudo cargar frontdeskoptionsclerk.fxml o el controlador es null.");

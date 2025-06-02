@@ -26,7 +26,7 @@ public class ProtocolHandler {
     private final Gson gson = new Gson();
 
 
-    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data";
+    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\Data";
     private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data/images/rooms/";
     private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data/images/temp_rooms/";
 

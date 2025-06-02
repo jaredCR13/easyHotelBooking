@@ -18,8 +18,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader; // Importar FXMLLoader
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.Modality; // Importar Modality
 import javafx.scene.Scene; // Importar Scene
@@ -46,7 +48,7 @@ public class SearchController {
     @FXML private Label searchResultsLabel;
     @FXML private VBox roomsDisplayVBox;
     @FXML private ScrollPane scrollPane;
-
+    @FXML private Text hotelNameText;
     private MainInterfaceController mainController;
     private Stage stage;
     private Hotel selectedHotel;
@@ -73,6 +75,7 @@ public class SearchController {
     @FXML
     public void initialize() {
         // Inicializa cualquier cosa que no dependa de los criterios de búsqueda.
+
     }
 
     private void performSearch() {
@@ -83,7 +86,7 @@ public class SearchController {
 
         roomsDisplayVBox.getChildren().clear();
         searchResultsLabel.setText("Buscando habitaciones en " + selectedHotel.getHotelName() + "...");
-
+        hotelNameText.setText("Hotel: "+selectedHotel.getHotelName());
         Request request = new Request("getRoomsByHotelId", selectedHotel.getNumHotel());
         logger.info("Enviando solicitud de búsqueda para hotel ID: " + selectedHotel.getNumHotel());
 

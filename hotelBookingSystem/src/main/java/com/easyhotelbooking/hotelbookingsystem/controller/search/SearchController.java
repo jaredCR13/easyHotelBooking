@@ -181,9 +181,6 @@ public class SearchController {
         // CAMBIO: Label de descripción por Label de número de habitación
         Label roomNumberLabel = new Label("Número de Habitación: " + room.getRoomNumber());
         roomNumberLabel.setWrapText(true);
-        // Ya no necesitamos VBox.setVgrow en el número de habitación, ya que es corto
-        // VBox.setVgrow(roomDescriptionLabel, Priority.ALWAYS); // <--- ELIMINADO
-
 
         // Region para empujar el contenido hacia abajo
         Region spacer = new Region();

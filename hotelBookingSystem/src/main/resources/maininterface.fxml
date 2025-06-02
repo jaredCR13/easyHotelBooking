@@ -36,7 +36,7 @@
                 <ComboBox fx:id="hotelCombo" prefWidth="150" promptText="Select Hotel" />
                 <DatePicker fx:id="fromDate" />
                 <DatePicker fx:id="toDate" />
-                <Button fx:id="clientSelectorButton" prefWidth="150" text="Who" /> <Button fx:id="searchButton" prefWidth="40" text="🔍" />
+                <Button fx:id="clientSelectorButton" prefWidth="150" text="Who" /> <Button fx:id="searchButton" onAction="#searchOnAction" prefWidth="40" text="🔍" />
             </HBox>
         </VBox>
     </top>

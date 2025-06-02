@@ -148,10 +148,22 @@ public class RoomService {
             return false;
         }
     }
-
-    public Room getRoomById(int roomNumber) { // This method still gets a room by its *unique* room number
+    public List<Room> getRoomsByHotelId(int hotelId) {
         try {
-            Room foundRoom = roomData.findById(roomNumber); // Assuming findById still finds a unique room.
+
+            List<Room> allRooms = roomData.findAll();
+
+            return allRooms.stream()
+                    .filter(room -> room.getHotelId() == hotelId)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error al obtener todas las habitaciones para filtrar por hotel ID {}: {}", hotelId, e.getMessage());
+            throw new RuntimeException("Error al obtener habitaciones por hotel ID", e);
+        }
+    }
+    public Room getRoomById(int roomNumber) {
+        try {
+            Room foundRoom = roomData.findById(roomNumber);
 
             if (foundRoom != null) {
                 if (foundRoom.getHotelId() != -1) {
@@ -176,13 +188,7 @@ public class RoomService {
         }
     }
 
-    /**
-     * Retrieves a room by its room number and the hotel it belongs to.
-     * This method is crucial for ensuring uniqueness within a hotel.
-     * @param roomNumber The number of the room.
-     * @param hotelId The ID of the hotel the room belongs to.
-     * @return The Room object if found, otherwise null.
-     */
+
     public Room getRoomByHotelAndRoomNumber(int roomNumber, int hotelId) {
         try {
             return roomData.findAll().stream()

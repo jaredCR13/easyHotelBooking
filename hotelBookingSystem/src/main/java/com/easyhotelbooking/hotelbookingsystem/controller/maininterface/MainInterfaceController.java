@@ -3,6 +3,7 @@ package com.easyhotelbooking.hotelbookingsystem.controller.maininterface;
 import com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomOptionsController;
+import com.easyhotelbooking.hotelbookingsystem.controller.search.SearchController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
@@ -10,6 +11,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -22,33 +25,41 @@ import javafx.stage.Window;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MainInterfaceController {
 
         // Removed @FXML private ComboBox<?> clientCombo;
 
-        @FXML private BorderPane bp;
-        @FXML private StackPane contentPane;
-        @FXML private DatePicker fromDate;
-        @FXML private ComboBox<String> hotelCombo;
-        @FXML private Button searchButton;
-        // New FXML for the button that will trigger the spinner popup
-        @FXML private Button clientSelectorButton;
+        @FXML
+        private BorderPane bp;
+        @FXML
+        private StackPane contentPane;
+        @FXML
+        private DatePicker fromDate;
+        @FXML
+        private ComboBox<String> hotelCombo;
+        @FXML
+        private Button searchButton;
+        @FXML
+        private Button clientSelectorButton;
 
-
-        @FXML private TextArea textArea; // This seems unused, consider removing it if not needed.
 
         private Stage stage;
 
         private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
         private Gson gson = new Gson();
 
-        // New fields for the spinners and the popup
+
         private Spinner<Integer> adultsSpinner;
         private Spinner<Integer> childrenSpinner;
         private Popup spinnerPopup;
+        private List<Hotel> allHotels = new ArrayList<>();
 
         public void setStage(Stage stage) {
                 this.stage = stage;
@@ -58,9 +69,8 @@ public class MainInterfaceController {
         @FXML
         public void initialize() {
                 loadHotelNames();
-                initializeSpinnersAndPopup(); // Initialize the spinners and popup here
+                initializeSpinnersAndPopup();
 
-                // ACTION PARA EL SELECTOR
                 clientSelectorButton.setOnAction(event -> {
                         if (spinnerPopup != null && spinnerPopup.isShowing()) {
                                 spinnerPopup.hide();
@@ -68,7 +78,8 @@ public class MainInterfaceController {
                                 showSpinnerPopup();
                         }
                 });
-                updateClientSelectorButtonText(); // Set initial text for the button
+                updateClientSelectorButtonText();
+
         }
 
         private void initializeSpinnersAndPopup() {
@@ -92,7 +103,7 @@ public class MainInterfaceController {
                 doneButton.setOnAction(event -> {
                         if (spinnerPopup != null) {
                                 spinnerPopup.hide();
-                                updateClientSelectorButtonText(); // Update button text after closing popup
+                                updateClientSelectorButtonText();
                         }
                 });
 
@@ -101,7 +112,7 @@ public class MainInterfaceController {
                 //CREA EL POP UP Y SETTEA EL CONTENIDO
                 spinnerPopup = new Popup();
                 spinnerPopup.getContent().add(content);
-                spinnerPopup.setAutoHide(true); // Hide popup when clicking outside
+                spinnerPopup.setAutoHide(true);
         }
 
         private void showSpinnerPopup() {
@@ -142,21 +153,40 @@ public class MainInterfaceController {
 
         private void loadHotelNames() {
                 Request request = new Request("getHotels", null);
-                Response response = ClientConnectionManager.sendRequest(request);
+                Response response = ClientConnectionManager.sendRequest(request); // <-- La llamada al servidor
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
-                        List<Hotel> hotelList = gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<Hotel>>() {
-                        }.getType());
-                        List<String> names = hotelList.stream().map(Hotel::getHotelName).collect(Collectors.toList());
-                        hotelCombo.getItems().clear();
-                        hotelCombo.getItems().addAll(names);
-                        hotelCombo.setValue(names.isEmpty() ? null : names.get(0));
+                        try {
+                                allHotels = gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<Hotel>>() {}.getType());
+                                if (allHotels == null) {
+                                        allHotels = new ArrayList<>();
+                                }
+
+                                List<String> names = allHotels.stream().map(Hotel::getHotelName).collect(Collectors.toList());
+
+                                hotelCombo.getItems().clear();
+                                hotelCombo.getItems().addAll(names);
+
+                                logger.info("Hoteles cargados con éxito. Total: {}", allHotels.size());
+                                for (Hotel h : allHotels) {
+                                        logger.info("  - Hotel en allHotels: '{}' (ID: {})", h.getHotelName(), h.getNumHotel());
+                                }
+
+                        } catch (Exception e) {
+                                logger.error("Error al deserializar la lista de hoteles: {}", e.getMessage(), e);
+                                allHotels = new ArrayList<>();
+                                FXUtility.alert("Error", "Error al procesar la lista de hoteles del servidor.");
+                        }
                 } else {
                         String message = response != null ? response.getMessage() : "Error desconocido al obtener hoteles";
-                        logger.error("Error al obtener hoteles: {}", message);
+                        logger.error("Error al obtener hoteles: {}", message); // <-- ¡Busca este log!
                         FXUtility.alert("Error", "Error al obtener hoteles: " + message);
+                        allHotels = new ArrayList<>(); // Aseguramos que siga siendo una lista vacía
                 }
         }
+
+        // ...
+
 
         public void registerHotel(Hotel hotel) {
                 Request request = new Request("registerHotel", hotel);
@@ -347,6 +377,9 @@ public class MainInterfaceController {
                 if ("201".equalsIgnoreCase(response.getStatus())) {
                         FXUtility.alertInfo("Éxito", "Recepcionista registrado correctamente.");
 
+                } else if ("409".equalsIgnoreCase(response.getStatus())) {
+                        FXUtility.alert("Error", response.getMessage());
+                        logger.warn("Intento de registrar habitación duplicada: {}", frontDeskClerk.getEmployeeId());
                 } else {
                         FXUtility.alert("Error", "No se pudo registrar el recepcionista: " + response.getMessage());
                 }
@@ -367,16 +400,18 @@ public class MainInterfaceController {
                         FXUtility.alert("Error", "Recepcionista no encontrado: " + (response != null ? response.getMessage() : ""));
                 }
         }
-        public void deleteFrontDeskClerk(FrontDeskClerk frontDeskClerk){
-                Request request= new Request("deleteFrontDeskClerk",frontDeskClerk.getEmployeeId());
-                Response response= ClientConnectionManager.sendRequest(request);
+
+        public void deleteFrontDeskClerk(FrontDeskClerk frontDeskClerk) {
+                Request request = new Request("deleteFrontDeskClerk", frontDeskClerk.getEmployeeId());
+                Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus())) {
-                        FXUtility.alertInfo("Éxito", "FrontDeskClerk "+frontDeskClerk.getEmployeeId()+" eliminado correctamente.");
+                        FXUtility.alertInfo("Éxito", "FrontDeskClerk " + frontDeskClerk.getEmployeeId() + " eliminado correctamente.");
                 } else {
                         FXUtility.alert("Error", "No se pudo eliminar el frontDeskClerk: " + response.getMessage());
                 }
         }
+
         public void updateClerk(FrontDeskClerk frontDeskClerk) {
                 Request request = new Request("updateClerk", frontDeskClerk);
                 Response response = ClientConnectionManager.sendRequest(request);
@@ -389,14 +424,70 @@ public class MainInterfaceController {
         }
 
 
-        //============= BARRA BUSQUEDA ============
+                @FXML
+                private void searchOnAction() {
+                        String selectedHotelName = hotelCombo.getSelectionModel().getSelectedItem();
 
-        //TODO
-        @FXML
-        private void onSearchButtonAction() {
-                // Retrieve spinner values when the search button is clicked
-                int adults = adultsSpinner.getValue();
-                int children = childrenSpinner.getValue();
 
+                        logger.info("searchOnAction disparado.");
+                        logger.info("Nombre de hotel seleccionado en ComboBox: '{}'", selectedHotelName);
+                        logger.info("Tamaño de allHotels en searchOnAction: {}", allHotels.size());
+
+
+                        if (selectedHotelName == null || selectedHotelName.isEmpty()) {
+                                FXUtility.alert("Advertencia", "Por favor, seleccione un hotel para buscar habitaciones.");
+                                return;
+                        }
+
+                        if (allHotels == null || allHotels.isEmpty()) {
+                                logger.error("La lista allHotels está vacía o nula. No se pueden buscar habitaciones.");
+                                FXUtility.alert("Error", "No se pudo cargar la lista de hoteles. Intente recargar la aplicación.");
+                                return;
+                        }
+
+
+                        Optional<Hotel> selectedHotelOpt = allHotels.stream()
+                                .filter(h -> h.getHotelName() != null &&
+                                        h.getHotelName().trim().equalsIgnoreCase(selectedHotelName.trim()))
+                                .findFirst();
+
+                        if (selectedHotelOpt.isPresent()) {
+                                Hotel selectedHotel = selectedHotelOpt.get();
+
+                                logger.info("¡Hotel '{}' (ID: {}) encontrado en allHotels!", selectedHotel.getHotelName(), selectedHotel.getNumHotel());
+
+
+                                int adults = adultsSpinner.getValue();
+                                int children = childrenSpinner.getValue();
+                                LocalDate from = fromDate.getValue();
+
+                                try {
+                                        SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
+
+                                        if (searchController != null) {
+                                                searchController.setMainController(this);
+                                                searchController.setStage(this.stage);
+                                                searchController.setSearchCriteria(selectedHotel);
+                                        } else {
+                                                logger.error("No se pudo obtener el controlador para searchinterface.fxml.");
+                                                FXUtility.alert("Error", "No se pudo cargar la página de búsqueda.");
+                                        }
+
+                                        logger.info("Cargada vista de búsqueda con criterios para hotel: " + selectedHotel.getHotelName());
+
+                                } catch (Exception e) {
+                                        logger.error("Error al cargar la vista de búsqueda: " + e.getMessage(), e);
+                                        FXUtility.alert("Error", "No se pudo cargar la página de búsqueda. " + e.getMessage());
+                                }
+
+                        } else {
+
+                                logger.warn("El nombre de hotel seleccionado '{}' NO SE ENCONTRÓ en la lista de hoteles cargados.", selectedHotelName);
+
+                                FXUtility.alert("Error", "No se pudo encontrar la información del hotel seleccionado.");
+                                logger.error("Hotel seleccionado en ComboBox no encontrado en la lista allHotels: {}", selectedHotelName);
+                        }
+                }
         }
-}
+
+

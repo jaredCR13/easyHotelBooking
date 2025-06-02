@@ -131,7 +131,21 @@ public class ProtocolHandler {
                         return new Response("500", "Error interno al consultar habitación", null);
                     }
                 }
+                case "getRoomsByHotelId": {
+                    try {
 
+                        int hotelId = parseIntFromRequest(request.getData());
+                        List<Room> rooms = roomService.getRoomsByHotelId(hotelId);
+                        logger.debug("Retrieved {} rooms for hotel ID {}", rooms.size(), hotelId);
+                        return new Response("200", "Habitaciones del hotel cargadas", rooms);
+                    } catch (NumberFormatException e) {
+                        logger.error("Formato de ID de hotel inválido para getRoomsByHotelId", e);
+                        return new Response("400", "ID de hotel inválido.", null);
+                    } catch (Exception e) {
+                        logger.error("Error al obtener habitaciones por ID de hotel", e);
+                        return new Response("500", "Error interno al obtener habitaciones por hotel.", null);
+                    }
+                }
                 case "registerRoom": {
                     try {
                         Room newRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
@@ -228,8 +242,15 @@ public class ProtocolHandler {
                 case "registerFrontDeskClerk": {
                     try {
                         FrontDeskClerk frontDeskClerk = gson.fromJson(gson.toJson(request.getData()), FrontDeskClerk.class);
-                        boolean success = frontDeskClerkService.addClerk(frontDeskClerk);
 
+
+                        FrontDeskClerk existingFrontDeskClerkInHotel = frontDeskClerkService.getFrontDeskClerkByEmployeeIdAndHotelId(frontDeskClerk.getEmployeeId(), frontDeskClerk.getHotelId());
+
+                        if (existingFrontDeskClerkInHotel != null) {
+                            logger.warn("Intento de registrar frontDeskClerk duplicada con número {} en el hotel {}. Ya existe.", frontDeskClerk.getEmployeeId(), frontDeskClerk.getHotelId());
+                            return new Response("409", "El id de frontDeskClerk " + frontDeskClerk.getEmployeeId() + " ya existe en el hotel " + frontDeskClerk.getHotelId() + ".", null);
+                        }
+                        boolean success = frontDeskClerkService.addClerk(frontDeskClerk);
                         if (success) {
                             logger.info("Recepcionista registrado: {}", frontDeskClerk);
                             return new Response("201", "Recepcionista registrado con éxito", frontDeskClerk);

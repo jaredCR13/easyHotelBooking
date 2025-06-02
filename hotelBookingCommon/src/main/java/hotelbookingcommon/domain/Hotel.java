@@ -18,7 +18,7 @@ public class Hotel implements Serializable {
 
     @Expose
     private List<Room> rooms; //1 HOTEL HAS 0..** ROOMS
-
+    private List<FrontDeskClerk>frontDeskClerks;
     //TODO
     // 1 HOTEL HAS 0...** BOOKINGS
 
@@ -27,6 +27,7 @@ public class Hotel implements Serializable {
         this.hotelName = hotelName;
         this.hotelLocation = hotelLocation;
         this.rooms = new ArrayList<>();
+        this.frontDeskClerks=new ArrayList<>();
     }
 
     public Hotel(int numHotel, String hotelName, String hotelLocation, List<Room> rooms) {
@@ -38,6 +39,15 @@ public class Hotel implements Serializable {
 
     public Hotel() {
         this.rooms = new ArrayList<>();
+        this.frontDeskClerks=new ArrayList<>();
+    }
+
+    public List<FrontDeskClerk> getFrontDeskClerks() {
+        return frontDeskClerks;
+    }
+
+    public void setFrontDeskClerks(List<FrontDeskClerk> frontDeskClerks) {
+        this.frontDeskClerks = frontDeskClerks;
     }
 
     //Getters and Setters
@@ -88,6 +98,23 @@ public class Hotel implements Serializable {
             //ANULA LA ASOCIACION
             room.setHotel(null);
             room.setHotelId(-1);
+        }
+    }
+
+    public void addFrontDeskClerk(FrontDeskClerk clerk) {
+        if (this.frontDeskClerks == null) {
+            this.frontDeskClerks = new ArrayList<>();
+        }
+        this.frontDeskClerks.add(clerk);
+        clerk.setHotel(this);           //Asigna el hotel al clerk
+        clerk.setHotelId(this.numHotel);//Asigna el id del hotel al clerk
+    }
+
+    public void removeFrontDeskClerk(FrontDeskClerk clerk) {
+        if (this.frontDeskClerks != null) {
+            this.frontDeskClerks.remove(clerk);
+            clerk.setHotel(null); //Rompe la relación
+            clerk.setHotelId(-1);
         }
     }
 

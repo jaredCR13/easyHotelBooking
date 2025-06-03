@@ -11,7 +11,7 @@ import java.util.List;
 
 public class GuestService {
     private static final Logger logger = LogManager.getLogger(GuestService.class);
-    private static final String GUEST_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\guests.dat";
+    private static final String GUEST_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\guests.dat";
 
     private GuestData guestData;
 

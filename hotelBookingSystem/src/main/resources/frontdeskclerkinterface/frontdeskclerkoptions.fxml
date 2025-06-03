@@ -13,8 +13,8 @@
 
                 <!-- Sección de botones -->
                 <HBox alignment="TOP_LEFT" spacing="10">
-                    <Button fx:id="registerButton" onAction="#openRegisterFrontDeskClerkOnAction" text="Register" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
-                    <Button fx:id="goBack" onAction="#goBackOnAction" text="Go Back" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
+                    <Button fx:id="registerButton" onAction="#openRegisterFrontDeskClerkOnAction" prefWidth="120" text="Register" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
+                    <Button fx:id="goBack" onAction="#goBackOnAction" prefWidth="120" text="Go Back" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
                 </HBox>
             </VBox>
 

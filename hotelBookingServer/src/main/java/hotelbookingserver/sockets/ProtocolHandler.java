@@ -3,6 +3,7 @@ package hotelbookingserver.sockets;
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.*; // Asegúrate de que ImageUploadDTO es accesible aquí
 import hotelbookingserver.service.FrontDeskClerkService;
+import hotelbookingserver.service.GuestService;
 import hotelbookingserver.service.HotelService;
 import hotelbookingserver.service.RoomService;
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +23,7 @@ public class ProtocolHandler {
     private final HotelService hotelService = new HotelService();
     private final RoomService roomService = new RoomService();
     private final FrontDeskClerkService frontDeskClerkService = new FrontDeskClerkService();
+    private final GuestService guestService = new GuestService();
 
     private final Gson gson = new Gson();
 
@@ -444,6 +446,82 @@ public class ProtocolHandler {
                     } catch (Exception e) {
                         logger.error("Error inesperado al manejar 'downloadRoomImage': {}", e.getMessage(), e);
                         return new Response("500", "Error interno del servidor al descargar imagen.", null);
+                    }
+                }
+
+                // =================== GUEST =========================
+                case "registerGuest": {
+                    try {
+                        Guest guest = gson.fromJson(gson.toJson(request.getData()), Guest.class);
+                        boolean success = guestService.addGuest(guest);
+
+                        if (success) {
+                            logger.info("Huésped registrado: {}", guest);
+                            return new Response("201", "Huésped registrado con éxito", guest);
+                        } else {
+                            logger.warn("No se pudo registrar huésped (ID duplicado): {}", guest);
+                            return new Response("400", "Ya existe un huésped con ese ID", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al registrar huésped", e);
+                        return new Response("500", "Error interno al registrar huésped", null);
+                    }
+                }
+
+                case "getGuest": {
+                    try {
+                        int guestId = ((Double) request.getData()).intValue(); // JSON numérico
+                        Guest guest = guestService.getGuestById(guestId);
+
+                        if (guest != null) {
+                            return new Response("200", "Huésped encontrado", guest);
+                        } else {
+                            return new Response("404", "Huésped no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al consultar huésped", e);
+                        return new Response("500", "Error interno al consultar huésped", null);
+                    }
+                }
+
+                case "getGuests": {
+                    try {
+                        List<Guest> guests = guestService.getAllGuests();
+                        return new Response("200", "Lista de huéspedes cargada", guests);
+                    } catch (Exception e) {
+                        logger.error("Error al obtener lista de huéspedes", e);
+                        return new Response("500", "Error interno al obtener huéspedes", null);
+                    }
+                }
+
+                case "updateGuest": {
+                    try {
+                        Guest guestToUpdate = gson.fromJson(gson.toJson(request.getData()), Guest.class);
+                        boolean updated = guestService.updateGuest(guestToUpdate);
+                        if (updated) {
+                            return new Response("200", "Huésped actualizado con éxito", guestToUpdate);
+                        } else {
+                            return new Response("404", "Huésped no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error actualizando huésped", e);
+                        return new Response("500", "Error al actualizar huésped", null);
+                    }
+                }
+
+                case "deleteGuest": {
+                    try {
+                        int guestId = ((Double) request.getData()).intValue(); // JSON numérico
+                        boolean deleted = guestService.deleteGuest(guestId);
+
+                        if (deleted) {
+                            return new Response("200", "Huésped eliminado con éxito", null);
+                        } else {
+                            return new Response("404", "Huésped no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar huésped", e);
+                        return new Response("500", "Error interno al eliminar huésped", null);
                     }
                 }
 

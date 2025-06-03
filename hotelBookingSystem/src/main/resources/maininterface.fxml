@@ -26,6 +26,7 @@
                      <MenuItem mnemonicParsing="false" onAction="#hotelOptionsOnAction" text="Hotel Options" />
                      <MenuItem mnemonicParsing="false" onAction="#roomOptionsOnAction" text="Room Options" />
                       <MenuItem mnemonicParsing="false" onAction="#frontDeskClerkOptionsOnAction" text="Front Desk Clerk Options" />
+                      <MenuItem mnemonicParsing="false" onAction="#guestOptionsOnAction" text="Guest Options"/>
                   </items>
              </Menu>
            </menus>

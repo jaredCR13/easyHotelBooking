@@ -1,6 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.maininterface;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkOptionsController;
+import com.easyhotelbooking.hotelbookingsystem.controller.guestregister.GuestOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.search.SearchController;
@@ -420,6 +421,68 @@ public class MainInterfaceController {
                         FXUtility.alertInfo("Éxito", "FrontDeskClerk actualizado correctamente.");
                 } else {
                         FXUtility.alert("Error", "No se pudo actualizar el frontDeskClerk: " + response.getMessage());
+                }
+        }
+
+        // ================= GUEST CRUD =====================
+
+        public void guestOptionsOnAction() {
+                GuestOptionsController controller = Utility.loadPage2("guestinterface/guestoptions.fxml", bp);
+                if (controller != null) {
+                        controller.setMainController(this);
+
+                        if (this.stage != null) {
+                                controller.setStage(this.stage);
+                        }
+                } else {
+                        logger.error("No se pudo cargar guest.fxml o el controlador es null.");
+                        FXUtility.alert("Error", "No se pudo cargar la página de opciones de guest.");
+                }
+        }
+        public void registerGuest(Guest guest) {
+                Request request = new Request("registerGuest", guest);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("201".equalsIgnoreCase(response.getStatus())) {
+                        FXUtility.alertInfo("Éxito", "Huésped registrado correctamente.");
+                } else {
+                        FXUtility.alert("Error", "No se pudo registrar el huésped: " + response.getMessage());
+                }
+        }
+
+        public void consultGuest(int guestId) {
+                Request request = new Request("getGuest", guestId);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        Guest guest = new Gson().fromJson(new Gson().toJson(response.getData()), Guest.class);
+                        FXUtility.alertInfo("Huésped encontrado",
+                                "ID: " + guest.getId() +
+                                        "\nNombre: " + guest.getName() + " " + guest.getLastName() +
+                                        "\nEmail: " + guest.getEmail() +
+                                        "\nTeléfono: " + guest.getPhoneNumber());
+                } else {
+                        FXUtility.alert("Error", "Huésped no encontrado: " + response.getMessage());
+                }
+        }
+
+        public void updateGuest(Guest guest) {
+                Request request = new Request("updateGuest", guest);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if (!"200".equals(response.getStatus())) {
+                        FXUtility.alert("Error", "No se pudo actualizar el huésped.");
+                }
+        }
+
+        public void deleteGuest(int guestId) {
+                Request request = new Request("deleteGuest", guestId);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                if ("200".equalsIgnoreCase(response.getStatus())) {
+                        FXUtility.alertInfo("Éxito", "Huésped eliminado correctamente.");
+                } else {
+                        FXUtility.alert("Error", "No se pudo eliminar el huésped: " + response.getMessage());
                 }
         }
 

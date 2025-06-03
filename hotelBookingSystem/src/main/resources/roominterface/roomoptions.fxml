@@ -21,8 +21,8 @@
             <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
                 <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Room Options" />
                 <HBox alignment="TOP_LEFT" spacing="10">
-                    <Button fx:id="registerButton" onAction="#registerRoomOnAction" prefWidth="120" text="Register room" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
-                    <Button fx:id="goBack" onAction="#goBackOnAction" prefWidth="120" text="Go back" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
+                    <Button fx:id="registerButton" onAction="#registerRoomOnAction" prefWidth="120" text="Register room" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
+                    <Button fx:id="goBack" onAction="#goBackOnAction" prefWidth="120" text="Go back" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
                 </HBox>
             </VBox>
 

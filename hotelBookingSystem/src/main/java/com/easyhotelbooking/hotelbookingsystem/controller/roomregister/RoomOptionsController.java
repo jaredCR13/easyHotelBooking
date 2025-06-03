@@ -275,10 +275,12 @@ public class RoomOptionsController {
     public void loadRoomsIntoRegister() {
         Request request = new Request("getRooms", null);
         Response response = ClientConnectionManager.sendRequest(request);
+
         if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
             List<Room> rooms = new Gson().fromJson(new Gson().toJson(response.getData()), new TypeToken<List<Room>>() {}.getType());
             roomRegister.setItems(FXCollections.observableArrayList(rooms));
             addButtonsToRoomTable();
+
         } else {
             mostrarAlertaError("Error", "No se pudieron cargar las habitaciones.");
             logger.error("Error al cargar habitaciones en la tabla: {}", response != null ? response.getMessage() : "Desconocido");

@@ -302,7 +302,6 @@ public class HotelOptionsController {
     public void stopPolling() {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();
-            logger.info("Polling de hoteles detenido.");
         }
     }
 

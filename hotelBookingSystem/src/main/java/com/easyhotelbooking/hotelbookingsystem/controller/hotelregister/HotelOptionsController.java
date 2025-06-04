@@ -1,13 +1,14 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.hotelregister;
 
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
-//import com.easyhotelbooking.hotelbookingsystem.util.FxUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.Hotel;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
 import javafx.application.Platform;
@@ -53,6 +54,19 @@ public class HotelOptionsController {
     private Stage stage;
     private MainInterfaceController mainController;
     private static final Logger logger = LogManager.getLogger(HotelOptionsController.class);
+
+    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private Main mainAppReference;
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("HotelOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("HotelOptionsController: Main application reference set.");
+    }
 
     public void setMainController(MainInterfaceController mainController) {
         this.mainController = mainController;
@@ -137,7 +151,13 @@ public class HotelOptionsController {
 
     @FXML
     void goBackOnAction() {
-        Utility.loadFullView("maininterface.fxml", goBack);
+        if (mainAppReference != null && loggedInClerk != null) {
+            mainAppReference.loadMainInterface(loggedInClerk);
+            logger.info("HotelOptionsController: Volviendo a la interfaz principal con el recepcionista loggeado.");
+        } else {
+            logger.error("HotelOptionsController: No se puede volver a la interfaz principal. mainAppReference o loggedInClerk es null.");
+            FXUtility.alert("Error de Navegación", "No se pudo regresar a la interfaz principal. Por favor, reinicie la aplicación.");
+        }
     }
 
 

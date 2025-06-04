@@ -13,7 +13,7 @@ public class FrontDeskClerkData {
     private static final int EMPLOYEE_ID_SIZE = 20;
     private static final int NAME_SIZE = 30;
     private static final int LAST_NAME_SIZE = 30;
-    private static final int PASSWORD_SIZE = 30;
+    private static final int PASSWORD_SIZE = 70;
     private static final int USER_SIZE = 30;
     private static final int PHONE_NUMBER_SIZE = 15;
     private static final int ROLE_SIZE = 20;         // Nuevo campo
@@ -29,8 +29,10 @@ public class FrontDeskClerkData {
     private byte[] toFixedBytes(String data, int length) {
         byte[] bytes = new byte[length];
         byte[] temp = data != null ? data.getBytes() : new byte[0];
-        for (int i = 0; i < length; i++) {
-            bytes[i] = (byte) ((i < temp.length) ? temp[i] : ' ');
+        int actualLength = Math.min(temp.length, length);
+        System.arraycopy(temp, 0, bytes, 0, actualLength);
+        for (int i = actualLength; i < length; i++) {
+            bytes[i] = (byte) ' ';
         }
         return bytes;
     }
@@ -46,7 +48,9 @@ public class FrontDeskClerkData {
         raf.write(toFixedBytes(clerk.getEmployeeId(), EMPLOYEE_ID_SIZE));
         raf.write(toFixedBytes(clerk.getName(), NAME_SIZE));
         raf.write(toFixedBytes(clerk.getLastName(), LAST_NAME_SIZE));
+
         raf.write(toFixedBytes(clerk.getPassword(), PASSWORD_SIZE));
+
         raf.write(toFixedBytes(clerk.getUser(), USER_SIZE));
         raf.write(toFixedBytes(clerk.getPhoneNumber(), PHONE_NUMBER_SIZE));
         raf.write(toFixedBytes(clerk.getFrontDeskClerkRole().name(), ROLE_SIZE)); // Nuevo
@@ -61,14 +65,15 @@ public class FrontDeskClerkData {
             String employeeId = readFixedString(EMPLOYEE_ID_SIZE);
             String name = readFixedString(NAME_SIZE);
             String lastName = readFixedString(LAST_NAME_SIZE);
-            String password = readFixedString(PASSWORD_SIZE);
+            String hashedPassword  = readFixedString(PASSWORD_SIZE);
             String user = readFixedString(USER_SIZE);
             String phoneNumber = readFixedString(PHONE_NUMBER_SIZE);
             String roleStr = readFixedString(ROLE_SIZE); // Nuevo
             int hotelId = raf.readInt();
 
             FrontDeskClerkRole role = FrontDeskClerkRole.valueOf(roleStr);
-            FrontDeskClerk clerk = new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber, role, hotelId);
+            //SE USA CONTRUCTOR QUE NO HASHEA PASSWORD
+            FrontDeskClerk clerk = new FrontDeskClerk(employeeId, name, lastName, hashedPassword, user, phoneNumber, role, hotelId, true);
             clerks.add(clerk);
         }
 
@@ -84,7 +89,7 @@ public class FrontDeskClerkData {
             String employeeId = readFixedString(EMPLOYEE_ID_SIZE);
             String name = readFixedString(NAME_SIZE);
             String lastName = readFixedString(LAST_NAME_SIZE);
-            String password = readFixedString(PASSWORD_SIZE);
+            String hashedPassword  = readFixedString(PASSWORD_SIZE);
             String user = readFixedString(USER_SIZE);
             String phoneNumber = readFixedString(PHONE_NUMBER_SIZE);
             String roleStr = readFixedString(ROLE_SIZE); // Nuevo
@@ -92,7 +97,8 @@ public class FrontDeskClerkData {
 
             if (employeeId.equalsIgnoreCase(employeeIdToFind)) {
                 FrontDeskClerkRole role = FrontDeskClerkRole.valueOf(roleStr);
-                return new FrontDeskClerk(employeeId, name, lastName, password, user, phoneNumber, role, hotelId);
+                //SE USA CONTRUCTOR QUE NO HASHEA PASSWORD
+                return new FrontDeskClerk(employeeId, name, lastName, hashedPassword, user, phoneNumber, role, hotelId, true);
             }
         }
 

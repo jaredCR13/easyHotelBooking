@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -7,6 +8,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -51,6 +53,9 @@ public class FrontDeskClerkModifyController {
     private FrontDeskClerk currentFrontDeskClerk;
     private FrontDeskClerkOptionsController frontDeskClerkOptionsController;
     private static final Logger logger = LogManager.getLogger(FrontDeskClerkRegisterController.class);
+    private Main mainAppReference;
+    private FrontDeskClerkDTO loggedInClerk;
+    private Stage primaryStage;
 
     @FXML
     public void initialize(){
@@ -61,6 +66,19 @@ public class FrontDeskClerkModifyController {
     }
     public void setParentBp(BorderPane parentBp) {
         this.parentBp = parentBp;
+    }
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("ModifyFrontDeskClerkController: Main application reference set.");
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("ModifyFrontDeskClerkController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
+    public void setStage(Stage stage) {
+        this.primaryStage = stage;
     }
 
     public void setMainController(MainInterfaceController controller) {
@@ -122,7 +140,15 @@ public class FrontDeskClerkModifyController {
         FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkoptions.fxml", parentBp);
         if (controller != null) {
             controller.setMainController(mainController);
+
+            controller.setLoggedInClerk(this.loggedInClerk);
+            controller.setMainApp(this.mainAppReference);
+
             controller.setStage(((Stage) parentBp.getScene().getWindow())); // opcional
+            controller.loadFrontDeskClerkIntoRegister();
+        } else {
+            FXUtility.alert("Error de Navegación", "No se pudo volver a la página de opciones de recepcionista.");
+            logger.error("Failed to load frontdeskclerkoptions.fxml from FrontDeskClerkModifyController onCancel.");
         }
     }
     private void loadHotelsIntoComboBox() {

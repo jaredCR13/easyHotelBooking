@@ -4,5 +4,5 @@ import java.io.Serializable;
 
 public enum FrontDeskClerkRole implements Serializable {
     ADMINISTRATOR,
-    FRONTDESKCLERK
+    RECEPCIONIST
 }

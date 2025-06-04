@@ -127,4 +127,19 @@ public class Guest {
     public void addBooking(Booking booking) {
         this.bookings.add(booking);
     }
+
+    @Override
+    public String toString() {
+        return "Guest{" +
+                "id=" + id +
+                ", credential=" + credential +
+                ", name='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", address='" + address + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", nativeCountry='" + nativeCountry + '\'' +
+                ", bookings=" + bookings +
+                '}';
+    }
 }

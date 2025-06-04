@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -7,6 +8,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -34,6 +36,25 @@ public class FrontDeskClerkRegisterController {
     private MainInterfaceController mainController;
     private FrontDeskClerkOptionsController optionsController; // opcional
     private static final Logger logger = LogManager.getLogger(FrontDeskClerkRegisterController.class);
+
+    private Stage primaryStage;
+
+    private Main mainAppReference;
+    private FrontDeskClerkDTO loggedInClerk;
+
+    public void setStage(Stage stage) {
+        this.primaryStage = stage;
+    }
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("FrontDeskClerkRegisterController: Main application reference set.");
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("FrontDeskClerkRegisterController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
 
     public void setParentBp(BorderPane parentBp) {
         this.parentBp = parentBp;
@@ -74,18 +95,30 @@ public class FrontDeskClerkRegisterController {
 
         FrontDeskClerk clerk = new FrontDeskClerk(id, name, lastName, password, user, phone,role,selectedHotel.getNumHotel());
         mainController.registerFrontDeskClerk(clerk);
+        if (optionsController != null) {
+            optionsController.loadFrontDeskClerkIntoRegister(); // Refresh the table
+        }
         clearFields();
     }
 
     @FXML
     void onCancel() {
-        // Volver a cargar la vista anterior (FrontDeskClerkOptions)
-        FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkoptions.fxml", parentBp);
+       FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkoptions.fxml", parentBp);
         if (controller != null) {
             controller.setMainController(mainController);
-            controller.setStage(((Stage) parentBp.getScene().getWindow())); // opcional
+
+            controller.setLoggedInClerk(this.loggedInClerk);
+            controller.setMainApp(this.mainAppReference);
+
+            controller.setStage(((Stage) parentBp.getScene().getWindow()));
+
+            controller.loadFrontDeskClerkIntoRegister();
+        } else {
+            logger.error("FrontDeskClerkRegisterController: No se pudo cargar frontdeskclerkoptions.fxml en onCancel.");
+            FXUtility.alert("Error de Navegación", "No se pudo regresar a la página de opciones de recepcionista.");
         }
     }
+
     private void loadHotelsIntoComboBox() {
         Request request = new Request("getHotels", null);
         Response response = ClientConnectionManager.sendRequest(request);

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="bp" prefHeight="469.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingTableController">
+
+    <!-- Sección superior azul -->
+    <top>
+        <VBox spacing="0">
+
+            <!-- Zona Azul -->
+            <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
+                <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Room Options" />
+                <HBox alignment="TOP_LEFT" spacing="10">
+                    <Button fx:id="goBack" onAction="#goBackOnAction" prefWidth="120" style="-fx-background-color: #5fabff; -fx-text-fill: white;" text="Go back" />
+                </HBox>
+            </VBox>
+
+            <!-- Línea decorativa -->
+            <Region prefHeight="10" style="-fx-background-color: #3985d8;" VBox.vgrow="NEVER" />
+        </VBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20" style="-fx-padding: 30;">
+
+            <!-- Busqueda rápida -->
+            <HBox fx:id="quickSearchBox" alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 0 10 0;">
+                <Label style="-fx-text-fill: #333;" text="Quick Search:" />
+                <TextField fx:id="quickSearchField" prefWidth="150" promptText="Enter room number" />
+                <Button onAction="#onQuickSearch" style="-fx-background-color: #3985d8; -fx-text-fill: white;" text="🔍" />
+                <Button onAction="#onClearSearch" style="-fx-background-color: #6c757d; -fx-text-fill: white;" text="Clear" />
+            </HBox>
+
+            <!-- Sección del TableView -->
+            <TableView fx:id="roomRegister" prefHeight="300.0" prefWidth="1100.0">
+                <columns>
+                    <TableColumn fx:id="bookingNumberColumn" prefWidth="100" text="Booking number" />
+                    <TableColumn fx:id="hotelIdColumn" prefWidth="100" text="Hotel Id" />
+                    <TableColumn fx:id="GuestIdColumn" prefWidth="160" text="Guest Id" />
+                    <TableColumn fx:id="startDateColumn" prefWidth="100" text="Start Date" />
+                    <TableColumn fx:id="endDateColumn" prefWidth="100" text="End Date" />
+                    <TableColumn fx:id="frontDeskIdColumn" prefWidth="136.0" text="Front Desk Clerk id" />
+                    <TableColumn fx:id="daysOfStayColumn" prefWidth="164.0" text="Days of stay" />
+               <TableColumn fx:id="roomNumberColumn" prefWidth="136.0" text="Room number" />
+               <TableColumn fx:id="ActionsColumn" prefWidth="136.0" text="Actions" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

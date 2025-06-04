@@ -16,14 +16,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="bp" prefHeight="600" prefWidth="900" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingRegisterController">
+<BorderPane fx:id="bp" prefHeight="600" prefWidth="900" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.ModifyBookingController">
     <center>
         <VBox alignment="TOP_LEFT" spacing="10.0">
             <padding>
                 <Insets bottom="20" left="20" right="20" top="20" />
             </padding>
 
-            <Label text="Register Booking">
+            <Label text="Modify Booking">
                 <font>
                     <Font size="24" />
                 </font>
@@ -49,7 +49,7 @@
                 <TextField fx:id="daysOfStayTf" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
                 <Label text="Room:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-            <TextArea fx:id="textAreaRoomId" prefHeight="37.0" prefWidth="135.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <TextArea fx:id="textAreaRoomId" prefHeight="37.0" prefWidth="135.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
                 <columnConstraints>
                     <ColumnConstraints />
@@ -71,7 +71,7 @@
                 <padding>
                     <Insets bottom="0" left="0" right="0" top="10" />
                 </padding>
-                <Button fx:id="saveButton" onAction="#onSave" style="-fx-background-color: #007bff; -fx-text-fill: white" text="Save" />
+                <Button fx:id="modifyButtom" onAction="#onModify" style="-fx-background-color: #007bff; -fx-text-fill: white" text="Modify" />
                 <Button fx:id="cancelButton" onAction="#onCancel" style="-fx-background-color: #dc3545; -fx-text-fill: white" text="Cancel" />
             </HBox>
         </VBox>

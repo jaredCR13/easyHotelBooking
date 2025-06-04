@@ -2,6 +2,7 @@ package hotelbookingserver.sockets;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
@@ -15,7 +16,9 @@ import java.net.Socket;
 public class ClientHandler implements Runnable {
     private static final Logger logger = LogManager.getLogger(ClientHandler.class);
     private final Socket socket;
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .create();
     private final ProtocolHandler handler = new ProtocolHandler();
 
     public ClientHandler(Socket socket) {

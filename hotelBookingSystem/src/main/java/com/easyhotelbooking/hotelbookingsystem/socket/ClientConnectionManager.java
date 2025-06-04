@@ -1,6 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.socket;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
 import java.io.*;
@@ -11,7 +12,9 @@ public class ClientConnectionManager {
 
     private static final String HOST = "192.168.18.61";
     private static final int PORT = 5000;
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .create();
 
     public static Response sendRequest(Request request) {
 

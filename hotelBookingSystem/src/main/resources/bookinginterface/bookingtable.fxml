@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="bp" prefHeight="469.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingTableController">
+<BorderPane fx:id="bp" prefHeight="469.0" prefWidth="1249.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingTableController">
 
     <!-- Sección superior azul -->
     <top>

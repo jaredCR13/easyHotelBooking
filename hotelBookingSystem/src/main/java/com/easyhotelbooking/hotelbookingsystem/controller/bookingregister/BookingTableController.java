@@ -52,6 +52,9 @@ public class BookingTableController {
     private Hotel selectedHotelFromSearch;
     private Date startDate, endDate;
 
+    public void initData() {
+        loadBookings();  // Solo cuando ya tengas selectedHotelFromSearch seteado
+    }
     public void initialize() {
         bookingNumberColumn.setCellValueFactory(new PropertyValueFactory<>("bookingNumber"));
         GuestIdColumn.setCellValueFactory(new PropertyValueFactory<>("guestId"));
@@ -63,14 +66,14 @@ public class BookingTableController {
         endDateColumn.setCellValueFactory(new PropertyValueFactory<>("endDateStr"));
 
         addButtonsToTable();
-        loadBookings();
     }
+
     public void setSelectedHotelFromSearchTable(Hotel hotel, Date start, Date end) {
         this.selectedHotelFromSearch = hotel;
         this.startDate = start;
         this.endDate = end;
 
-        loadBookings(); // opcional
+        //loadBookings(); // opcional
     }
     public void setSelectedRoomFromSearchTable(Room room) {
         this.selectedRoomFromSearch = room;
@@ -79,14 +82,14 @@ public class BookingTableController {
         this.stage = stage;
     }
 
-    private void loadBookings() {
+    public void loadBookings() {
         if (selectedHotelFromSearch == null) {
             FXUtility.alert("Error", "Debe seleccionar un hotel para cargar las reservaciones.");
             logger.error("Hotel no seleccionado");
             return;
         }
 
-        int hotelId = selectedHotelFromSearch.getNumHotel(); // o getHotelId(), según tu clase Hotel
+        int hotelId = selectedHotelFromSearch.getNumHotel();
         Request request = new Request("getBookingsByHotelId", hotelId);
         Response response = ClientConnectionManager.sendRequest(request);
 
@@ -99,6 +102,7 @@ public class BookingTableController {
             logger.error("Error al obtener reservaciones: {}", response != null ? response.getMessage() : "null");
         }
     }
+
 
     private void addButtonsToTable() {
         ActionsColumn.setCellFactory(col -> new TableCell<>() {
@@ -183,6 +187,8 @@ public class BookingTableController {
     public void onClearSearch(ActionEvent event) {
 
     }
+
+
 }
 
 

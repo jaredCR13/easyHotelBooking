@@ -282,8 +282,6 @@ public class SearchController {
             if (bookingRegController != null) {
                 // Pasa el hotel seleccionado a la instancia de BookingRegisterController
                 bookingRegController.setSelectedHotelFromSearch(this.selectedHotel, startDate, endDate);
-                // También puedes pasar la habitación seleccionada si el formulario de booking lo necesita
-                // bookingRegController.setSelectedRoom(room);
                 bookingRegController.setSelectedRoomFromSearch(room);
             }
         });
@@ -356,6 +354,11 @@ public class SearchController {
 
     @FXML
     public void tablaReservacionesOnAction() {
-
+        BookingTableController controller = Utility.loadPage2("bookinginterface/bookingtable.fxml", bp);
+        if (controller != null) {
+            controller.setSelectedHotelFromSearchTable(selectedHotel, startDate, endDate);
+            controller.setStage(stage);
+            controller.loadBookings();
+        }
     }
 }

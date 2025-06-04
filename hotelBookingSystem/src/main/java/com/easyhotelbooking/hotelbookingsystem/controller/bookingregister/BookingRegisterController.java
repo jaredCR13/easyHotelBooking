@@ -11,11 +11,15 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -36,9 +40,10 @@ public class BookingRegisterController {
     private TextField bookingNumberTf;
     @FXML
     private DatePicker startDatePicker;
-    @FXML DatePicker endDatePicker;
-    @FXML TextField daysOfStayTf;
-
+    @FXML private DatePicker endDatePicker;
+    @FXML private TextField daysOfStayTf;
+    @FXML
+    private FlowPane flowPane;
     private Stage stage;
     private Hotel selectedHotelFromSearch;
     private Date startDate;
@@ -55,6 +60,7 @@ public class BookingRegisterController {
     public void setSelectedRoomFromSearch(Room room){
         this.selectedRoomFromSearch=room;
         updateRoomDetails();
+        loadImagesIntoFlowPane();
     }
 
     @FXML
@@ -283,12 +289,62 @@ public class BookingRegisterController {
             Platform.runLater(() -> {
                 textAreaRoomId.setText(String.valueOf(selectedRoomFromSearch.getRoomNumber()));
                 logger.info("ID de habitación establecido: " + selectedRoomFromSearch.getRoomNumber());
-                // Aquí puedes actualizar otros campos de la UI con detalles de la habitación, por ejemplo:
-                // roomPriceLabel.setText(String.format("$%.2f", selectedRoomFromSearch.getRoomPrice()));
-                // roomStyleLabel.setText(selectedRoomFromSearch.getStyle().toString());
+
             });
         } else {
             logger.warn("textAreaRoomId o selectedRoomFromSearch es nulo. No se pudo actualizar la UI de la habitación.");
         }
     }
+    private void loadImagesIntoFlowPane() {
+        if (selectedRoomFromSearch.getImagesPaths() != null && !selectedRoomFromSearch.getImagesPaths().isEmpty()) {
+            String serverImagePath = selectedRoomFromSearch.getImagesPaths().get(0); // Solo una imagen
+
+            new Thread(() -> {
+                Request request = new Request("downloadRoomImage", serverImagePath);
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                Platform.runLater(() -> {
+                    if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        try {
+                            byte[] imageData;
+
+                            if (response.getData() instanceof List) {
+                                List<Double> doubleList = new Gson().fromJson(new Gson().toJson(response.getData()),
+                                        new TypeToken<List<Double>>() {}.getType());
+                                imageData = new byte[doubleList.size()];
+                                for (int i = 0; i < doubleList.size(); i++) {
+                                    imageData[i] = doubleList.get(i).byteValue();
+                                }
+                            } else if (response.getData() instanceof byte[]) {
+                                imageData = (byte[]) response.getData();
+                            } else {
+                                logger.warn("Tipo inesperado: {}", response.getData().getClass().getName());
+                                return;
+                            }
+
+                            try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData)) {
+                                Image img = new Image(bis, 180, 150, true, true);
+                                ImageView imageView = new ImageView(img);
+                                imageView.setFitWidth(250);
+                                imageView.setFitHeight(200);
+                                imageView.setPreserveRatio(true);
+                                imageView.setSmooth(true);
+
+                                flowPane.getChildren().addAll(imageView); // reemplaza contenido del flowPane
+                            } catch (Exception e) {
+                                logger.error("Error creando imagen: ", e);
+                            }
+                        } catch (Exception e) {
+                            logger.error("Error procesando imagen: ", e);
+                        }
+                    } else {
+                        logger.warn("Error al descargar la imagen desde el servidor: {}", response.getMessage());
+                    }
+                });
+            }).start();
+        } else {
+            logger.info("No hay rutas de imagen para la habitación.");
+        }
+    }
+
 }

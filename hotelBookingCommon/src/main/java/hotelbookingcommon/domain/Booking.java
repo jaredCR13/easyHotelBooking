@@ -1,6 +1,7 @@
 package hotelbookingcommon.domain;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
@@ -95,6 +96,19 @@ public class Booking implements Serializable {
     public void setRoomNumber(int roomNumber) { // Setter para el número de habitación
         this.roomNumber = roomNumber;
     }
+    // Getters formateados para TableView
+    public String getStartDateStr() {
+        if (startDate == null) return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(startDate);
+    }
+
+    public String getEndDateStr() {
+        if (endDate == null) return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(endDate);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

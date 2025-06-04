@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 
 public class FrontDeskClerkService {
     private static final Logger logger = LogManager.getLogger(FrontDeskClerkService.class);
-    private static final String FRONT_DESK_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\frontdeskclerks.dat";
-    private static final String HOTEL_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\hotels.dat";
+    private static final String FRONT_DESK_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelRecepcionist\\frontdeskclerks.dat";
+    private static final String HOTEL_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\HotelFiles\\hotels.dat";
 
     private FrontDeskClerkData clerkData;
     private HotelData hotelData;
@@ -169,6 +169,28 @@ public class FrontDeskClerkService {
             throw new RuntimeException("Error al obtener frontDeskClerk por id y hotel", e);
         }
     }
+
+    public FrontDeskClerk getClerkByUsername(String username) {
+        try {
+            List<FrontDeskClerk> allClerks = clerkData.findAll(); // Lee todos los clerks para buscar por username
+            for (FrontDeskClerk clerk : allClerks) {
+                if (clerk.getUser().equalsIgnoreCase(username)) { // Compara el nombre de usuario ignorando mayúsculas/minúsculas
+                    if (clerk.getHotelId() != -1) {
+                        Hotel associatedHotel = hotelData.findById(clerk.getHotelId());
+                        if (associatedHotel != null) {
+                            clerk.setHotel(associatedHotel); // Asocia el objeto Hotel completo
+                        }
+                    }
+                    return clerk; // Retorna el recepcionista encontrado
+                }
+            }
+            return null; // Usuario no encontrado
+        } catch (IOException e) {
+            logger.error("Error al buscar recepcionista por nombre de usuario: {}", e.getMessage());
+            throw new RuntimeException("Error al buscar recepcionista por nombre de usuario", e);
+        }
+    }
+
     public void close() {
         try {
             clerkData.close();

@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.ModifyRoomController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomConsultController;
@@ -10,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.FrontDeskClerk;
 import hotelbookingcommon.domain.Hotel;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
 import javafx.application.Platform;
@@ -68,6 +70,8 @@ public class FrontDeskClerkOptionsController {
     @FXML private ComboBox<Hotel> hotelComboBox;
     private ScheduledExecutorService scheduler;
 
+    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private Main mainAppReference;
 
     private static final Logger logger = LogManager.getLogger(FrontDeskClerkOptionsController.class);
 
@@ -79,6 +83,16 @@ public class FrontDeskClerkOptionsController {
     }
     public void setMainController(MainInterfaceController mainController) {
         this.mainController = mainController;
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("FrontDeskClerkOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("FrontDeskClerkOptionsController: Main application reference set.");
     }
 
     @FXML
@@ -149,7 +163,13 @@ public class FrontDeskClerkOptionsController {
 
     @FXML
     void goBackOnAction() {
-        Utility.loadFullView("maininterface.fxml", goBack);
+        if (mainAppReference != null && loggedInClerk != null) {
+            mainAppReference.loadMainInterface(loggedInClerk);
+            logger.info("FrontDeskClerkOptionsController: Volviendo a la interfaz principal con el recepcionista loggeado.");
+        } else {
+            logger.error("FrontDeskClerkOptionsController: No se puede volver a la interfaz principal. mainAppReference o loggedInClerk es null.");
+            FXUtility.alert("Error de Navegación", "No se pudo regresar a la interfaz principal. Por favor, reinicie la aplicación.");
+        }
     }
 
     //Registrar Recepcionistas
@@ -161,6 +181,8 @@ public class FrontDeskClerkOptionsController {
                 controller.setMainController(mainController);
                 controller.setParentBp(bp); // para poder regresar después
                 controller.setOptionsController(this); // si necesitas volver aquí
+                controller.setLoggedInClerk(this.loggedInClerk);
+                controller.setMainApp(this.mainAppReference);
             }
         } catch (Exception e) {
             FXUtility.alert("Error", "No se pudo abrir la pantalla de registro.");
@@ -198,6 +220,8 @@ public class FrontDeskClerkOptionsController {
             controller.setMainController(mainController);
             controller.setFrontDeskClerk(clerk);
             controller.setOptionsController(this); // <- IMPORTANTE si quieres recargar luego
+            controller.setLoggedInClerk(this.loggedInClerk);
+            controller.setMainApp(this.mainAppReference);
         }
     }
 

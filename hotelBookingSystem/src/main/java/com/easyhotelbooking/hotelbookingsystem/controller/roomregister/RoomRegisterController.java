@@ -1,6 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -8,6 +9,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -68,6 +70,8 @@ public class RoomRegisterController {
     private List<String> currentImagePaths = new ArrayList<>();
 
     private Stage primaryStage;
+    private Main mainAppReference;
+    private FrontDeskClerkDTO loggedInClerk;
 
     @FXML
     public void initialize() {
@@ -86,6 +90,16 @@ public class RoomRegisterController {
 
     public void setRoomOptionsController(RoomOptionsController roomOptionsController) {
         this.roomOptionsController = roomOptionsController;
+    }
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("RoomRegisterController: Main application reference set.");
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("RoomRegisterController: Logged-in clerk received: {}", loggedInClerk.getUser());
     }
 
     public void setStage(Stage stage) {
@@ -274,7 +288,13 @@ public class RoomRegisterController {
         controller.setMainController(mainController);
         if (this.primaryStage != null) {
             controller.setStage(this.primaryStage);
+            controller.setLoggedInClerk(this.loggedInClerk); // <--- ADD THIS LINE
+            controller.setMainApp(this.mainAppReference);
+        } else {
+        FXUtility.alert("Error de Navegación", "No se pudo volver a la página de opciones de habitaciones.");
+        logger.error("Failed to load roomoptions.fxml from RoomRegisterController onCancel.");
         }
+
         roomOptionsController.loadRoomsIntoRegister();
         clearFields();
     }

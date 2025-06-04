@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.maininterface;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.guestregister.GuestOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController;
@@ -11,6 +12,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -55,7 +57,8 @@ public class MainInterfaceController {
 
         private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
         private Gson gson = new Gson();
-
+        private Main mainAppReference;
+        private FrontDeskClerkDTO loggedInClerk;
 
         private Spinner<Integer> adultsSpinner;
         private Spinner<Integer> childrenSpinner;
@@ -65,6 +68,21 @@ public class MainInterfaceController {
         public void setStage(Stage stage) {
                 this.stage = stage;
                 logger.info("Stage principal establecido en MainInterfaceController.");
+        }
+
+
+        public void setMainApp(Main mainAppReference) {
+                this.mainAppReference = mainAppReference;
+                logger.info("FrontDeskClerkRegisterController: Main application reference set.");
+        }
+
+        public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+                this.loggedInClerk = loggedInClerk;
+                if (loggedInClerk != null) {
+                        logger.info("MainInterfaceController: Logged-in clerk received: {}", loggedInClerk.getUser());
+                } else {
+                        logger.warn("MainInterfaceController: setLoggedInClerk called with null loggedInClerk.");
+                }
         }
 
         @FXML
@@ -140,7 +158,8 @@ public class MainInterfaceController {
                 HotelOptionsController controller = Utility.loadPage2("hotelinterface/hoteloptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
-
+                        controller.setLoggedInClerk(this.loggedInClerk);
+                        controller.setMainApp(this.mainAppReference);
                         if (this.stage != null) {
                                 controller.setStage(this.stage);
                         } else {
@@ -283,7 +302,8 @@ public class MainInterfaceController {
                 RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
-
+                        controller.setLoggedInClerk(this.loggedInClerk);
+                        controller.setMainApp(this.mainAppReference);
                         if (this.stage != null) {
                                 controller.setStage(this.stage);
                         } else {
@@ -358,10 +378,17 @@ public class MainInterfaceController {
 
         @FXML
         void frontDeskClerkOptionsOnAction() {
+                // Solo ADMINISTRATOR puede acceder a esta sección
+                if (loggedInClerk == null || loggedInClerk.getFrontDeskClerkRoleEnum() != FrontDeskClerkRole.ADMINISTRATOR) {
+                        FXUtility.alert("Permiso Denegado", "No tienes los permisos para gestionar recepcionistas.");
+                        return;
+                }
+
                 FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
-
+                        controller.setLoggedInClerk(this.loggedInClerk);
+                        controller.setMainApp(this.mainAppReference);
                         if (this.stage != null) {
                                 controller.setStage(this.stage);
                         }
@@ -372,6 +399,12 @@ public class MainInterfaceController {
         }
 
         public void registerFrontDeskClerk(FrontDeskClerk frontDeskClerk) {
+                // Solo ADMINISTRATOR puede registrar recepcionistas
+                if (loggedInClerk == null || loggedInClerk.getFrontDeskClerkRoleEnum() != FrontDeskClerkRole.ADMINISTRATOR) {
+                        FXUtility.alert("Permiso Denegado", "No tienes los permisos para registrar recepcionistas.");
+                        return;
+                }
+
                 Request request = new Request("registerFrontDeskClerk", frontDeskClerk);
                 Response response = ClientConnectionManager.sendRequest(request);
 
@@ -387,10 +420,24 @@ public class MainInterfaceController {
         }
 
         public void consultFrontDeskClerk(String employeeId) {
+                // La consulta de recepcionistas puede ser accesible para todos
+
                 Request request = new Request("getFrontDeskClerk", employeeId);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+
+                        /**
+                         * FrontDeskClerkDTO frontDeskClerkDTO = gson.fromJson(gson.toJson(response.getData()), FrontDeskClerkDTO.class);
+                         *                         FXUtility.alertInfo("Recepcionista encontrado",
+                         *                                 "N° Empleado: " + frontDeskClerkDTO.getEmployeeId() +
+                         *                                         "\nNombre: " + frontDeskClerkDTO.getName() + " " + frontDeskClerkDTO.getLastName() +
+                         *                                         "\nTeléfono: " + frontDeskClerkDTO.getPhoneNumber() +
+                         *                                         "\nUsuario: " + frontDeskClerkDTO.getUser() +
+                         *                                         "\nRol: " + frontDeskClerkDTO.getFrontDeskClerkRoleEnum() +
+                         *                                         "\nID Hotel: " + frontDeskClerkDTO.getHotelId());
+                         */
+
                         FrontDeskClerk frontDeskClerk = gson.fromJson(gson.toJson(response.getData()), FrontDeskClerk.class);
                         mostrarAlerta("Recepcionista encontrado",
                                 "N° Empleado: " + frontDeskClerk.getEmployeeId() +
@@ -403,6 +450,12 @@ public class MainInterfaceController {
         }
 
         public void deleteFrontDeskClerk(FrontDeskClerk frontDeskClerk) {
+                // Solo ADMINISTRATOR puede eliminar recepcionistas
+                if (loggedInClerk == null || loggedInClerk.getFrontDeskClerkRoleEnum() != FrontDeskClerkRole.ADMINISTRATOR) {
+                        FXUtility.alert("Permiso Denegado", "No tienes los permisos para eliminar recepcionistas.");
+                        return;
+                }
+
                 Request request = new Request("deleteFrontDeskClerk", frontDeskClerk.getEmployeeId());
                 Response response = ClientConnectionManager.sendRequest(request);
 
@@ -414,6 +467,12 @@ public class MainInterfaceController {
         }
 
         public void updateClerk(FrontDeskClerk frontDeskClerk) {
+                // Solo ADMINISTRATOR puede actualizar recepcionistas
+                if (loggedInClerk == null || loggedInClerk.getFrontDeskClerkRoleEnum() != FrontDeskClerkRole.ADMINISTRATOR) {
+                        FXUtility.alert("Permiso Denegado", "No tienes los permisos para actualizar recepcionistas.");
+                        return;
+                }
+
                 Request request = new Request("updateClerk", frontDeskClerk);
                 Response response = ClientConnectionManager.sendRequest(request);
 
@@ -430,6 +489,8 @@ public class MainInterfaceController {
                 GuestOptionsController controller = Utility.loadPage2("guestinterface/guestoptions.fxml", bp);
                 if (controller != null) {
                         controller.setMainController(this);
+                        controller.setLoggedInClerk(this.loggedInClerk);
+                        controller.setMainApp(this.mainAppReference);
 
                         if (this.stage != null) {
                                 controller.setStage(this.stage);
@@ -487,70 +548,71 @@ public class MainInterfaceController {
         }
 
 
-                @FXML
-                private void searchOnAction() {
-                        String selectedHotelName = hotelCombo.getSelectionModel().getSelectedItem();
+        @FXML
+        private void searchOnAction() {
+                String selectedHotelName = hotelCombo.getSelectionModel().getSelectedItem();
 
 
-                        logger.info("searchOnAction disparado.");
-                        logger.info("Nombre de hotel seleccionado en ComboBox: '{}'", selectedHotelName);
-                        logger.info("Tamaño de allHotels en searchOnAction: {}", allHotels.size());
+                logger.info("searchOnAction disparado.");
+                logger.info("Nombre de hotel seleccionado en ComboBox: '{}'", selectedHotelName);
+                logger.info("Tamaño de allHotels en searchOnAction: {}", allHotels.size());
 
 
-                        if (selectedHotelName == null || selectedHotelName.isEmpty()) {
-                                FXUtility.alert("Advertencia", "Por favor, seleccione un hotel para buscar habitaciones.");
-                                return;
-                        }
+                if (selectedHotelName == null || selectedHotelName.isEmpty()) {
+                        FXUtility.alert("Advertencia", "Por favor, seleccione un hotel para buscar habitaciones.");
+                        return;
+                }
 
-                        if (allHotels == null || allHotels.isEmpty()) {
-                                logger.error("La lista allHotels está vacía o nula. No se pueden buscar habitaciones.");
-                                FXUtility.alert("Error", "No se pudo cargar la lista de hoteles. Intente recargar la aplicación.");
-                                return;
-                        }
-
-
-                        Optional<Hotel> selectedHotelOpt = allHotels.stream()
-                                .filter(h -> h.getHotelName() != null &&
-                                        h.getHotelName().trim().equalsIgnoreCase(selectedHotelName.trim()))
-                                .findFirst();
-
-                        if (selectedHotelOpt.isPresent()) {
-                                Hotel selectedHotel = selectedHotelOpt.get();
-
-                                logger.info("¡Hotel '{}' (ID: {}) encontrado en allHotels!", selectedHotel.getHotelName(), selectedHotel.getNumHotel());
+                if (allHotels == null || allHotels.isEmpty()) {
+                        logger.error("La lista allHotels está vacía o nula. No se pueden buscar habitaciones.");
+                        FXUtility.alert("Error", "No se pudo cargar la lista de hoteles. Intente recargar la aplicación.");
+                        return;
+                }
 
 
-                                int adults = adultsSpinner.getValue();
-                                int children = childrenSpinner.getValue();
-                                LocalDate from = fromDate.getValue();
+                Optional<Hotel> selectedHotelOpt = allHotels.stream()
+                        .filter(h -> h.getHotelName() != null &&
+                                h.getHotelName().trim().equalsIgnoreCase(selectedHotelName.trim()))
+                        .findFirst();
 
-                                try {
-                                        SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
+                if (selectedHotelOpt.isPresent()) {
+                        Hotel selectedHotel = selectedHotelOpt.get();
 
-                                        if (searchController != null) {
-                                                searchController.setMainController(this);
-                                                searchController.setStage(this.stage);
-                                                searchController.setSearchCriteria(selectedHotel);
-                                        } else {
-                                                logger.error("No se pudo obtener el controlador para searchinterface.fxml.");
-                                                FXUtility.alert("Error", "No se pudo cargar la página de búsqueda.");
-                                        }
+                        logger.info("¡Hotel '{}' (ID: {}) encontrado en allHotels!", selectedHotel.getHotelName(), selectedHotel.getNumHotel());
 
-                                        logger.info("Cargada vista de búsqueda con criterios para hotel: " + selectedHotel.getHotelName());
 
-                                } catch (Exception e) {
-                                        logger.error("Error al cargar la vista de búsqueda: " + e.getMessage(), e);
-                                        FXUtility.alert("Error", "No se pudo cargar la página de búsqueda. " + e.getMessage());
+                        int adults = adultsSpinner.getValue();
+                        int children = childrenSpinner.getValue();
+                        LocalDate from = fromDate.getValue();
+
+                        try {
+                                SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
+
+                                if (searchController != null) {
+                                        searchController.setMainController(this);
+                                        searchController.setStage(this.stage);
+                                        searchController.setSearchCriteria(selectedHotel);
+                                } else {
+                                        logger.error("No se pudo obtener el controlador para searchinterface.fxml.");
+                                        FXUtility.alert("Error", "No se pudo cargar la página de búsqueda.");
                                 }
 
-                        } else {
+                                logger.info("Cargada vista de búsqueda con criterios para hotel: " + selectedHotel.getHotelName());
 
-                                logger.warn("El nombre de hotel seleccionado '{}' NO SE ENCONTRÓ en la lista de hoteles cargados.", selectedHotelName);
-
-                                FXUtility.alert("Error", "No se pudo encontrar la información del hotel seleccionado.");
-                                logger.error("Hotel seleccionado en ComboBox no encontrado en la lista allHotels: {}", selectedHotelName);
+                        } catch (Exception e) {
+                                logger.error("Error al cargar la vista de búsqueda: " + e.getMessage(), e);
+                                FXUtility.alert("Error", "No se pudo cargar la página de búsqueda. " + e.getMessage());
                         }
+
+                } else {
+
+                        logger.warn("El nombre de hotel seleccionado '{}' NO SE ENCONTRÓ en la lista de hoteles cargados.", selectedHotelName);
+
+                        FXUtility.alert("Error", "No se pudo encontrar la información del hotel seleccionado.");
+                        logger.error("Hotel seleccionado en ComboBox no encontrado en la lista allHotels: {}", selectedHotelName);
                 }
         }
+
+}
 
 

@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.bookingregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.search.SearchController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -7,6 +8,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -51,7 +53,19 @@ public class BookingRegisterController {
     private final Gson gson = new Gson();
     private static final Logger logger = LogManager.getLogger(BookingRegisterController.class);
     private Room selectedRoomFromSearch;
+    private Stage primaryStage;
+    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private Main mainAppReference;
 
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("HotelOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
+
+    public void setSearchApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("HotelOptionsController: Main application reference set.");
+    }
     public void setSelectedHotelFromSearch(Hotel hotel,Date startDate,Date endDate) {
         this.selectedHotelFromSearch = hotel;
         this.startDate= startDate;
@@ -217,7 +231,7 @@ public class BookingRegisterController {
             return;
         }
 
-        // 6. ¡OBTENER EL BOOKING NUMBER DEL CAMPO DE TEXTO!
+
         String bookingNumberText = bookingNumberTf.getText();
         int bookingNumber;
         if (bookingNumberText == null || bookingNumberText.trim().isEmpty()) {
@@ -247,7 +261,7 @@ public class BookingRegisterController {
             Response response = ClientConnectionManager.sendRequest(request);
             Platform.runLater(() -> {
                 if ("201".equalsIgnoreCase(response.getStatus())) {
-                    FXUtility.alert("Éxito", "Reserva creada exitosamente!");
+                    FXUtility.alertInfo("Éxito", "Reserva creada exitosamente!");
                     logger.info("Reserva exitosa: " + newBooking.getBookingNumber());
                     onCancel(null); // O redirigir
                 } else {

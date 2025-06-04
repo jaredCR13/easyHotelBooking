@@ -2,6 +2,7 @@ package com.easyhotelbooking.hotelbookingsystem;
 
 import com.easyhotelbooking.hotelbookingsystem.controller.logincontroller.LogInController;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.controller.search.SearchController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import hotelbookingcommon.domain.FrontDeskClerk;
@@ -75,6 +76,37 @@ public class Main extends Application {
                 logger.info("Main.java: DTO del recepcionista loggeado pasado al MainInterfaceController.");
                 mainController.setMainApp(this);
                 mainController.setStage(primaryStage); // Pasa la referencia del Stage
+                logger.info("Main.java: Stage principal pasado al MainInterfaceController.");
+            } else {
+                logger.error("Error: MainInterfaceController es null después de cargar el FXML. Revisa tu FXML 'main-interface-view.fxml'.");
+                FXUtility.alert("Error de Carga", "No se pudo cargar la interfaz principal. Revisa el archivo FXML.");
+                return; // No intentar mostrar una escena si el controlador es null
+            }
+
+            Scene scene = new Scene(root);
+            primaryStage.setTitle("Easy Hotel Booking System - Main Interface"); // Título más descriptivo
+            primaryStage.setScene(scene);
+            primaryStage.setResizable(false);
+            primaryStage.show();
+            logger.info("Main.java: Interfaz principal cargada exitosamente.");
+
+        } catch (IOException e) {
+            logger.error("Error al cargar la interfaz principal: {}", e.getMessage(), e); // Usa {} para parámetros
+            FXUtility.alert("Error de Carga", "No se pudo cargar la interfaz principal. Por favor, reinicie la aplicación.");
+        }
+    }
+    public void loadSearchInterface(FrontDeskClerkDTO loggedInClerk) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/searchinterface/searchinterface.fxml"));
+            Parent root = fxmlLoader.load();
+            SearchController searchController = fxmlLoader.getController();
+
+            if (searchController != null) {
+                // *** ¡ESTA ES LA LÍNEA CRÍTICA QUE FALTABA! ***
+                searchController.setLoggedInClerk(loggedInClerk);
+                logger.info("Main.java: DTO del recepcionista loggeado pasado al MainInterfaceController.");
+                searchController.setMainApp(this);
+                searchController.setStage(primaryStage); // Pasa la referencia del Stage
                 logger.info("Main.java: Stage principal pasado al MainInterfaceController.");
             } else {
                 logger.error("Error: MainInterfaceController es null después de cargar el FXML. Revisa tu FXML 'main-interface-view.fxml'.");

@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.search;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingRegisterController;
 import com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingTableController;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
@@ -9,6 +10,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -68,6 +70,18 @@ public class SearchController {
 
     public void setStage(Stage stage) {
         this.stage = stage;
+    }
+    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private Main mainAppReference;
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("HotelOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("HotelOptionsController: Main application reference set.");
     }
 
     public void setSearchCriteria(Hotel hotel, Date startDate, Date endDate) {
@@ -343,7 +357,13 @@ public class SearchController {
     @FXML
     public void goBackOnAction(ActionEvent event) {
 
-        Utility.loadPage2("maininterface.fxml", bp);
+        if (mainAppReference != null && loggedInClerk != null) {
+            mainAppReference.loadMainInterface(loggedInClerk);
+            logger.info("SearchController: Volviendo a la interfaz principal con el recepcionista loggeado.");
+        } else {
+            logger.error("SearchController: No se puede volver a la interfaz principal. mainAppReference o loggedInClerk es null.");
+            FXUtility.alert("Error de Navegación", "No se pudo regresar a la interfaz principal. Por favor, reinicie la aplicación.");
+        }
     }
 
     @FXML
@@ -358,7 +378,7 @@ public class SearchController {
         if (controller != null) {
             controller.setSelectedHotelFromSearchTable(selectedHotel, startDate, endDate);
             controller.setStage(stage);
-            controller.loadBookings();
+
         }
     }
 }

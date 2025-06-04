@@ -160,6 +160,9 @@ public class MainInterfaceController {
         @FXML
         void hotelOptionsOnAction() {
                 HotelOptionsController controller = Utility.loadPage2("hotelinterface/hoteloptions.fxml", bp);
+                controller.setMainApp(mainAppReference); // <- referencia a MainApp
+                controller.setLoggedInClerk(loggedInClerk); // <- recepcionista logueado
+
                 if (controller != null) {
                         controller.setMainController(this);
 
@@ -303,6 +306,9 @@ public class MainInterfaceController {
         @FXML
         void roomOptionsOnAction() {
                 RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", bp);
+                controller.setMainApp(mainAppReference); //  referencia a MainApp
+                controller.setLoggedInClerk(loggedInClerk); //  recepcionista logueado
+
                 if (controller != null) {
                         controller.setMainController(this);
 
@@ -381,6 +387,9 @@ public class MainInterfaceController {
         @FXML
         void frontDeskClerkOptionsOnAction() {
                 FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkoptions.fxml", bp);
+                controller.setMainApp(mainAppReference); // referencia a MainApp
+                controller.setLoggedInClerk(loggedInClerk); // recepcionista logueado
+
                 if (controller != null) {
                         controller.setMainController(this);
 
@@ -448,8 +457,13 @@ public class MainInterfaceController {
 
         // ================= GUEST CRUD =====================
 
+        @FXML
         public void guestOptionsOnAction() {
+
                 GuestOptionsController controller = Utility.loadPage2("guestinterface/guestoptions.fxml", bp);
+                controller.setMainApp(mainAppReference);
+                controller.setLoggedInClerk(loggedInClerk);
+
                 if (controller != null) {
                         controller.setMainController(this);
 
@@ -538,11 +552,11 @@ public class MainInterfaceController {
 
                         try {
                                 SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
-
                                 if (searchController != null) {
                                         searchController.setMainController(this);
                                         searchController.setStage(this.stage);
-
+                                        searchController.setMainApp(mainAppReference); //  referencia a MainApp
+                                        searchController.setLoggedInClerk(loggedInClerk);
                                         Date startDate = java.util.Date.from(localStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                                         Date endDate = java.util.Date.from(localEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 

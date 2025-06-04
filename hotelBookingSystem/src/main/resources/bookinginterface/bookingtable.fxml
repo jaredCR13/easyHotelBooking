@@ -18,7 +18,7 @@
 
             <!-- Zona Azul -->
             <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
-                <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Room Options" />
+                <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Booking Options" />
                 <HBox alignment="TOP_LEFT" spacing="10">
                     <Button fx:id="goBack" onAction="#goBackOnAction" prefWidth="120" style="-fx-background-color: #5fabff; -fx-text-fill: white;" text="Go back" />
                 </HBox>

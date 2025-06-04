@@ -2,6 +2,8 @@ package hotelbookingserver.sockets;
 
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.*; // Asegúrate de que ImageUploadDTO es accesible aquí
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
+import hotelbookingcommon.domain.LogIn.LoginRequestDTO;
 import hotelbookingserver.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +27,7 @@ public class ProtocolHandler {
     private final GuestService guestService = new GuestService();
     private final BookingService bookingService= new BookingService();
     private final Gson gson = new Gson();
-
+    private final LoginService loginService = new LoginService();
 
     private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\Data";
     private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data/images/rooms/";
@@ -521,6 +523,31 @@ public class ProtocolHandler {
                     } catch (Exception e) {
                         logger.error("Error al eliminar huésped", e);
                         return new Response("500", "Error interno al eliminar huésped", null);
+                    }
+                }
+
+                //-----------------Login----------------------------
+                case "login": {
+                    try {
+                        // **AJUSTE**: Usa LoginRequestDTO para deserializar credenciales
+                        LoginRequestDTO loginDto = gson.fromJson(gson.toJson(request.getData()), LoginRequestDTO.class);
+                        String username = loginDto.getUsername();
+                        String password = loginDto.getPassword();
+
+                        FrontDeskClerk authenticatedClerk = loginService.authenticate(username, password);
+
+                        if (authenticatedClerk != null) {
+                            logger.info("Login exitoso para el usuario: {}", username);
+                            // **AJUSTE**: Devuelve FrontDeskClerkDTO (sin password)
+                            FrontDeskClerkDTO responseClerk = new FrontDeskClerkDTO(authenticatedClerk);
+                            return new Response("200", "Login exitoso", responseClerk);
+                        } else {
+                            logger.warn("Login fallido para el usuario: {}", username);
+                            return new Response("401", "Credenciales inválidas", null); // 401 Unauthorized
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al procesar la solicitud de login: {}", e.getMessage(), e);
+                        return new Response("500", "Error interno del servidor al procesar login.", null);
                     }
                 }
 

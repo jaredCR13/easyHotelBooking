@@ -1,5 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.maininterface;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
+import com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingTableController;
 import com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.guestregister.GuestOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController;
@@ -11,9 +13,9 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -26,9 +28,12 @@ import javafx.stage.Window;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
+
+
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,13 +49,15 @@ public class MainInterfaceController {
         @FXML
         private DatePicker fromDate;
         @FXML
+        private DatePicker toDate;
+        @FXML
         private ComboBox<String> hotelCombo;
         @FXML
         private Button searchButton;
         @FXML
         private Button clientSelectorButton;
 
-
+        private Main mainAppReference;
         private Stage stage;
 
         private static final Logger logger = LogManager.getLogger(MainInterfaceController.class);
@@ -61,12 +68,24 @@ public class MainInterfaceController {
         private Spinner<Integer> childrenSpinner;
         private Popup spinnerPopup;
         private List<Hotel> allHotels = new ArrayList<>();
+        private FrontDeskClerkDTO loggedInClerk;
 
         public void setStage(Stage stage) {
                 this.stage = stage;
                 logger.info("Stage principal establecido en MainInterfaceController.");
         }
-
+        public void setMainApp(Main mainAppReference) {
+                this.mainAppReference = mainAppReference;
+                logger.info("FrontDeskClerkRegisterController: Main application reference set.");
+        }
+        public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+                this.loggedInClerk = loggedInClerk;
+                if (loggedInClerk != null) {
+                        logger.info("MainInterfaceController: Logged-in clerk received: {}", loggedInClerk.getUser());
+                } else {
+                        logger.warn("MainInterfaceController: setLoggedInClerk called with null loggedInClerk.");
+                }
+        }
         @FXML
         public void initialize() {
                 loadHotelNames();
@@ -82,6 +101,9 @@ public class MainInterfaceController {
                 updateClientSelectorButtonText();
 
         }
+
+
+
 
         private void initializeSpinnersAndPopup() {
                 // CREAMOS LOS SPINNERS
@@ -186,7 +208,7 @@ public class MainInterfaceController {
                 }
         }
 
-        // ...
+
 
 
         public void registerHotel(Hotel hotel) {
@@ -487,70 +509,62 @@ public class MainInterfaceController {
         }
 
 
-                @FXML
-                private void searchOnAction() {
-                        String selectedHotelName = hotelCombo.getSelectionModel().getSelectedItem();
+        @FXML
+        private void searchOnAction() {
+                String selectedHotelName = hotelCombo.getSelectionModel().getSelectedItem();
+                LocalDate localStartDate = fromDate.getValue();
+                LocalDate localEndDate = toDate.getValue();
 
+                logger.info("searchOnAction disparado.");
+                logger.info("Hotel seleccionado: '{}'", selectedHotelName);
 
-                        logger.info("searchOnAction disparado.");
-                        logger.info("Nombre de hotel seleccionado en ComboBox: '{}'", selectedHotelName);
-                        logger.info("Tamaño de allHotels en searchOnAction: {}", allHotels.size());
+                if (selectedHotelName == null || selectedHotelName.isEmpty()) {
+                        FXUtility.alert("Advertencia", "Por favor, seleccione un hotel para buscar habitaciones.");
+                        return;
+                }
 
+                if (localStartDate == null || localEndDate == null || localStartDate.isAfter(localEndDate)) {
+                        FXUtility.alert("Advertencia", "Por favor, seleccione un rango de fechas válido.");
+                        return;
+                }
 
-                        if (selectedHotelName == null || selectedHotelName.isEmpty()) {
-                                FXUtility.alert("Advertencia", "Por favor, seleccione un hotel para buscar habitaciones.");
-                                return;
-                        }
+                Optional<Hotel> selectedHotelOpt = allHotels.stream()
+                        .filter(h -> h.getHotelName() != null &&
+                                h.getHotelName().trim().equalsIgnoreCase(selectedHotelName.trim()))
+                        .findFirst();
 
-                        if (allHotels == null || allHotels.isEmpty()) {
-                                logger.error("La lista allHotels está vacía o nula. No se pueden buscar habitaciones.");
-                                FXUtility.alert("Error", "No se pudo cargar la lista de hoteles. Intente recargar la aplicación.");
-                                return;
-                        }
+                if (selectedHotelOpt.isPresent()) {
+                        Hotel selectedHotel = selectedHotelOpt.get();
 
+                        try {
+                                SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
 
-                        Optional<Hotel> selectedHotelOpt = allHotels.stream()
-                                .filter(h -> h.getHotelName() != null &&
-                                        h.getHotelName().trim().equalsIgnoreCase(selectedHotelName.trim()))
-                                .findFirst();
+                                if (searchController != null) {
+                                        searchController.setMainController(this);
+                                        searchController.setStage(this.stage);
 
-                        if (selectedHotelOpt.isPresent()) {
-                                Hotel selectedHotel = selectedHotelOpt.get();
+                                        Date startDate = java.util.Date.from(localStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                                        Date endDate = java.util.Date.from(localEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-                                logger.info("¡Hotel '{}' (ID: {}) encontrado en allHotels!", selectedHotel.getHotelName(), selectedHotel.getNumHotel());
+                                        searchController.setSearchCriteria(selectedHotel, startDate, endDate);
 
-
-                                int adults = adultsSpinner.getValue();
-                                int children = childrenSpinner.getValue();
-                                LocalDate from = fromDate.getValue();
-
-                                try {
-                                        SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
-
-                                        if (searchController != null) {
-                                                searchController.setMainController(this);
-                                                searchController.setStage(this.stage);
-                                                searchController.setSearchCriteria(selectedHotel);
-                                        } else {
-                                                logger.error("No se pudo obtener el controlador para searchinterface.fxml.");
-                                                FXUtility.alert("Error", "No se pudo cargar la página de búsqueda.");
-                                        }
-
-                                        logger.info("Cargada vista de búsqueda con criterios para hotel: " + selectedHotel.getHotelName());
-
-                                } catch (Exception e) {
-                                        logger.error("Error al cargar la vista de búsqueda: " + e.getMessage(), e);
-                                        FXUtility.alert("Error", "No se pudo cargar la página de búsqueda. " + e.getMessage());
+                                } else {
+                                        FXUtility.alert("Error", "No se pudo cargar la página de búsqueda.");
+                                        logger.error("No se pudo obtener el controlador para searchinterface.fxml.");
                                 }
 
-                        } else {
-
-                                logger.warn("El nombre de hotel seleccionado '{}' NO SE ENCONTRÓ en la lista de hoteles cargados.", selectedHotelName);
-
-                                FXUtility.alert("Error", "No se pudo encontrar la información del hotel seleccionado.");
-                                logger.error("Hotel seleccionado en ComboBox no encontrado en la lista allHotels: {}", selectedHotelName);
+                        } catch (Exception e) {
+                                logger.error("Error al cargar la vista de búsqueda", e);
+                                FXUtility.alert("Error", "No se pudo cargar la página de búsqueda. " + e.getMessage());
                         }
+
+                } else {
+                        FXUtility.alert("Error", "No se pudo encontrar la información del hotel seleccionado.");
+                        logger.error("Hotel seleccionado no encontrado: {}", selectedHotelName);
                 }
         }
+
+
+}
 
 

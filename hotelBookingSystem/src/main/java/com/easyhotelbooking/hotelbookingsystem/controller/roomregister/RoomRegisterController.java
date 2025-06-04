@@ -130,7 +130,7 @@ public class RoomRegisterController {
                         imageData
                 );
 
-                Request request = new Request("uploadTempRoomImage", uploadDto); // Nueva acción para imágenes temporales
+                Request request = new Request("uploadTempRoomImage", uploadDto);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
@@ -203,7 +203,6 @@ public class RoomRegisterController {
 
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == ButtonType.OK) {
-
 
                             if (currentImagePaths.remove(serverImagePath)) {
                                 FXUtility.alertInfo("Éxito", "Imagen eliminada de la lista.");

@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -7,6 +8,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -54,6 +56,22 @@ public class RoomOptionsController {
     private MainInterfaceController mainController;
     private Stage currentStage;
     private Window stage;
+    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private Main mainAppReference;
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("RoomOptionsController: Main application reference set.");
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        if (loggedInClerk != null) {
+            logger.info("RoomOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+        } else {
+            logger.warn("RoomOptionsController: setLoggedInClerk called with a null loggedInClerk. This indicates an issue in the login or navigation flow.");
+        }
+    }
 
     public void setStage(Stage stage) {
         this.currentStage = stage;
@@ -68,6 +86,7 @@ public class RoomOptionsController {
 
         loadRoomsIntoRegister();
     }
+
 
 
     @FXML
@@ -154,7 +173,13 @@ public class RoomOptionsController {
 
     @FXML
     void goBackOnAction() {
-        Utility.loadFullView("maininterface.fxml", goBack);
+        if (mainAppReference != null && loggedInClerk != null) {
+            mainAppReference.loadMainInterface(loggedInClerk);
+            logger.info("RoomOptionsController: Volviendo a la interfaz principal con el recepcionista loggeado.");
+        } else {
+            logger.error("RoomOptionsController: No se puede volver a la interfaz principal. mainAppReference o loggedInClerk es null.");
+            FXUtility.alert("Error de Navegación", "No se pudo regresar a la interfaz principal. Por favor, reinicie la aplicación.");
+        }
     }
 
     private void openModifyOnAction(Room room) {
@@ -171,6 +196,9 @@ public class RoomOptionsController {
                 controller.setMainController(mainController);
                 controller.setRoomOptionsController(this);
                 controller.setRoom(completeRoom);
+                controller.setLoggedInClerk(this.loggedInClerk);
+                controller.setMainApp(this.mainAppReference);
+                controller.setStage(this.currentStage);
             }
         } else {
             FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
@@ -184,6 +212,9 @@ public class RoomOptionsController {
             controller.setParentBp(bp);
             controller.setMainController(mainController);
             controller.setRoomOptionsController(this);
+            controller.setLoggedInClerk(this.loggedInClerk);
+            controller.setMainApp(this.mainAppReference);
+            controller.setStage(this.currentStage);
         }
     }
 

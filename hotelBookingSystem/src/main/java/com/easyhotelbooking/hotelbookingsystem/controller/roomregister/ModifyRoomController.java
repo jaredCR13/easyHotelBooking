@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -7,6 +8,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -61,7 +63,8 @@ public class ModifyRoomController {
     private Stage primaryStage;
     private final Gson gson = new Gson();
     private static final Logger logger = LogManager.getLogger(ModifyRoomController.class);
-
+    private Main mainAppReference;
+    private FrontDeskClerkDTO loggedInClerk;
 
 
     public void initialize() {
@@ -71,7 +74,15 @@ public class ModifyRoomController {
         roomNumberTf.setEditable(false);
 
     }
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("ModifyRoomController: Main application reference set.");
+    }
 
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("ModifyRoomController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
     public void setParentBp(BorderPane parentBp) {
         this.parentBp = parentBp;
     }
@@ -263,7 +274,17 @@ public class ModifyRoomController {
         if (controller != null) {
             controller.setMainController(mainController);
             controller.loadRoomsIntoRegister();
+            controller.setLoggedInClerk(this.loggedInClerk);
+            controller.setMainApp(this.mainAppReference);
+            if (this.primaryStage != null) { // Pass the stage as well
+                controller.setStage(this.primaryStage);
+            }
+            controller.loadRoomsIntoRegister();
+        } else {
+            FXUtility.alert("Error de Navegación", "No se pudo volver a la página de opciones de habitaciones.");
+            logger.error("Failed to load roomoptions.fxml from ModifyRoomController onCancel.");
         }
+
     }
 
     @FXML

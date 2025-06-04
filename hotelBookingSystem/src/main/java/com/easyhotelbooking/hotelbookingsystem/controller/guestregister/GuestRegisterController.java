@@ -1,11 +1,13 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.guestregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.Guest;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
 import javafx.fxml.FXML;
@@ -32,7 +34,22 @@ public class GuestRegisterController {
     private MainInterfaceController mainController;
     private Stage primaryStage;
     private static final Logger logger = LogManager.getLogger(GuestRegisterController.class);
+    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private Main mainAppReference;
 
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("RoomOptionsController: Main application reference set.");
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        if (loggedInClerk != null) {
+            logger.info("RoomOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+        } else {
+            logger.warn("RoomOptionsController: setLoggedInClerk called with a null loggedInClerk. This indicates an issue in the login or navigation flow.");
+        }
+    }
     public void setParentBp(BorderPane parentBp) {
         this.parentBp = parentBp;
     }
@@ -75,6 +92,9 @@ public class GuestRegisterController {
                     controller.setMainController(mainController);
                     if (this.primaryStage != null) {
                         controller.setStage(this.primaryStage);
+                        controller.setLoggedInClerk(this.loggedInClerk);
+                        controller.setMainApp(this.mainAppReference);
+
                     }
                     controller.loadGuestsIntoTable();
                 }
@@ -98,6 +118,9 @@ public class GuestRegisterController {
             GuestOptionsController controller = Utility.loadPage2("guestinterface/guestoptions.fxml", parentBp);
             if (controller != null) {
                 controller.setMainController(mainController);
+                controller.setLoggedInClerk(this.loggedInClerk);
+                controller.setMainApp(this.mainAppReference);
+
                 if (this.primaryStage != null) {
                     controller.setStage(this.primaryStage);
                 }

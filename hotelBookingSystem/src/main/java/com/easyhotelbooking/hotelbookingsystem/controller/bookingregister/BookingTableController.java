@@ -47,10 +47,11 @@ public class BookingTableController {
     @FXML private TableColumn<Booking, String> endDateColumn;
     @FXML private TableColumn<Booking, Void> ActionsColumn;
     @FXML private TextField quickSearchField;
+    private ScheduledExecutorService scheduler;
     @FXML private Button goBack;
 
     private static final Logger logger = LogManager.getLogger(BookingTableController.class);
-    private ScheduledExecutorService scheduler;
+
 
     private Stage stage;
     private Room selectedRoomFromSearch;
@@ -79,13 +80,14 @@ public class BookingTableController {
         startDateColumn.setCellValueFactory(new PropertyValueFactory<>("startDateStr"));
         endDateColumn.setCellValueFactory(new PropertyValueFactory<>("endDateStr"));
         addButtonsToTable();
-
+        startPolling();
     }
 
     public void setSelectedHotelFromSearchTable(Hotel hotel, Date start, Date end) {
         this.selectedHotelFromSearch = hotel;
         this.startDate = start;
         this.endDate = end;
+
 
         loadBookings();
     }
@@ -169,6 +171,7 @@ public class BookingTableController {
 
 
     private void removeBooking(Booking booking) {
+
         Request request = new Request("deleteBooking", booking);
         Response response = ClientConnectionManager.sendRequest(request);
 
@@ -216,7 +219,7 @@ public class BookingTableController {
     @FXML
     private void onQuickSearch() {
         String bookingText = quickSearchField.getText().trim();
-
+        stopPolling();
         if (bookingText.isEmpty()) {
             FXUtility.alert("Error", "Por favor ingrese el número de Reservación.");
             return;
@@ -268,6 +271,7 @@ public class BookingTableController {
     @FXML
     void onClearSearch() {
         quickSearchField.clear();
+        startPolling();
         loadBookings();
     }
 

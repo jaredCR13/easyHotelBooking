@@ -70,7 +70,7 @@ public class FrontDeskClerkOptionsController {
     @FXML private ComboBox<Hotel> hotelComboBox;
     private ScheduledExecutorService scheduler;
 
-    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private FrontDeskClerkDTO loggedInClerk;
     private Main mainAppReference;
 
     private static final Logger logger = LogManager.getLogger(FrontDeskClerkOptionsController.class);
@@ -97,8 +97,6 @@ public class FrontDeskClerkOptionsController {
 
     @FXML
     public void initialize() {
-        //roleComboBox.setItems(FXCollections.observableArrayList("Administrator", "Front Desk Clerk"));
-        //roleComboBox.setValue("Front Desk Clerk");
 
         employeeIdColumn.setCellValueFactory(new PropertyValueFactory<>("employeeId"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -107,9 +105,6 @@ public class FrontDeskClerkOptionsController {
         phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("frontDeskClerkRole"));
         hotelIdColumn.setCellValueFactory(new PropertyValueFactory<>("hotelId"));
-        addButtonsToTable();
-        loadFrontDeskClerkIntoRegister();
-        loadHotelsIntoQuickCombo();
 
         hotelComboBox.setConverter(new StringConverter<Hotel>() {
         public String toString(Hotel hotel) {
@@ -124,6 +119,10 @@ public class FrontDeskClerkOptionsController {
                     .orElse(null);
         }
     });
+        addButtonsToTable();
+        loadFrontDeskClerkIntoRegister();
+        loadHotelsIntoQuickCombo();
+        startPolling();
     }
 
     private void addButtonsToTable() {
@@ -240,6 +239,8 @@ public class FrontDeskClerkOptionsController {
 
     @FXML
     private void onQuickSearch() {
+        stopPolling();
+
         String id = quickSearchField.getText().trim();
         Hotel selectedHotel = hotelComboBox.getValue();
 
@@ -276,6 +277,7 @@ public class FrontDeskClerkOptionsController {
         quickSearchField.clear();
         hotelComboBox.getSelectionModel().clearSelection();
         loadFrontDeskClerkIntoRegister();
+        startPolling();
     }
 
     public void loadFrontDeskClerkIntoRegister() {

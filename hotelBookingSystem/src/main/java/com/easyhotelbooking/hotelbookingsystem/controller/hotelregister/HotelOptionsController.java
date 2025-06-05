@@ -85,11 +85,12 @@ public class HotelOptionsController {
         locationHotelRegister.setCellValueFactory(data ->
                 new SimpleStringProperty(data.getValue().getHotelLocation()));
 
-        loadHotelsIntoRegister();
-        addButtonsToTableView();
-
         //Elimina una columna vacía que se crea sola en el TableView
         hotelRegister.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // 3
+
+        loadHotelsIntoRegister();
+        addButtonsToTableView();
+        startPolling();
 
     }
 
@@ -120,14 +121,12 @@ public class HotelOptionsController {
                         modify.setOnAction(event -> {
                             Hotel hotel = getTableView().getItems().get(getIndex());
                             openModifyHotel(hotel);
-                            // Refresh the table after potential modification
-                            loadHotelsIntoRegister(); // Added this line
+                            loadHotelsIntoRegister();
                         });
 
                         remove.setOnAction(event -> {
                             Hotel hotel = getTableView().getItems().get(getIndex());
                             removeHotelOnAction(hotel);
-                            // The alert for removal is handled in MainInterfaceController
                         });
                     }
 
@@ -165,7 +164,6 @@ public class HotelOptionsController {
     @FXML
     void registerHotelOnAction() {
         openRegisterHotel();
-        // Alert for registration is handled in MainInterfaceController
     }
 
     public void openRegisterHotel() {
@@ -194,7 +192,6 @@ public class HotelOptionsController {
 
     void consultHotelOnAction(Hotel hotel) {
         openConsultHotel(hotel);
-        // Alert for consultation is handled in MainInterfaceController
     }
 
     private void openConsultHotel(Hotel hotel) {
@@ -221,8 +218,8 @@ public class HotelOptionsController {
 
     void modifyHotelOnAction(Hotel hotel) {
         openModifyHotel(hotel);
-        loadHotelsIntoRegister(); // Ensure table is refreshed after modification
-        // Alert for modification is handled in MainInterfaceController
+        loadHotelsIntoRegister();
+
     }
 
     private void openModifyHotel(Hotel hotel) {
@@ -240,7 +237,7 @@ public class HotelOptionsController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            loadHotelsIntoRegister(); // Also refresh here in case the modal closes without a successful update
+            loadHotelsIntoRegister();
 
         } catch (Exception e) {
             logger.error("Error al abrir ventana de modificación de hotel: {}", e.getMessage(), e);
@@ -251,9 +248,8 @@ public class HotelOptionsController {
     @FXML
     void removeHotelOnAction(Hotel hotel) {
         try {
-            // The actual alert for success/failure is handled in MainInterfaceController.deleteHotel
             mainController.deleteHotel(hotel.getNumHotel());
-            loadHotelsIntoRegister(); // Refresh table after deletion attempt
+            loadHotelsIntoRegister();
         } catch (Exception e) {
             logger.error("Error al intentar eliminar hotel: {}", e.getMessage(), e);
             mostrarAlertaError("Error", "Ocurrió un error al eliminar el hotel.");
@@ -262,6 +258,8 @@ public class HotelOptionsController {
 
     @FXML
     private void onQuickHotelSearch() {
+        stopPolling();
+
         String input = quickSearchField.getText().trim();
         if (input.isEmpty()) {
             mostrarAlertaError("Error de búsqueda", "Por favor ingrese un número de hotel para buscar.");
@@ -277,7 +275,6 @@ public class HotelOptionsController {
                 Hotel foundHotel = new Gson().fromJson(new Gson().toJson(response.getData()), Hotel.class);
                 hotelRegister.getItems().clear();
                 hotelRegister.getItems().add(foundHotel);
-                // Informational alert for successful search
                 FXUtility.alertInfo("Búsqueda Exitosa", "Hotel encontrado: " + foundHotel.getHotelName());
             } else {
                 mostrarAlertaError("Hotel No Encontrado", "No existe un hotel con el número: " + hotelNumber + ".");
@@ -294,8 +291,8 @@ public class HotelOptionsController {
     private void onClearSearch() {
         quickSearchField.clear();
         loadHotelsIntoRegister();
-        // Informational alert for clearing search
         FXUtility.alertInfo("Búsqueda Limpiada", "Se han mostrado todos los hoteles nuevamente.");
+        startPolling();
     }
 
     private void loadHotelsIntoRegister() {

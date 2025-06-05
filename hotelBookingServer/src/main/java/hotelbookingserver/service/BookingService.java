@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 
 public class BookingService {
     private static final Logger logger = LogManager.getLogger(BookingService.class);
-    private static final String BOOKING_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\bookings.dat";
-    private static final String GUEST_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\guests.dat";
-    private static final String ROOM_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\rooms.dat";
-    private static final String FRONT_DESK_CLERK_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\frontdeskclerks.dat";
+    private static final String BOOKING_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\bookings.dat";
+    private static final String GUEST_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\guests.dat";
+    private static final String ROOM_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\rooms.dat";
+    private static final String FRONT_DESK_CLERK_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\frontdeskclerks.dat";
 
 
     private BookingData bookingData;

@@ -33,8 +33,8 @@ public class FXUtility {
     public static Alert alertInfo(String title, String header){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
-        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE); //no estoy seguro si es necesario
-        alert.getDialogPane().setMinWidth(400); //no estoy seguro si es necesario
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        alert.getDialogPane().setMinWidth(400);
         alert.setHeaderText(header);
         alert.showAndWait();
         return alert;

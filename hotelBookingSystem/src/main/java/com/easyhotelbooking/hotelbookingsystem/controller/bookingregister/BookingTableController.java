@@ -56,7 +56,7 @@ public class BookingTableController {
     private Room selectedRoomFromSearch;
     private Hotel selectedHotelFromSearch;
     private Date startDate, endDate;
-    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private FrontDeskClerkDTO loggedInClerk;
     private Main mainAppReference;
 
     public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {

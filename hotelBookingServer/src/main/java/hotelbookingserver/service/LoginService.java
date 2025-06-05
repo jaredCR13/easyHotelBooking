@@ -2,6 +2,7 @@ package hotelbookingserver.service; // O el paquete donde tengas tus servicios
 
 import hotelbookingcommon.domain.FrontDeskClerk;
 import hotelbookingcommon.domain.FrontDeskClerkRole;
+import hotelbookingcommon.domain.Hotel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,19 +16,9 @@ public class LoginService {
         this.clerkService = new FrontDeskClerkService();
     }
 
-    /**
-     * Intenta autenticar a un usuario con su nombre de usuario y contraseña.
-     *
-     * @param username El nombre de usuario (asumimos que es el campo 'user' en FrontDeskClerk).
-     * @param password La contraseña en texto plano que el usuario ingresó.
-     * @return El objeto FrontDeskClerk si la autenticación es exitosa, o null si falla.
-     */
     public FrontDeskClerk authenticate(String username, String password) {
-        // 1. Buscar el FrontDeskClerk por su nombre de usuario.
-        //    Necesitarás un método para buscar por 'user' en FrontDeskClerkData,
-        //    ya que tu findById es por 'employeeId'. Si no lo tienes, deberás agregarlo.
-        //    Por ahora, simularemos que FrontDeskClerkService tiene un findByUser.
-        FrontDeskClerk clerk = clerkService.getClerkByUsername(username); // Suponiendo que este método existe
+        // 1. Buscar el FrontDeskClerk por su nombre de usuario
+        FrontDeskClerk clerk = clerkService.getClerkByUsername(username);
 
         if (clerk == null) {
             logger.warn("Intento de login fallido: Usuario '{}' no encontrado.", username);
@@ -50,15 +41,15 @@ public class LoginService {
         clerkService.close();
     }
 
-    // --- PARA PRUEBAS - SE PUEDE ELIMINAR EL MAIN ---
     public static void main(String[] args) {
+        HotelService hotelService = new HotelService();
+        Hotel hotel = new Hotel(1, "Hotel Central", "Ciudad X");
+        hotelService.addHotel(hotel);
+        hotelService.close();
         System.out.println("--- Iniciando pruebas de LoginService ---");
 
         // ==============================================================================
-        // >>>>>>> BLOQUE PARA AGREGAR RECEPCIONISTAS DE PRUEBA (EJECUTAR UNA SOLA VEZ) <<<<<<<
-        // Descomenta y ejecuta esto UNA VEZ para agregar los usuarios si no existen.
-        // Después de la primera ejecución exitosa, vuelve a comentarlo para evitar duplicados
-        // o errores de "ya existe".
+        // AGREGAR RECEPCIONISTAS DE PRUEBA
 
         FrontDeskClerkService tempClerkService = new FrontDeskClerkService();
         FrontDeskClerk adminToAdd = new FrontDeskClerk("ADM001", "Admin", "General", "admin123", "admin", "555-1234", FrontDeskClerkRole.ADMINISTRATOR, 1);
@@ -78,7 +69,7 @@ public class LoginService {
         } else {
             System.out.println("Usuario 'juanp' NO agregado (quizás ya existe o hubo un error).");
         }
-        tempClerkService.close(); // Importante cerrar para que los cambios se guarden.
+        tempClerkService.close();
 
         // ==============================================================================
 

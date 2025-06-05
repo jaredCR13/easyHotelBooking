@@ -55,7 +55,7 @@ public class BookingRegisterController {
     private static final Logger logger = LogManager.getLogger(BookingRegisterController.class);
     private Room selectedRoomFromSearch;
     private Stage primaryStage;
-    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private FrontDeskClerkDTO loggedInClerk;
     private Main mainAppReference;
     private MainInterfaceController mainInterfaceController;
     private BorderPane parentBp;

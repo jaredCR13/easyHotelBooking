@@ -31,9 +31,9 @@ public class Guest {
     private String nativeCountry;
 
     @Expose
-    private List<Booking> bookings; // 1 GUEST HAS 0...** BOOKINGS
+    private List<Booking> bookings;
 
-    // Constructor sin lista
+
     public Guest(int id, int credential, String name, String lastName, String address, String email, String phoneNumber, String nativeCountry) {
         this.id = id;
         this.credential = credential;
@@ -46,7 +46,7 @@ public class Guest {
         this.bookings = new ArrayList<>();
     }
 
-    // Constructor con lista
+
     public Guest(int id, int credential, String name, String lastName, String address, String email, String phoneNumber, String nativeCountry, List<Booking> bookings) {
         this(id, credential, name, lastName, address, email, phoneNumber, nativeCountry);
         this.bookings = bookings != null ? bookings : new ArrayList<>();

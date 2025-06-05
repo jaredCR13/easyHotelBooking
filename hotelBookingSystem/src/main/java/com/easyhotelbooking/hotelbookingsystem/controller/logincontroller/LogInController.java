@@ -40,12 +40,8 @@ public class LogInController {
             FXUtility.alert("Error de Login", "Por favor, introduce usuario y contraseña.");
             return;
         }
-
-        // Create a LoginRequestDTO and pass the plain-text username and password.
-        // DO NOT create a FrontDeskClerk and call setPassword() for login, as that hashes prematurely.
         LoginRequestDTO loginCredentials = new LoginRequestDTO(username, password);
 
-        // Send this DTO in the request
         Request request = new Request("login", loginCredentials);
 
         Response response = ClientConnectionManager.sendRequest(request);

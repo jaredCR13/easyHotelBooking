@@ -164,7 +164,7 @@ public class GuestOptionsController {
     private void onClearSearch() {
         quickSearchField.clear();
         loadGuestsIntoTable();
-        startPolling(); // <--- Reanuda actualización automática
+        startPolling(); // Reanuda actualización automática
     }
 
     public void loadGuestsIntoTable() {

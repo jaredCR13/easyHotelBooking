@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 public class RoomService {
     private static final Logger logger = LogManager.getLogger(RoomService.class);
-    private static final String ROOM_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\rooms.dat";
-    private static final String HOTEL_FILE = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\hotels.dat";
+    private static final String ROOM_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\rooms.dat";
+    private static final String HOTEL_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\hotels.dat";
 
     private RoomData roomData;
     private HotelData hotelData;
@@ -128,7 +128,7 @@ public class RoomService {
 
     public boolean deleteRoom(int roomNumber) {
         try {
-            Room roomToDelete = roomData.findById(roomNumber); // Find by ID, not just roomNumber
+            Room roomToDelete = roomData.findById(roomNumber);
             boolean deleted = roomData.delete(roomNumber);
 
             if (deleted) {

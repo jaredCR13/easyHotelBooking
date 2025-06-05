@@ -17,10 +17,9 @@ public class Hotel implements Serializable {
     private String hotelLocation;
 
     @Expose
-    private List<Room> rooms; //1 HOTEL HAS 0..** ROOMS
+    private List<Room> rooms;
     private List<FrontDeskClerk>frontDeskClerks;
-    //TODO
-    // 1 HOTEL HAS 0...** BOOKINGS
+
 
     public Hotel(int numHotel, String hotelName, String hotelLocation) {
         this.numHotel = numHotel;
@@ -50,7 +49,7 @@ public class Hotel implements Serializable {
         this.frontDeskClerks = frontDeskClerks;
     }
 
-    //Getters and Setters
+
     public int getNumHotel() {
         return numHotel;
     }

@@ -56,7 +56,7 @@ public class RoomOptionsController {
     private MainInterfaceController mainController;
     private Stage currentStage;
     private Window stage;
-    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private FrontDeskClerkDTO loggedInClerk;
     private Main mainAppReference;
 
     public void setMainApp(Main mainAppReference) {
@@ -99,8 +99,7 @@ public class RoomOptionsController {
         styleColumn.setCellValueFactory(new PropertyValueFactory<>("style"));
         hotelIdColumn.setCellValueFactory(new PropertyValueFactory<>("hotelId"));
 
-        addButtonsToRoomTable();
-        loadHotelsIntoQuickCombo();
+
 
         quickHotelCombo.setConverter(new StringConverter<Hotel>() {
         public String toString(Hotel hotel) {
@@ -115,6 +114,9 @@ public class RoomOptionsController {
                     .orElse(null);
         }
         });
+        addButtonsToRoomTable();
+        loadHotelsIntoQuickCombo();
+        startPolling();
     }
 
 
@@ -265,6 +267,8 @@ public class RoomOptionsController {
 
     @FXML
     private void onQuickSearch() {
+        stopPolling();
+
         String roomText = quickSearchField.getText().trim();
         Hotel selectedHotel = quickHotelCombo.getValue();
 
@@ -301,6 +305,7 @@ public class RoomOptionsController {
         quickSearchField.clear();
         quickHotelCombo.setValue(null);
         loadRoomsIntoRegister();
+        startPolling();
     }
 
     public void loadRoomsIntoRegister() {

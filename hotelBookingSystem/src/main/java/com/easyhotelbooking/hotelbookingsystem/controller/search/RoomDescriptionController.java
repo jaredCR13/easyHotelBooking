@@ -14,8 +14,8 @@ public class RoomDescriptionController { // Mantenemos el nombre original para e
     private Label roomNumberLabel;
     // Método para establecer el texto de la descripción
     public void setDescriptionText(String text) {
-        // CORRECCIÓN: Usar el método setText() del objeto Label
-        if (descriptionLabel != null) { // Es buena práctica verificar que el Label no sea nulo (ya inyectado)
+
+        if (descriptionLabel != null) {
             descriptionLabel.setText(text);
         } else {
 

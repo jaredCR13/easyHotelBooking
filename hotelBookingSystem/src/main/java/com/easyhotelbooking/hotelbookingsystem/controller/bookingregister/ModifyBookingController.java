@@ -62,7 +62,7 @@ public class ModifyBookingController {
     private Date startDate;
     private Date endDate;
     private Stage primaryStage;
-    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private FrontDeskClerkDTO loggedInClerk;
     private Main mainAppReference;
     private final Gson gson = new Gson();
     private static final Logger logger = LogManager.getLogger(BookingTableController.class);

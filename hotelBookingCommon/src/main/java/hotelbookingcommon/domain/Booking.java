@@ -16,7 +16,6 @@ public class Booking implements Serializable {
     private int daysOfStay;
     private int roomNumber;          // Solo el número de habitación (que actúa como ID)
 
-    //viate  Constructor que solo recibe y inicializa los IDs
     public Booking(int bookingNumber,int hotelId, int guestId, Date starDate, Date endDate, String frontDeskClerkId, int daysOfStay, int roomNumber) {
         this.bookingNumber = bookingNumber;
         this.hotelId= hotelId;
@@ -31,7 +30,6 @@ public class Booking implements Serializable {
 
     public Booking() {
     }
-// --- Getters y Setters para TODOS los atributos (CRUCIAL para GSON) ---
 
     public int getHotelId() {
         return hotelId;
@@ -96,7 +94,7 @@ public class Booking implements Serializable {
     public void setRoomNumber(int roomNumber) { // Setter para el número de habitación
         this.roomNumber = roomNumber;
     }
-    // Getters formateados para TableView
+
     public String getStartDateStr() {
         if (startDate == null) return "";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -114,7 +112,7 @@ public class Booking implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Booking booking = (Booking) o;
-        // La igualdad se basa en la combinación de bookingNumber y hotelId
+
         return bookingNumber == booking.bookingNumber &&
                 hotelId == booking.hotelId;
     }

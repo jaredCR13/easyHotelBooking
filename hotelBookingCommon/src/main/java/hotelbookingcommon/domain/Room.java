@@ -48,7 +48,7 @@ public class Room implements Serializable {
         this.hotelId = -1;
     }
 
-    // Getters and Setters
+
 
     public int getRoomNumber() {
         return roomNumber;

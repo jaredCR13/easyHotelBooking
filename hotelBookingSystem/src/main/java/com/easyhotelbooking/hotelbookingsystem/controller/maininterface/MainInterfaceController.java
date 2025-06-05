@@ -5,6 +5,7 @@ import com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.Bookin
 import com.easyhotelbooking.hotelbookingsystem.controller.frontdeskclerkregister.FrontDeskClerkOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.guestregister.GuestOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController;
+import com.easyhotelbooking.hotelbookingsystem.controller.logincontroller.LogInController;
 import com.easyhotelbooking.hotelbookingsystem.controller.roomregister.RoomOptionsController;
 import com.easyhotelbooking.hotelbookingsystem.controller.search.SearchController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
@@ -16,11 +17,11 @@ import hotelbookingcommon.domain.*;
 import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.fxml.FXML;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.HBox; // Import HBox
-import javafx.scene.layout.VBox; // Import VBox
+import javafx.scene.layout.*;
 import javafx.stage.Popup;     // Import Popup
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -29,7 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -565,9 +566,7 @@ public class MainInterfaceController {
                                         searchController.setLoggedInClerk(loggedInClerk);
                                         Date startDate = java.util.Date.from(localStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                                         Date endDate = java.util.Date.from(localEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                                        List<Room> availableRooms = selectedHotel.getRooms().stream()
-                                                .filter(r -> RoomStatus.AVAILABLE.equals(r.getStatus()))
-                                                .collect(Collectors.toList());
+
                                         searchController.setSearchCriteria(selectedHotel, startDate, endDate);
 
                                 } else {
@@ -587,6 +586,20 @@ public class MainInterfaceController {
         }
 
 
-}
+                @FXML
+                private void logOutOnAction(){
+                        if (mainAppReference != null) {
+                                // Llama a un método en la clase Main para manejar el logout
+                                mainAppReference.showLoginScreenAfterLogout(this.stage); // Pasa el Stage actual para que Main lo cierre
+                                logger.info("MainInterfaceController: Delegando el cierre de sesión a la clase Main.");
+                        } else {
+                                logger.error("MainInterfaceController: Referencia a Main (mainAppReference) es null al intentar cerrar sesión.");
+                                FXUtility.alert("Error Interno", "No se pudo procesar el cierre de sesión. Por favor, reinicie la aplicación.");
+                        }
+                }
+        }
+
+
+
 
 

@@ -29,7 +29,7 @@ public class ProtocolHandler {
     private final Gson gson = new Gson();
     private final LoginService loginService = new LoginService();
 
-    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\Data";
+    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\img";
     private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data/images/rooms/";
     private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data/images/temp_rooms/";
 
@@ -454,17 +454,22 @@ public class ProtocolHandler {
                 case "registerGuest": {
                     try {
                         Guest guest = gson.fromJson(gson.toJson(request.getData()), Guest.class);
-                        boolean success = guestService.addGuest(guest);
+                        String duplicateMessage = guestService.addGuest(guest);
 
-                        if (success) {
+                        if (duplicateMessage == null) {
                             logger.info("Huésped registrado: {}", guest);
                             return new Response("201", "Huésped registrado con éxito", guest);
                         } else {
-                            logger.warn("No se pudo registrar huésped (ID duplicado): {}", guest);
-                            return new Response("400", "Ya existe un huésped con ese ID", null);
+                            // Construct a more specific error message
+                            String errorMessage = "No se pudo registrar el huésped. El campo " + duplicateMessage + " ya está en uso.";
+                            logger.warn(errorMessage);
+                            return new Response("409", errorMessage, null);
                         }
+                    } catch (IOException e) {
+                        logger.error("Error de E/S al registrar huésped: {}", e.getMessage(), e);
+                        return new Response("500", "Error interno de servidor al registrar huésped.", null);
                     } catch (Exception e) {
-                        logger.error("Error al registrar huésped", e);
+                        logger.error("Error inesperado al registrar huésped: {}", e.getMessage(), e);
                         return new Response("500", "Error interno al registrar huésped", null);
                     }
                 }
@@ -498,14 +503,24 @@ public class ProtocolHandler {
                 case "updateGuest": {
                     try {
                         Guest guestToUpdate = gson.fromJson(gson.toJson(request.getData()), Guest.class);
-                        boolean updated = guestService.updateGuest(guestToUpdate);
-                        if (updated) {
+                        String duplicateMessage = guestService.updateGuest(guestToUpdate); //METODO MODIFICADO
+
+                        if (duplicateMessage == null) { //SI NO ESTA DUPLICADOA SE AGREGA CON EXITO
+                            logger.info("Huésped actualizado: {}", guestToUpdate);
                             return new Response("200", "Huésped actualizado con éxito", guestToUpdate);
+                        } else if (duplicateMessage.equals("not found")) {
+                            logger.warn("No se encontró huésped para actualizar con ID: {}", guestToUpdate.getId());
+                            return new Response("404", "Huésped no encontrado para actualizar", null);
                         } else {
-                            return new Response("404", "Huésped no encontrado", null);
+                            String errorMessage = "No se pudo actualizar el huésped. El campo " + duplicateMessage + " ya está en uso por otro huésped.";
+                            logger.warn(errorMessage);
+                            return new Response("409", errorMessage, null); //ERROR POR DUPLICADOS
                         }
+                    } catch (IOException e) {
+                        logger.error("Error de E/S al actualizar huésped: {}", e.getMessage(), e);
+                        return new Response("500", "Error interno de servidor al actualizar huésped.", null);
                     } catch (Exception e) {
-                        logger.error("Error actualizando huésped", e);
+                        logger.error("Error inesperado al actualizar huésped: {}", e.getMessage(), e);
                         return new Response("500", "Error al actualizar huésped", null);
                     }
                 }

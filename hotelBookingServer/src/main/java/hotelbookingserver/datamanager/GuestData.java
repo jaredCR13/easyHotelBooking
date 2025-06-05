@@ -45,6 +45,27 @@ public class GuestData {
     }
 
     public void insert(Guest guest) throws IOException {
+        List<Guest> guests = findAll();
+
+        for (Guest existing : guests) {
+            if (existing.getId() == guest.getId()) {
+                throw new IOException("ID duplicado: " + guest.getId());
+            }
+            if (existing.getCredential() == guest.getCredential()) {
+                throw new IOException("Credential duplicado: " + guest.getCredential());
+            }
+            if (existing.getEmail().equalsIgnoreCase(guest.getEmail())) {
+                throw new IOException("Email duplicado: " + guest.getEmail());
+            }
+            if (existing.getPhoneNumber().equals(guest.getPhoneNumber())) {
+                throw new IOException("Número de teléfono duplicado: " + guest.getPhoneNumber());
+            }
+            if (existing.getName().equalsIgnoreCase(guest.getName())
+                    && existing.getLastName().equalsIgnoreCase(guest.getLastName())) {
+                throw new IOException("Nombre y apellido duplicados: " + guest.getName() + " " + guest.getLastName());
+            }
+        }
+
         raf.seek(raf.length());
 
         raf.writeInt(guest.getId());
@@ -102,6 +123,24 @@ public class GuestData {
     public boolean update(Guest updatedGuest) throws IOException {
         List<Guest> guests = findAll();
         boolean updated = false;
+
+        for (Guest existing : guests) {
+            if (existing.getId() != updatedGuest.getId()) {
+                if (existing.getCredential() == updatedGuest.getCredential()) {
+                    throw new IOException("Credential duplicado: " + updatedGuest.getCredential());
+                }
+                if (existing.getEmail().equalsIgnoreCase(updatedGuest.getEmail())) {
+                    throw new IOException("Email duplicado: " + updatedGuest.getEmail());
+                }
+                if (existing.getPhoneNumber().equals(updatedGuest.getPhoneNumber())) {
+                    throw new IOException("Número de teléfono duplicado: " + updatedGuest.getPhoneNumber());
+                }
+                if (existing.getName().equalsIgnoreCase(updatedGuest.getName())
+                        && existing.getLastName().equalsIgnoreCase(updatedGuest.getLastName())) {
+                    throw new IOException("Nombre y apellido duplicados: " + updatedGuest.getName() + " " + updatedGuest.getLastName());
+                }
+            }
+        }
 
         for (int i = 0; i < guests.size(); i++) {
             if (guests.get(i).getId() == updatedGuest.getId()) {

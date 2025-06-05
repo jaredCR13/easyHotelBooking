@@ -65,6 +65,12 @@ public class GuestRegisterController {
     @FXML
     void onSave() {
         try {
+            // Validaciones de formato
+            if (idField.getText().trim().isEmpty() || credentialField.getText().trim().isEmpty()) {
+                FXUtility.alert("Validación", "ID y Credencial no pueden estar vacíos.");
+                return;
+            }
+
             int id = Integer.parseInt(idField.getText().trim());
             int credential = Integer.parseInt(credentialField.getText().trim());
             String name = nameField.getText().trim();
@@ -74,8 +80,9 @@ public class GuestRegisterController {
             String phone = phoneField.getText().trim();
             String country = countryField.getText().trim();
 
-            if (name.isEmpty() || lastName.isEmpty() || email.isEmpty()) {
-                FXUtility.alert("Error de Validación", "Nombre, Apellido y Email son requeridos.");
+            // Validación de campos obligatorios
+            if (name.isEmpty() || lastName.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+                FXUtility.alert("Validación", "Nombre, Apellido, Email y Teléfono son obligatorios.");
                 return;
             }
 
@@ -89,8 +96,6 @@ public class GuestRegisterController {
 
             if ("201".equalsIgnoreCase(response.getStatus())) {
                 FXUtility.alertInfo("Éxito", "Huésped registrado correctamente.");
-
-                // Vuelve a GuestOptions después del registro
                 GuestOptionsController controller = Utility.loadPage2("guestinterface/guestoptions.fxml", parentBp);
                 if (controller != null) {
                     controller.setMainController(mainController);
@@ -98,21 +103,21 @@ public class GuestRegisterController {
                         controller.setStage(this.primaryStage);
                         controller.setLoggedInClerk(this.loggedInClerk);
                         controller.setMainApp(this.mainAppReference);
-
                     }
                     controller.loadGuestsIntoTable();
                 }
-
                 clearFields();
             } else {
-                FXUtility.alert("Error", "No se pudo registrar el huésped: " + response.getMessage());
+                // Mostrar error específico si lo provee el servidor
+                String serverMsg = response.getMessage() != null ? response.getMessage() : "No se pudo registrar el huésped.";
+                FXUtility.alert("Error", serverMsg);
             }
 
         } catch (NumberFormatException e) {
-            FXUtility.alert("Error", "ID y credencial deben ser valores numéricos.");
+            FXUtility.alert("Error de Formato", "ID y credencial deben ser valores numéricos.");
         } catch (Exception e) {
             logger.error("Error inesperado al registrar huésped", e);
-            FXUtility.alert("Error", "Ocurrió un error inesperado.");
+            FXUtility.alert("Error", "Ocurrió un error inesperado al registrar el huésped.");
         }
     }
 

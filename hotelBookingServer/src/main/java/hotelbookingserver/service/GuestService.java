@@ -8,10 +8,11 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class GuestService {
     private static final Logger logger = LogManager.getLogger(GuestService.class);
-    private static final String GUEST_FILE = "C:\\Users\\Lexis\\Desktop\\Proyecto\\Data\\guests.dat";
+    private static final String GUEST_FILE = "C:\\Users\\Lab01\\Desktop\\Proyecto\\DATA\\guests.dat";
 
     private GuestData guestData;
 
@@ -26,11 +27,32 @@ public class GuestService {
 
     public boolean addGuest(Guest guest) {
         try {
-            // Verificar si ya existe un huésped con el mismo ID
-            Guest existingGuest = guestData.findById(guest.getId());
-            if (existingGuest != null) {
-                logger.warn("Intento de agregar huésped duplicado con ID: {}", guest.getId());
-                return false;
+            List<Guest> existingGuests = guestData.findAll();
+
+            for (Guest existing : existingGuests) {
+                if (existing.getId() == guest.getId()) {
+                    logger.warn("ID duplicado: {}", guest.getId());
+                    return false;
+                }
+                if (Objects.equals(existing.getCredential(), guest.getCredential())) {
+                    logger.warn("Credential duplicado: {}", guest.getCredential());
+                    return false;
+                }
+                if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(guest.getEmail())) {
+                    logger.warn("Email duplicado: {}", guest.getEmail());
+                    return false;
+                }
+                if (existing.getPhoneNumber() != null && existing.getPhoneNumber().equals(guest.getPhoneNumber())) {
+                    logger.warn("Número de teléfono duplicado: {}", guest.getPhoneNumber());
+                    return false;
+                }
+                if (existing.getName() != null && existing.getLastName() != null &&
+                        guest.getName() != null && guest.getLastName() != null &&
+                        existing.getName().equalsIgnoreCase(guest.getName()) &&
+                        existing.getLastName().equalsIgnoreCase(guest.getLastName())) {
+                    logger.warn("Nombre y apellido duplicados: {} {}", guest.getName(), guest.getLastName());
+                    return false;
+                }
             }
 
             guestData.insert(guest);
@@ -70,6 +92,32 @@ public class GuestService {
 
     public boolean updateGuest(Guest guest) {
         try {
+            List<Guest> existingGuests = guestData.findAll();
+
+            for (Guest existing : existingGuests) {
+                if (existing.getId() != guest.getId()) { // ignorar el mismo huésped
+                    if (Objects.equals(existing.getCredential(), guest.getCredential())) {
+                        logger.warn("Credential duplicado: {}", guest.getCredential());
+                        return false;
+                    }
+                    if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(guest.getEmail())) {
+                        logger.warn("Email duplicado: {}", guest.getEmail());
+                        return false;
+                    }
+                    if (existing.getPhoneNumber() != null && existing.getPhoneNumber().equals(guest.getPhoneNumber())) {
+                        logger.warn("Teléfono duplicado: {}", guest.getPhoneNumber());
+                        return false;
+                    }
+                    if (existing.getName() != null && existing.getLastName() != null &&
+                            guest.getName() != null && guest.getLastName() != null &&
+                            existing.getName().equalsIgnoreCase(guest.getName()) &&
+                            existing.getLastName().equalsIgnoreCase(guest.getLastName())) {
+                        logger.warn("Nombre y apellido duplicados: {} {}", guest.getName(), guest.getLastName());
+                        return false;
+                    }
+                }
+            }
+
             boolean updated = guestData.update(guest);
             if (updated) {
                 logger.info("Huésped actualizado: {}", guest);

@@ -200,7 +200,7 @@ public class ModifyBookingController {
                 return;
             }
 
-            localEndDate = localEndDate.plusDays(1);
+
 
             Date startDate = Utility.convertToDate(localStartDate);
             Date endDate = Utility.convertToDate(localEndDate);

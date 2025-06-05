@@ -1,11 +1,15 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
-import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.Main;
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,19 +21,21 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RoomOptionsController {
 
     @FXML private BorderPane bp;
-
     @FXML private Button goBack;
-
-
     @FXML private ComboBox<RoomStatus> statusCombo;
     @FXML private ComboBox<RoomStyle> styleCombo;
     @FXML private ComboBox<Hotel> hotelComboBox;
@@ -41,10 +47,31 @@ public class RoomOptionsController {
     @FXML private TableColumn<Room, RoomStyle> styleColumn;
     @FXML private TableColumn<Room, Integer> hotelIdColumn; // Nueva columna para mostrar el ID del hotel
     @FXML private TableColumn<Room, Void> actionColumn;
+    @FXML private TextField quickSearchField;
+    @FXML private ComboBox<Hotel> quickHotelCombo;
+    private ScheduledExecutorService scheduler;
+
     private static final Logger logger = LogManager.getLogger(RoomOptionsController.class);
 
     private MainInterfaceController mainController;
     private Stage currentStage;
+    private Window stage;
+    private FrontDeskClerkDTO loggedInClerk;
+    private Main mainAppReference;
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("RoomOptionsController: Main application reference set.");
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        if (loggedInClerk != null) {
+            logger.info("RoomOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+        } else {
+            logger.warn("RoomOptionsController: setLoggedInClerk called with a null loggedInClerk. This indicates an issue in the login or navigation flow.");
+        }
+    }
 
     public void setStage(Stage stage) {
         this.currentStage = stage;
@@ -56,10 +83,10 @@ public class RoomOptionsController {
 
     public void setMainController(MainInterfaceController mainController) {
         this.mainController = mainController;
-        // Se llama loadRoomsIntoRegister() solo una vez al cargar el controlador
-        // para que la tabla se llene con datos
+
         loadRoomsIntoRegister();
     }
+
 
 
     @FXML
@@ -72,9 +99,26 @@ public class RoomOptionsController {
         styleColumn.setCellValueFactory(new PropertyValueFactory<>("style"));
         hotelIdColumn.setCellValueFactory(new PropertyValueFactory<>("hotelId"));
 
-        addButtonsToRoomTable(); // <-- aquí
 
+
+        quickHotelCombo.setConverter(new StringConverter<Hotel>() {
+        public String toString(Hotel hotel) {
+            return hotel != null ? hotel.getHotelName() : "";
+        }
+
+        @Override
+        public Hotel fromString(String string) {
+            return quickHotelCombo.getItems().stream()
+                    .filter(h -> h.getHotelName().equals(string))
+                    .findFirst()
+                    .orElse(null);
+        }
+        });
+        addButtonsToRoomTable();
+        loadHotelsIntoQuickCombo();
+        startPolling();
     }
+
 
 
     private void addButtonsToRoomTable() {
@@ -101,7 +145,6 @@ public class RoomOptionsController {
 
                         modify.setOnAction(event -> {
                             Room room = getTableView().getItems().get(getIndex());
-                            // Rellenar campos para modificación
                             openModifyOnAction(room);
                         });
 
@@ -128,6 +171,19 @@ public class RoomOptionsController {
         actionColumn.setCellFactory(cellFactory);
     }
 
+
+
+    @FXML
+    void goBackOnAction() {
+        if (mainAppReference != null && loggedInClerk != null) {
+            mainAppReference.loadMainInterface(loggedInClerk);
+            logger.info("RoomOptionsController: Volviendo a la interfaz principal con el recepcionista loggeado.");
+        } else {
+            logger.error("RoomOptionsController: No se puede volver a la interfaz principal. mainAppReference o loggedInClerk es null.");
+            FXUtility.alert("Error de Navegación", "No se pudo regresar a la interfaz principal. Por favor, reinicie la aplicación.");
+        }
+    }
+
     private void openModifyOnAction(Room room) {
         Request request = new Request("getRoom", room.getRoomNumber());
         Response response = ClientConnectionManager.sendRequest(request);
@@ -142,27 +198,25 @@ public class RoomOptionsController {
                 controller.setMainController(mainController);
                 controller.setRoomOptionsController(this);
                 controller.setRoom(completeRoom);
+                controller.setLoggedInClerk(this.loggedInClerk);
+                controller.setMainApp(this.mainAppReference);
+                controller.setStage(this.currentStage);
             }
         } else {
-            util.FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
+            FXUtility.alert("Error", "No se pudo cargar la información completa de la habitación.");
         }
-    }
-
-
-
-
-    @FXML
-    void goBackOnAction() {
-        Utility.loadFullView("maininterface.fxml", goBack);
     }
 
     @FXML
     void registerRoomOnAction() {
         RoomRegisterController controller = Utility.loadPage2("roominterface/registerroom.fxml", bp);
         if (controller != null) {
-            controller.setParentBp(bp); // Pasa el BorderPane para poder volver atrás desde "Cancel"
+            controller.setParentBp(bp);
             controller.setMainController(mainController);
             controller.setRoomOptionsController(this);
+            controller.setLoggedInClerk(this.loggedInClerk);
+            controller.setMainApp(this.mainAppReference);
+            controller.setStage(this.currentStage);
         }
     }
 
@@ -184,27 +238,114 @@ public class RoomOptionsController {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void removeRoomOnAction(Room room){
         try {
             mainController.deleteRoom(room.getRoomNumber());
             loadRoomsIntoRegister();
         } catch (Exception e) {
-            util.FXUtility.alert("Error", "Ocurrió un error al eliminar el hotel.");
+            mostrarAlertaError("Error", "Ocurrió un error al eliminar el hotel.");
         }
     }
 
-    public void loadRoomsIntoRegister() {
-        Request request = new Request("getRooms", null); // Asegúrate de que el endpoint sea "getRooms"
+    private void loadHotelsIntoQuickCombo() {
+        Request request = new Request("getHotels", null);
         Response response = ClientConnectionManager.sendRequest(request);
+
+        if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+            List<Hotel> hotelList = new Gson().fromJson(
+                    new Gson().toJson(response.getData()),
+                    new TypeToken<List<Hotel>>() {}.getType()
+            );
+            quickHotelCombo.getItems().clear();
+            quickHotelCombo.getItems().addAll(hotelList);
+        } else {
+            mostrarAlertaError("Error", "No se pudieron cargar los hoteles para búsqueda rápida.");
+        }
+    }
+
+    @FXML
+    private void onQuickSearch() {
+        stopPolling();
+
+        String roomText = quickSearchField.getText().trim();
+        Hotel selectedHotel = quickHotelCombo.getValue();
+
+        if (roomText.isEmpty() || selectedHotel == null) {
+            mostrarAlertaError("Error", "Por favor ingrese el número de habitación y seleccione un hotel.");
+            return;
+        }
+
+        try {
+            int roomNumber = Integer.parseInt(roomText);
+            Request request = new Request("getRoom", roomNumber);
+            Response response = ClientConnectionManager.sendRequest(request);
+
+            if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                Room room = new Gson().fromJson(new Gson().toJson(response.getData()), Room.class);
+                FXUtility.alertInfo("Búsqueda Exitosa", "Habitacion encontrada: ");
+
+                if (room.getHotelId() == selectedHotel.getNumHotel()) {
+                    roomRegister.setItems(FXCollections.observableArrayList(room));
+                } else {
+                    mostrarAlertaError("Error", "La habitación no pertenece al hotel seleccionado.");
+                }
+            } else {
+                mostrarAlertaError("Error", "No existe una habitación con ese número.");
+            }
+
+        } catch (NumberFormatException e) {
+            mostrarAlertaError("Error", "El número de habitación debe ser un número entero.");
+        }
+    }
+
+    @FXML
+    void onClearSearch() {
+        quickSearchField.clear();
+        quickHotelCombo.setValue(null);
+        loadRoomsIntoRegister();
+        startPolling();
+    }
+
+    public void loadRoomsIntoRegister() {
+        Request request = new Request("getRooms", null);
+        Response response = ClientConnectionManager.sendRequest(request);
+
         if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
             List<Room> rooms = new Gson().fromJson(new Gson().toJson(response.getData()), new TypeToken<List<Room>>() {}.getType());
             roomRegister.setItems(FXCollections.observableArrayList(rooms));
+            addButtonsToRoomTable();
+
         } else {
-            util.FXUtility.alert("Error", "No se pudieron cargar las habitaciones.");
+            mostrarAlertaError("Error", "No se pudieron cargar las habitaciones.");
             logger.error("Error al cargar habitaciones en la tabla: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }
 
+    //Actaulización en tiempo real con intervalo de tiempo para el uso de servidor en diferentes computadoras
+    public void startPolling() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> loadRoomsIntoRegister());
+        }, 0, 2, TimeUnit.SECONDS); // cada 2 segundos se actualiza
+    }
+
+    public void stopPolling() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+    }
+
+    private void mostrarAlertaError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+
+        if (this.stage != null) {
+            alert.initOwner(this.stage);
+        }
+        alert.showAndWait();
+    }
 
 }

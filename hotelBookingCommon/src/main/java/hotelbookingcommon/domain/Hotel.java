@@ -1,4 +1,4 @@
-// In hotelbookingcommon.domain.Hotel
+
 package hotelbookingcommon.domain;
 
 import com.google.gson.annotations.Expose; // Import this!
@@ -18,28 +18,38 @@ public class Hotel implements Serializable {
 
     @Expose
     private List<Room> rooms;
+    private List<FrontDeskClerk>frontDeskClerks;
+
 
     public Hotel(int numHotel, String hotelName, String hotelLocation) {
         this.numHotel = numHotel;
         this.hotelName = hotelName;
         this.hotelLocation = hotelLocation;
-        this.rooms = new ArrayList<>(); //INICIALIZAR LA LIST
+        this.rooms = new ArrayList<>();
+        this.frontDeskClerks=new ArrayList<>();
     }
 
-    // Constructor without rooms (for initial creation)
     public Hotel(int numHotel, String hotelName, String hotelLocation, List<Room> rooms) {
-        this(numHotel, hotelName, hotelLocation); //LLAMADA AL CONSTRUCTOR
+        this(numHotel, hotelName, hotelLocation);
         if (rooms != null) {
             this.rooms = new ArrayList<>(rooms);
         }
     }
 
-    //CONSTRUCTOR DEFAULT
     public Hotel() {
         this.rooms = new ArrayList<>();
+        this.frontDeskClerks=new ArrayList<>();
     }
 
-    //Getters and Setters
+    public List<FrontDeskClerk> getFrontDeskClerks() {
+        return frontDeskClerks;
+    }
+
+    public void setFrontDeskClerks(List<FrontDeskClerk> frontDeskClerks) {
+        this.frontDeskClerks = frontDeskClerks;
+    }
+
+
     public int getNumHotel() {
         return numHotel;
     }
@@ -78,7 +88,7 @@ public class Hotel implements Serializable {
         }
         this.rooms.add(room);
         room.setHotel(this);
-        room.setHotelId(this.numHotel); //SET el hotel id
+        room.setHotelId(this.numHotel);
     }
 
     public void removeRoom(Room room) {
@@ -87,6 +97,23 @@ public class Hotel implements Serializable {
             //ANULA LA ASOCIACION
             room.setHotel(null);
             room.setHotelId(-1);
+        }
+    }
+
+    public void addFrontDeskClerk(FrontDeskClerk clerk) {
+        if (this.frontDeskClerks == null) {
+            this.frontDeskClerks = new ArrayList<>();
+        }
+        this.frontDeskClerks.add(clerk);
+        clerk.setHotel(this);           //Asigna el hotel al clerk
+        clerk.setHotelId(this.numHotel);//Asigna el id del hotel al clerk
+    }
+
+    public void removeFrontDeskClerk(FrontDeskClerk clerk) {
+        if (this.frontDeskClerks != null) {
+            this.frontDeskClerks.remove(clerk);
+            clerk.setHotel(null); //Rompe la relación
+            clerk.setHotelId(-1);
         }
     }
 

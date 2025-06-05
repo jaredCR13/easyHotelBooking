@@ -2,14 +2,15 @@ package hotelbookingserver.sockets;
 
 import com.google.gson.Gson;
 import hotelbookingcommon.domain.*; // Asegúrate de que ImageUploadDTO es accesible aquí
-import hotelbookingserver.service.FrontDeskClerkService;
-import hotelbookingserver.service.HotelService;
-import hotelbookingserver.service.RoomService;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
+import hotelbookingcommon.domain.LogIn.LoginRequestDTO;
+import hotelbookingserver.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Date;
 import java.util.UUID;
 import java.util.List;
-import java.io.File; // Importa File
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,11 +24,12 @@ public class ProtocolHandler {
     private final HotelService hotelService = new HotelService();
     private final RoomService roomService = new RoomService();
     private final FrontDeskClerkService frontDeskClerkService = new FrontDeskClerkService();
-
+    private final GuestService guestService = new GuestService();
+    private final BookingService bookingService= new BookingService();
     private final Gson gson = new Gson();
+    private final LoginService loginService = new LoginService();
 
-
-    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\PC\\Documents\\Proyecto1 progra 2";
+    private static final String SERVER_FILE_STORAGE_ROOT = "C:\\Users\\XT\\Documents\\ProyectoProgra2\\Data";
     private static final String ROOM_IMAGES_RELATIVE_PATH_PREFIX = "data/images/rooms/";
     private static final String TEMP_IMAGES_RELATIVE_PATH_PREFIX = "data/images/temp_rooms/";
 
@@ -38,7 +40,6 @@ public class ProtocolHandler {
 
                 // =================== HOTEL =========================
                 case "getHotels": {
-                    // hotelService.getAllHotels() ya carga las habitaciones asociadas
                     List<Hotel> hotels = hotelService.getAllHotels();
                     logger.debug("Retrieved {} hotels", hotels.size());
                     return new Response("200", "Hoteles cargados", hotels);
@@ -47,8 +48,6 @@ public class ProtocolHandler {
                 case "getHotel": {
                     try {
                         int hotelNumber = parseIntFromRequest(request.getData());
-                        // hotelService.getAllHotels() carga las asociaciones
-                        // Buscamos directamente en la lista completa
                         List<Hotel> hoteles = hotelService.getAllHotels();
                         Hotel foundHotel = hoteles.stream()
                                 .filter(h -> h.getNumHotel() == hotelNumber)
@@ -69,8 +68,6 @@ public class ProtocolHandler {
                 case "registerHotel": {
                     try {
                         Hotel newHotel = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
-                        // Cuando se registra un hotel, su lista de habitaciones estará vacía
-                        // Las habitaciones se annaden a través de registerRoom
                         List<Hotel> updatedHotels = hotelService.addHotel(newHotel);
                         logger.info("Hotel registrado: {}", newHotel);
                         return new Response("201", "Hotel registrado con éxito", updatedHotels);
@@ -83,12 +80,8 @@ public class ProtocolHandler {
                 case "updateHotel": {
                     try {
                         Hotel updated = gson.fromJson(gson.toJson(request.getData()), Hotel.class);
-                        //hotelService.updateHotel() solo actualiza los campos básicos del Hotel
-                        //'updated' contendrá la lista de habitaciones que venía del cliente,
                         Hotel result = hotelService.updateHotel(updated);
                         if (result != null) {
-                            //Devuelve el objeto que se actualizo
-                            //se obtiene la ista completa
                             List<Hotel> allHotels = hotelService.getAllHotels();
                             Hotel fullUpdatedHotel = allHotels.stream()
                                     .filter(h -> h.getNumHotel() == result.getNumHotel())
@@ -107,7 +100,6 @@ public class ProtocolHandler {
                 case "deleteHotel": {
                     try {
                         int number = parseIntFromRequest(request.getData());
-                        // hotelService.deleteHotel() elimina las habitaciones asociadas
                         boolean deleted = hotelService.deleteHotel(number);
                         if (deleted) {
                             return new Response("200", "Hotel eliminado", null);
@@ -122,7 +114,6 @@ public class ProtocolHandler {
 
                 // =================== ROOMS =========================
                 case "getRooms": {
-                    // roomService.getAllRooms() carga el objeto Hotel asociado
                     List<Room> rooms = roomService.getAllRooms();
                     logger.debug("Habitaciones cargadas: {}", rooms.size());
                     return new Response("200", "Habitaciones cargadas", rooms);
@@ -131,9 +122,7 @@ public class ProtocolHandler {
                 case "getRoom": {
                     try {
                         int roomNumber = parseIntFromRequest(request.getData());
-                        //Buscar la habitación directamente por ID,
-                        // y roomService la cargue con su Hotel asociado
-                        Room foundRoom = roomService.getRoomById(roomNumber); // Asumimos un nuevo método en RoomService
+                        Room foundRoom = roomService.getRoomById(roomNumber);
 
                         if (foundRoom != null) {
                             return new Response("200", "Habitación encontrada", foundRoom);
@@ -145,10 +134,31 @@ public class ProtocolHandler {
                         return new Response("500", "Error interno al consultar habitación", null);
                     }
                 }
+                case "getRoomsByHotelId": {
+                    try {
 
+                        int hotelId = parseIntFromRequest(request.getData());
+                        List<Room> rooms = roomService.getRoomsByHotelId(hotelId);
+                        logger.debug("Retrieved {} rooms for hotel ID {}", rooms.size(), hotelId);
+                        return new Response("200", "Habitaciones del hotel cargadas", rooms);
+                    } catch (NumberFormatException e) {
+                        logger.error("Formato de ID de hotel inválido para getRoomsByHotelId", e);
+                        return new Response("400", "ID de hotel inválido.", null);
+                    } catch (Exception e) {
+                        logger.error("Error al obtener habitaciones por ID de hotel", e);
+                        return new Response("500", "Error interno al obtener habitaciones por hotel.", null);
+                    }
+                }
                 case "registerRoom": {
                     try {
                         Room newRoom = gson.fromJson(gson.toJson(request.getData()), Room.class);
+
+                        Room existingRoomInHotel = roomService.getRoomByHotelAndRoomNumber(newRoom.getRoomNumber(), newRoom.getHotelId());
+
+                        if (existingRoomInHotel != null) {
+                            logger.warn("Intento de registrar habitación duplicada con número {} en el hotel {}. Ya existe.", newRoom.getRoomNumber(), newRoom.getHotelId());
+                            return new Response("409", "El número de habitación " + newRoom.getRoomNumber() + " ya existe en el hotel " + newRoom.getHotelId() + ".", null);
+                        }
 
                         List<String> finalImagePaths = new ArrayList<>();
                         if (newRoom.getImagesPaths() != null && !newRoom.getImagesPaths().isEmpty()) {
@@ -172,22 +182,15 @@ public class ProtocolHandler {
 
                         boolean added = roomService.addRoom(newRoom);
                         if (added) {
-                            Room addedRoomWithHotel = roomService.getRoomById(newRoom.getRoomNumber());
+                            Room addedRoomWithHotel = roomService.getRoomByHotelAndRoomNumber(newRoom.getRoomNumber(), newRoom.getHotelId());
                             return new Response("201", "Habitación registrada con éxito", addedRoomWithHotel);
                         } else {
-                            Room existingRoomCheck = roomService.getRoomById(newRoom.getRoomNumber());
-                            if (existingRoomCheck != null) {
-                                logger.warn("Intento de registrar habitación duplicada: {}", newRoom.getRoomNumber());
-                                return new Response("409", "El número de habitación " + newRoom.getRoomNumber() + " ya existe.", null);
-                            } else {
-                                logger.error("Error desconocido al registrar la habitación: {}", newRoom.getRoomNumber());
-                                return new Response("500", "No se pudo registrar la habitación (ver logs para detalles)", null);
-                            }
+                            logger.error("Error desconocido al registrar la habitación: {}", newRoom.getRoomNumber());
+                            return new Response("500", "No se pudo registrar la habitación (ver logs para detalles)", null);
                         }
 
                     } catch (Exception e) {
                         logger.error("Error al registrar habitación", e);
-                        // Considera revertir el movimiento de imágenes si falla el registro de la habitación
                         return new Response("500", "Error interno al registrar habitación: " + e.getMessage(), null);
                     }
                 }
@@ -242,9 +245,22 @@ public class ProtocolHandler {
                 case "registerFrontDeskClerk": {
                     try {
                         FrontDeskClerk frontDeskClerk = gson.fromJson(gson.toJson(request.getData()), FrontDeskClerk.class);
-                        List<FrontDeskClerk> updatedFrontDeskClerkList = frontDeskClerkService.addFrontDesk(frontDeskClerk);
-                        logger.info("Recepcionista registrado: {}", frontDeskClerk);
-                        return new Response("201", "Recepcionista registrado con éxito", updatedFrontDeskClerkList);
+
+
+                        FrontDeskClerk existingFrontDeskClerkInHotel = frontDeskClerkService.getFrontDeskClerkByEmployeeIdAndHotelId(frontDeskClerk.getEmployeeId(), frontDeskClerk.getHotelId());
+
+                        if (existingFrontDeskClerkInHotel != null) {
+                            logger.warn("Intento de registrar frontDeskClerk duplicada con número {} en el hotel {}. Ya existe.", frontDeskClerk.getEmployeeId(), frontDeskClerk.getHotelId());
+                            return new Response("409", "El id de frontDeskClerk " + frontDeskClerk.getEmployeeId() + " ya existe en el hotel " + frontDeskClerk.getHotelId() + ".", null);
+                        }
+                        boolean success = frontDeskClerkService.addClerk(frontDeskClerk);
+                        if (success) {
+                            logger.info("Recepcionista registrado: {}", frontDeskClerk);
+                            return new Response("201", "Recepcionista registrado con éxito", frontDeskClerk);
+                        } else {
+                            logger.warn("No se pudo registrar el recepcionista: {}", frontDeskClerk);
+                            return new Response("400", "No se pudo registrar el recepcionista (posible duplicado o error de hotel)", null);
+                        }
                     } catch (Exception e) {
                         logger.error("Error al registrar recepcionista", e);
                         return new Response("500", "Error interno al registrar recepcionista", null);
@@ -253,8 +269,9 @@ public class ProtocolHandler {
 
                 case "getFrontDeskClerk": {
                     try {
-                        String employeeId = String.valueOf(parseIntFromRequest(request.getData()));
-                        FrontDeskClerk found = frontDeskClerkService.findByEmployeeId(employeeId);
+                        String employeeId = request.getData().toString();
+                        FrontDeskClerk found = frontDeskClerkService.getClerkById(employeeId);
+
                         if (found != null) {
                             return new Response("200", "Recepcionista encontrado", found);
                         } else {
@@ -265,6 +282,51 @@ public class ProtocolHandler {
                         return new Response("500", "Error interno al consultar recepcionista", null);
                     }
                 }
+
+
+                case "getClerks": {
+                    try {
+                        List<FrontDeskClerk> clerks = frontDeskClerkService.getAllClerks();
+                        return new Response("200", "Recepcionistas cargados correctamente", clerks);
+                    } catch (Exception e) {
+                        logger.error("Error al obtener recepcionistas", e);
+                        return new Response("500", "Error interno al obtener recepcionistas", null);
+                    }
+                }
+                case "deleteFrontDeskClerk": {
+                    try {
+                        String employeeId = (String)request.getData();
+
+                        //FrontDeskClerk clerkToDelete = frontDeskClerkService.getClerkById(employeeId);
+                        boolean deleted = frontDeskClerkService.deleteClerk(employeeId);
+
+                        if (deleted) {
+                            return new Response("200", "Recepcionista eliminado con éxito", null);
+                        } else {
+                            return new Response("404", "Recepcionista no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar recepcionista", e);
+                        return new Response("500", "Error interno al eliminar recepcionista", null);
+                    }
+                }
+                case "updateClerk": {
+                    try {
+                        FrontDeskClerk clerkToUpdate = gson.fromJson(gson.toJson(request.getData()), FrontDeskClerk.class);
+                        boolean updated = frontDeskClerkService.updateClerk(clerkToUpdate);
+                        if (updated) {
+                            FrontDeskClerk updatedClerk = frontDeskClerkService.getClerkById(clerkToUpdate.getEmployeeId());
+                            return new Response("200", "Recepcionista actualizado con éxito", updatedClerk);
+                        } else {
+                            return new Response("404", "Recepcionista no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error procesando updateClerk", e);
+                        return new Response("500", "Error interno al actualizar recepcionista", null);
+                    }
+                }
+
+
 
                 // =================== IMAGENES DE HABITACIONES =========================
 
@@ -278,14 +340,14 @@ public class ProtocolHandler {
                         String fileExtension = "";
                         int dotIndex = originalFileName.lastIndexOf('.');
                         if (dotIndex > 0) {
-                            fileExtension = originalFileName.substring(dotIndex); // Incluye el punto
+                            fileExtension = originalFileName.substring(dotIndex);
                         }
                         String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
 
                         Path tempDirPath = Paths.get(SERVER_FILE_STORAGE_ROOT, TEMP_IMAGES_RELATIVE_PATH_PREFIX);
                         Path tempFilePath = tempDirPath.resolve(uniqueFileName);
 
-                        Files.createDirectories(tempDirPath); // Crea el directorio temporal si no existe
+                        Files.createDirectories(tempDirPath);
                         Files.write(tempFilePath, imageData);
 
                         String relativePathToClient = TEMP_IMAGES_RELATIVE_PATH_PREFIX + uniqueFileName;
@@ -388,6 +450,277 @@ public class ProtocolHandler {
                     }
                 }
 
+                // =================== GUEST =========================
+                case "registerGuest": {
+                    try {
+                        Guest guest = gson.fromJson(gson.toJson(request.getData()), Guest.class);
+                        boolean success = guestService.addGuest(guest);
+
+                        if (success) {
+                            logger.info("Huésped registrado: {}", guest);
+                            return new Response("201", "Huésped registrado con éxito", guest);
+                        } else {
+                            logger.warn("No se pudo registrar huésped (ID duplicado): {}", guest);
+                            return new Response("400", "Ya existe un huésped con ese ID", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al registrar huésped", e);
+                        return new Response("500", "Error interno al registrar huésped", null);
+                    }
+                }
+
+                case "getGuest": {
+                    try {
+                        int guestId = ((Double) request.getData()).intValue(); // JSON numérico
+                        Guest guest = guestService.getGuestById(guestId);
+
+                        if (guest != null) {
+                            return new Response("200", "Huésped encontrado", guest);
+                        } else {
+                            return new Response("404", "Huésped no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al consultar huésped", e);
+                        return new Response("500", "Error interno al consultar huésped", null);
+                    }
+                }
+
+                case "getGuests": {
+                    try {
+                        List<Guest> guests = guestService.getAllGuests();
+                        return new Response("200", "Lista de huéspedes cargada", guests);
+                    } catch (Exception e) {
+                        logger.error("Error al obtener lista de huéspedes", e);
+                        return new Response("500", "Error interno al obtener huéspedes", null);
+                    }
+                }
+
+                case "updateGuest": {
+                    try {
+                        Guest guestToUpdate = gson.fromJson(gson.toJson(request.getData()), Guest.class);
+                        boolean updated = guestService.updateGuest(guestToUpdate);
+                        if (updated) {
+                            return new Response("200", "Huésped actualizado con éxito", guestToUpdate);
+                        } else {
+                            return new Response("404", "Huésped no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error actualizando huésped", e);
+                        return new Response("500", "Error al actualizar huésped", null);
+                    }
+                }
+
+                case "deleteGuest": {
+                    try {
+                        int guestId = ((Double) request.getData()).intValue(); // JSON numérico
+                        boolean deleted = guestService.deleteGuest(guestId);
+
+                        if (deleted) {
+                            return new Response("200", "Huésped eliminado con éxito", null);
+                        } else {
+                            return new Response("404", "Huésped no encontrado", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar huésped", e);
+                        return new Response("500", "Error interno al eliminar huésped", null);
+                    }
+                }
+
+                //-----------------Login----------------------------
+                case "login": {
+                    try {
+                        // **AJUSTE**: Usa LoginRequestDTO para deserializar credenciales
+                        LoginRequestDTO loginDto = gson.fromJson(gson.toJson(request.getData()), LoginRequestDTO.class);
+                        String username = loginDto.getUsername();
+                        String password = loginDto.getPassword();
+
+                        FrontDeskClerk authenticatedClerk = loginService.authenticate(username, password);
+
+                        if (authenticatedClerk != null) {
+                            logger.info("Login exitoso para el usuario: {}", username);
+                            // **AJUSTE**: Devuelve FrontDeskClerkDTO (sin password)
+                            FrontDeskClerkDTO responseClerk = new FrontDeskClerkDTO(authenticatedClerk);
+                            return new Response("200", "Login exitoso", responseClerk);
+                        } else {
+                            logger.warn("Login fallido para el usuario: {}", username);
+                            return new Response("401", "Credenciales inválidas", null); // 401 Unauthorized
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al procesar la solicitud de login: {}", e.getMessage(), e);
+                        return new Response("500", "Error interno del servidor al procesar login.", null);
+                    }
+                }
+
+                case "addBooking": {
+                    try {
+                        Booking receivedBooking = gson.fromJson(gson.toJson(request.getData()), Booking.class);
+                        logger.info("Servidor - Booking recibido (después de deserialización): hotelId=" + receivedBooking.getHotelId() +
+                                ", bookingNumber=" + receivedBooking.getBookingNumber() +
+                                ", guestId=" + receivedBooking.getGuestId() +
+                                ", roomNumber=" + receivedBooking.getRoomNumber() +
+                                ", frontDeskClerkId=" + receivedBooking.getFrontDeskClerkId());
+
+
+                        Booking existingBooking = bookingService.getBookingById(receivedBooking.getBookingNumber(), receivedBooking.getHotelId());
+                        if (existingBooking != null) {
+                            logger.warn("Intento de crear reserva con ID duplicado: bookingNumber={} en hotelId={}",
+                                    receivedBooking.getBookingNumber(), receivedBooking.getHotelId());
+                            return new Response("409", "El número de reserva '" + receivedBooking.getBookingNumber() +
+                                    "' para el hotel '" + receivedBooking.getHotelId() + "' ya existe. Por favor, use uno diferente.", null);
+                        }
+
+                        // 2. Validar conflicto de fechas para la habitación Y EL HOTEL
+                        // La llamada a hasConflictingBooking ahora debe incluir el hotelId
+                        if (bookingService.hasConflictingBooking(receivedBooking.getRoomNumber(), receivedBooking.getHotelId(),
+                                receivedBooking.getStartDate(), receivedBooking.getEndDate())) {
+                            logger.warn("Conflicto de fechas detectado en el servidor para habitación {} en hotel {}.",
+                                    receivedBooking.getRoomNumber(), receivedBooking.getHotelId());
+                            return new Response("409", "Conflicto de fechas: la habitación ya está reservada para esas fechas en este hotel.", null);
+                        }
+
+
+
+                        boolean added = bookingService.addBooking(receivedBooking);
+                        if (added) {
+                            logger.info("Reserva {} para el hotel {} creada con éxito.", receivedBooking.getBookingNumber(), receivedBooking.getHotelId());
+                            return new Response("201", "Reserva creada con éxito", receivedBooking);
+                        } else {
+                            logger.error("Error desconocido al añadir reserva al sistema: bookingNumber={} en hotelId={}.",
+                                    receivedBooking.getBookingNumber(), receivedBooking.getHotelId());
+                            return new Response("500", "No se pudo añadir la reserva. Verifique los IDs de huésped, recepcionista o habitación.", null);
+                        }
+
+                    } catch (Exception e) {
+                        logger.error("Error al procesar la solicitud 'addBooking'", e);
+                        return new Response("500", "Error interno del servidor al crear reserva: " + e.getMessage(), null);
+                    }
+                }
+
+
+                case "getBookingById": {
+                    try {
+
+                        Booking identifierBooking = gson.fromJson(gson.toJson(request.getData()), Booking.class);
+                        int bookingNumber = identifierBooking.getBookingNumber();
+                        int hotelId = identifierBooking.getHotelId();
+
+                        Booking booking = bookingService.getBookingById(bookingNumber, hotelId);
+                        if (booking != null) {
+                            logger.info("Reserva con bookingNumber {} en hotel {} encontrada.", bookingNumber, hotelId);
+                            return new Response("200", "Reserva encontrada", booking);
+                        } else {
+                            logger.warn("Reserva con bookingNumber {} en hotel {} no encontrada.", bookingNumber, hotelId);
+                            return new Response("404", "Reserva no encontrada", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al obtener reserva por ID y hotelId", e);
+                        return new Response("500", "Error interno al obtener reserva: " + e.getMessage(), null);
+                    }
+                }
+
+
+                case "getAllBookings": {
+                    try {
+                        List<Booking> allBookings = bookingService.getAllBookings();
+                        logger.info("Se recuperaron {} reservas.", allBookings.size());
+                        return new Response("200", "Lista de reservas", allBookings);
+                    } catch (Exception e) {
+                        logger.error("Error al obtener todas las reservas", e);
+                        return new Response("500", "Error interno al obtener todas las reservas: " + e.getMessage(), null);
+                    }
+                }
+
+
+                case "updateBooking": {
+                    try {
+
+                        // Deserializa el objeto Booking con los datos actualizados, incluyendo la clave compuesta
+                        Booking updatedBooking = gson.fromJson(gson.toJson(request.getData()), Booking.class);
+
+                        logger.info("Servidor - Solicitud de actualización para Booking: bookingNumber={}, hotelId={}",
+                                updatedBooking.getBookingNumber(), updatedBooking.getHotelId());
+
+
+
+                        boolean updated = bookingService.updateBooking(updatedBooking); // El servicio usa la clave compuesta
+                        if (updated) {
+                            logger.info("Reserva con bookingNumber {} en hotel {} actualizada con éxito.",
+                                    updatedBooking.getBookingNumber(), updatedBooking.getHotelId());
+                            // Devuelve la reserva actualizada desde la fuente de datos para asegurar consistencia
+                            Booking fetchedUpdatedBooking = bookingService.getBookingById(updatedBooking.getBookingNumber(), updatedBooking.getHotelId());
+                            return new Response("200", "Reserva actualizada con éxito", fetchedUpdatedBooking);
+                        } else {
+                            logger.warn("Reserva con bookingNumber {} en hotel {} no encontrada para actualizar.",
+                                    updatedBooking.getBookingNumber(), updatedBooking.getHotelId());
+                            return new Response("404", "Reserva no encontrada para actualizar", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al actualizar reserva", e);
+                        return new Response("500", "Error interno al actualizar reserva: " + e.getMessage(), null);
+                    }
+                }
+
+
+                case "deleteBooking": {
+                    try {
+
+                        Booking identifierBooking = gson.fromJson(gson.toJson(request.getData()), Booking.class);
+                        int bookingNumber = identifierBooking.getBookingNumber();
+                        int hotelId = identifierBooking.getHotelId();
+
+                        logger.info("Servidor - Solicitud de eliminación para Booking: bookingNumber={}, hotelId={}",
+                                bookingNumber, hotelId);
+
+                        boolean deleted = bookingService.deleteBooking(bookingNumber, hotelId);
+                        if (deleted) {
+                            logger.info("Reserva con bookingNumber {} en hotel {} eliminada con éxito.", bookingNumber, hotelId);
+                            return new Response("200", "Reserva eliminada con éxito", null);
+                        } else {
+                            logger.warn("Reserva con bookingNumber {} en hotel {} no encontrada para eliminar.", bookingNumber, hotelId);
+                            return new Response("404", "Reserva no encontrada para eliminar", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error al eliminar reserva", e);
+                        return new Response("500", "Error interno al eliminar reserva: " + e.getMessage(), null);
+                    }
+                }
+
+
+
+                case "getBookingsByHotelId": {
+                            try {
+                                int hotelId = parseIntFromRequest(request.getData());
+                                List<Booking> bookings = bookingService.getBookingsByHotelId(hotelId);
+                        logger.info("Se recuperaron {} reservas para el hotel {}.", bookings.size(), hotelId);
+                        return new Response("200", "Reservas del hotel cargadas", bookings);
+                    } catch (NumberFormatException e) {
+                        logger.error("Formato de ID de hotel inválido para getBookingsByHotelId", e);
+                        return new Response("400", "ID de hotel inválido.", null);
+                    } catch (Exception e) {
+                        logger.error("Error al obtener reservas por ID de hotel", e);
+                        return new Response("500", "Error interno al obtener reservas por hotel.", null);
+                    }
+                }
+                case "getAvailableRoomsByDate": {
+                    try {
+                        // Supón que el cliente envía un objeto tipo Booking con hotelId, startDate y endDate
+                        Booking searchCriteria = gson.fromJson(gson.toJson(request.getData()), Booking.class);
+                        int hotelId = searchCriteria.getHotelId();
+                        Date startDate = searchCriteria.getStartDate();
+                        Date endDate = searchCriteria.getEndDate();
+
+
+                        logger.info("Buscando habitaciones disponibles en hotel {} entre {} y {}", hotelId, startDate, endDate);
+
+                        List<Room> availableRooms = bookingService.getAvailableRooms(hotelId, startDate, endDate);
+                        return new Response("200", "Habitaciones disponibles obtenidas", availableRooms);
+
+                    } catch (Exception e) {
+                        logger.error("Error al obtener habitaciones disponibles", e);
+                        return new Response("500", "Error interno al buscar habitaciones disponibles", null);
+                    }
+                }
+
 
                 default:
                     logger.warn("Acción no reconocida: {}", request.getAction());
@@ -399,9 +732,6 @@ public class ProtocolHandler {
             logger.error("Error handling request {}: {}", request.getAction(), e.getMessage());
             return new Response("500", "Internal Server Error: " + e.getMessage(), null);
         } finally {
-            // hotelService.close();
-            // roomService.close();
-            // frontDeskClerkService.close();
         }
 
     }

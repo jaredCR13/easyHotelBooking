@@ -1,72 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
 
-<BorderPane fx:id="bp" prefHeight="600" prefWidth="900" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController">
+<StackPane xmlns="http://javafx.com/javafx/23.0.1"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController">
 
-    <!--  TOP: Barra de búsqueda -->
-    <top>
-        <VBox spacing="10" style="-fx-background-color: #095ebb;" BorderPane.alignment="CENTER">
-         <MenuBar>
-           <menus>
-             <Menu mnemonicParsing="false" text="Options">
-                  <items>
-                     <MenuItem mnemonicParsing="false" onAction="#hotelOptionsOnAction" text="Hotel Options" />
-                     <MenuItem mnemonicParsing="false" onAction="#roomOptionsOnAction" text="Room Options" />
-                      <MenuItem mnemonicParsing="false" onAction="#frontDeskClerkOptionsOnAction" text="Front Desk Clerk Options" />
-                  </items>
-             </Menu>
-           </menus>
-         </MenuBar>
-            <Label style="-fx-font-size: 24px; -fx-text-fill: white; -fx-padding: 15 0 0 20;" text="Find your next stay" />
+    <!-- Imagen de fondo -->
 
-                        <HBox alignment="CENTER_LEFT" prefHeight="89.0" prefWidth="900.0" spacing="10" style="-fx-padding: 0 0 20 20;">
-                <ComboBox fx:id="hotelCombo" prefWidth="150" promptText="Select Hotel" />
-                <DatePicker fx:id="fromDate" />
-                <DatePicker fx:id="toDate" />
-                <ComboBox fx:id="clientCombo" prefWidth="150" promptText="Who" />
-                <Button fx:id="searchButton" prefWidth="40" text="🔍" />
-            </HBox>
-        </VBox>
-    </top>
 
-    <!--  CENTER: Contenido dinámico MDI -->
-    <center>
-        <VBox spacing="15" style="-fx-padding: 15;">
-            <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Trending rooms" />
-            <HBox spacing="15">
-                <ImageView fitHeight="150" fitWidth="250" preserveRatio="true">
-                    <image>
-                        <Image url="@/img/Captura de pantalla 2025-05-16 180737.png" />
-                    </image>
-                </ImageView>
-                <ImageView fitHeight="150" fitWidth="250" preserveRatio="true">
-                    <image>
-                        <Image url="@/img/Captura de pantalla 2025-05-16 180839.png" />
-                    </image>
-                </ImageView>
-                <ImageView fitHeight="150" fitWidth="250" preserveRatio="true">
-                    <image>
-                        <Image url="@/img/Captura de pantalla 2025-05-16 180936.png" />
-                    </image>
-                </ImageView>
-            </HBox>
+    <!-- Capa principal de contenido -->
+    <BorderPane fx:id="bp" prefHeight="600" prefWidth="900">
 
-            <!-- Este StackPane se usará para cargar otras vistas en MDI -->
-            <StackPane fx:id="contentPane" prefWidth="870.0" style="-fx-padding: 15;" />
-        </VBox>
-    </center>
+        <!-- TOP: Menú y logo -->
+        <top>
+            <VBox spacing="0">
+                <VBox spacing="10" style="-fx-background-color: #095ebb;">
+                    <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 10;">
+                        <Label text="🏨 HotelBooking" style="-fx-font-size: 22px; -fx-text-fill: white; -fx-font-weight: bold;" />
+                        <MenuBar>
+                            <menus>
+                                <Menu mnemonicParsing="false" text="Options">
+                                    <items>
+                                        <MenuItem text="Hotel Options" onAction="#hotelOptionsOnAction"/>
+                                        <MenuItem text="Room Options" onAction="#roomOptionsOnAction"/>
+                                        <MenuItem text="Front Desk Clerk Options" onAction="#frontDeskClerkOptionsOnAction"/>
+                                        <MenuItem text="Guest Options" onAction="#guestOptionsOnAction"/>
+                                    </items>
+                                </Menu>
+                            </menus>
+                        </MenuBar>
+                    </HBox>
+                </VBox>
 
-</BorderPane>
+                <!-- Buscador -->
+                <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 15 20 15 20; -fx-background-color: #BBCFE8FF;">
+                    <Label text="🔍" style="-fx-font-size: 18px;" />
+                    <ComboBox fx:id="hotelCombo" promptText="Destino" prefWidth="150"/>
+                    <DatePicker fx:id="fromDate" />
+                    <DatePicker fx:id="toDate" />
+                    <Button fx:id="clientSelectorButton" text="¿Quiénes?" prefWidth="100"/>
+                    <Button fx:id="searchButton" text="Buscar" onAction="#searchOnAction" style="-fx-background-color: #3985d8; -fx-text-fill: white;"/>
+                </HBox>
+            </VBox>
+        </top>
+
+        <!-- CENTER: Contenido principal -->
+        <!-- Centro -->
+        <center>
+            <VBox spacing="15" style="-fx-padding: 15;" alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+                <!-- Espaciador flexible -->
+                <Region VBox.vgrow="ALWAYS" />
+
+                <Label text="Trending rooms" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
+
+                <HBox spacing="15" alignment="CENTER">
+                    <ImageView fitHeight="250" fitWidth="250" preserveRatio="true">
+                        <image>
+                            <Image url="@img/Captura de pantalla 2025-05-16 180737.png" />
+                        </image>
+                    </ImageView>
+                    <ImageView fitHeight="250" fitWidth="250" preserveRatio="true">
+                        <image>
+                            <Image url="@img/Captura de pantalla 2025-05-16 180839.png" />
+                        </image>
+                    </ImageView>
+                    <ImageView fitHeight="250" fitWidth="250" preserveRatio="true">
+                        <image>
+                            <Image url="@img/Captura de pantalla 2025-05-16 180936.png" />
+                        </image>
+                    </ImageView>
+                </HBox>
+
+                <!-- Contenedor donde se cargarán otras vistas -->
+                <StackPane fx:id="contentPane" prefWidth="870.0" style="-fx-padding: 15;" />
+            </VBox>
+        </center>
+    </BorderPane>
+</StackPane>
+
+

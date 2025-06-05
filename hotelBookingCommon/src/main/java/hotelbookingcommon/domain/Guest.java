@@ -1,31 +1,71 @@
 package hotelbookingcommon.domain;
 
+import com.google.gson.annotations.Expose;
+import java.util.List;
+import java.util.ArrayList;
+
 public class Guest {
 
-    private int idNumber;
+    @Expose
+    private int id;
+
+    @Expose
+    private int credential;
+
+    @Expose
     private String name;
+
+    @Expose
     private String lastName;
+
+    @Expose
     private String address;
+
+    @Expose
     private String email;
-    private int phoneNumber;
+
+    @Expose
+    private String phoneNumber;
+
+    @Expose
     private String nativeCountry;
 
-    public Guest(int idNumber, String name, String lastName, String address, String email, int phoneNumber, String nativeCountry) {
-        this.idNumber = idNumber;
+    @Expose
+    private List<Booking> bookings;
+
+
+    public Guest(int id, int credential, String name, String lastName, String address, String email, String phoneNumber, String nativeCountry) {
+        this.id = id;
+        this.credential = credential;
         this.name = name;
         this.lastName = lastName;
         this.address = address;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.nativeCountry = nativeCountry;
+        this.bookings = new ArrayList<>();
     }
 
-    public int getIdNumber() {
-        return idNumber;
+
+    public Guest(int id, int credential, String name, String lastName, String address, String email, String phoneNumber, String nativeCountry, List<Booking> bookings) {
+        this(id, credential, name, lastName, address, email, phoneNumber, nativeCountry);
+        this.bookings = bookings != null ? bookings : new ArrayList<>();
     }
 
-    public void setIdNumber(int idNumber) {
-        this.idNumber = idNumber;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getCredential() {
+        return credential;
+    }
+
+    public void setCredential(int credential) {
+        this.credential = credential;
     }
 
     public String getName() {
@@ -60,11 +100,11 @@ public class Guest {
         this.email = email;
     }
 
-    public int getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(int phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
@@ -74,5 +114,32 @@ public class Guest {
 
     public void setNativeCountry(String nativeCountry) {
         this.nativeCountry = nativeCountry;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings != null ? bookings : new ArrayList<>();
+    }
+
+    public void addBooking(Booking booking) {
+        this.bookings.add(booking);
+    }
+
+    @Override
+    public String toString() {
+        return "Guest{" +
+                "id=" + id +
+                ", credential=" + credential +
+                ", name='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", address='" + address + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", nativeCountry='" + nativeCountry + '\'' +
+                ", bookings=" + bookings +
+                '}';
     }
 }

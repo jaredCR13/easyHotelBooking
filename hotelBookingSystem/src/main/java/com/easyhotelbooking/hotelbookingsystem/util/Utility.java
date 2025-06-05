@@ -7,6 +7,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Date;
 
 public class Utility {
 
@@ -17,7 +21,7 @@ public class Utility {
 
             Stage stage = (Stage) anyNodeInScene.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setTitle("Hotel Booking"); // o cualquier título
+            stage.setTitle("Hotel Booking");
         } catch (IOException e) {
             System.out.println("Error loading " + fxmlFileName);
             e.printStackTrace();
@@ -39,15 +43,28 @@ public class Utility {
         try {
             FXMLLoader loader = new FXMLLoader(Utility.class.getResource("/" + fxmlFileName));
             Parent view = loader.load();
-            bp.setTop(view);
+            bp.setTop(null);
             bp.setBottom(null);
-            bp.setCenter(null);
+            bp.setCenter(view);
+            bp.setRight(null);
+            bp.setLeft(null);
             return loader.getController(); // Devuelve el controlador
         } catch (IOException e) {
             System.out.println("Error loading center content: " + fxmlFileName);
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static LocalDate convertToLocalDate(Date date) {
+        if (date == null) return null;
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+
+    public static Date convertToDate(LocalDate localDate) {
+        if (localDate == null) return null;
+        return Date.from(localDate.atTime(12, 0).atZone(ZoneId.systemDefault()).toInstant());
     }
 
 

@@ -39,7 +39,6 @@ public class HotelConsultController {
             summary.append(style).append(": ").append(count).append("\n");
         }
 
-        // Mostrar en el Label
         roomTypesSummary.setText(summary.toString());
     }
 

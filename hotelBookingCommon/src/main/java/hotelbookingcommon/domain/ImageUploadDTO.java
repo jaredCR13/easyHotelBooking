@@ -1,11 +1,11 @@
 package hotelbookingcommon.domain;
 
 
-import java.io.Serializable; // Es buena práctica para DTOs que se envían por red
+import java.io.Serializable;
 
 public class ImageUploadDTO implements Serializable {
-    private int roomNumber;   // El número de la habitación a la que se asocia la imagen
-    private String fileName;  // El nombre original del archivo
+    private int roomNumber;
+    private String fileName;
     private byte[] imageData;
 
 

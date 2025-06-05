@@ -1,12 +1,15 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.roomregister;
 
 
-import com.easyhotelbooking.hotelbookingsystem.controller.MainInterfaceController;
+import com.easyhotelbooking.hotelbookingsystem.Main;
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
+import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
 import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,17 +22,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.io.*;
+
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-
-
-import hotelbookingcommon.domain.*;
-
-import javafx.scene.control.*;
 
 
 import java.io.ByteArrayInputStream; // Necesitarás esta importación
@@ -73,6 +70,8 @@ public class RoomRegisterController {
     private List<String> currentImagePaths = new ArrayList<>();
 
     private Stage primaryStage;
+    private Main mainAppReference;
+    private FrontDeskClerkDTO loggedInClerk;
 
     @FXML
     public void initialize() {
@@ -93,6 +92,16 @@ public class RoomRegisterController {
         this.roomOptionsController = roomOptionsController;
     }
 
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("RoomRegisterController: Main application reference set.");
+    }
+
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("RoomRegisterController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
+
     public void setStage(Stage stage) {
         this.primaryStage = stage;
     }
@@ -100,7 +109,7 @@ public class RoomRegisterController {
     @FXML
     private void onUploadImage() {
         if (currentImagePaths.size() >= 5) { // Limitar máximo 5 imágenes
-            util.FXUtility.alertInfo("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación.");
+            FXUtility.alertInfo("Límite de Imágenes", "Solo se permiten hasta 5 imágenes por habitación.");
             return;
         }
 
@@ -110,7 +119,7 @@ public class RoomRegisterController {
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
 
-        File selectedFile = fileChooser.showOpenDialog(primaryStage); // Usar primaryStage
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
         if (selectedFile != null) {
             try {
                 byte[] imageData = Files.readAllBytes(selectedFile.toPath());
@@ -121,27 +130,27 @@ public class RoomRegisterController {
                         imageData
                 );
 
-                Request request = new Request("uploadTempRoomImage", uploadDto); // Nueva acción para imágenes temporales
+                Request request = new Request("uploadTempRoomImage", uploadDto);
                 Response response = ClientConnectionManager.sendRequest(request);
 
                 if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
 
                     String tempImagePath = gson.fromJson(gson.toJson(response.getData()), String.class);
                     currentImagePaths.add(tempImagePath); // Añade la ruta temporal a la lista local
-                    util.FXUtility.alertInfo("Éxito", "Imagen subida temporalmente al servidor.");
+                    FXUtility.alertInfo("Éxito", "Imagen subida temporalmente al servidor.");
                     logger.info("Imagen temporal subida: {}", tempImagePath);
                     refreshImagesDisplay(); // Volver a cargar las imágenes
                 } else {
                     logger.error("Error al subir la imagen temporal al servidor: {}", response.getMessage());
-                    util.FXUtility.alert("Error", "No se pudo subir la imagen: " + response.getMessage());
+                    FXUtility.alert("Error", "No se pudo subir la imagen: " + response.getMessage());
                 }
 
             } catch (IOException e) {
                 logger.error("Error de E/S al leer la imagen o al enviarla al servidor: {}", e.getMessage(), e);
-                util.FXUtility.alert("Error", "No se pudo procesar la imagen para subir: " + e.getMessage());
+                FXUtility.alert("Error", "No se pudo procesar la imagen para subir: " + e.getMessage());
             } catch (Exception e) {
                 logger.error("Error inesperado en onUploadImage: {}", e.getMessage(), e);
-                util.FXUtility.alert("Error", "Ocurrió un error inesperado al subir la imagen.");
+                FXUtility.alert("Error", "Ocurrió un error inesperado al subir la imagen.");
             }
         }
     }
@@ -195,13 +204,12 @@ public class RoomRegisterController {
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == ButtonType.OK) {
 
-
                             if (currentImagePaths.remove(serverImagePath)) {
-                                util.FXUtility.alertInfo("Éxito", "Imagen eliminada de la lista.");
+                                FXUtility.alertInfo("Éxito", "Imagen eliminada de la lista.");
                                 logger.info("Imagen eliminada de la lista local: {}", serverImagePath);
                                 refreshImagesDisplay(); // Refrescar la UI
                             } else {
-                                util.FXUtility.alert("Error", "No se pudo encontrar la imagen para eliminar.");
+                                FXUtility.alert("Error", "No se pudo encontrar la imagen para eliminar.");
                             }
                         }
                     });
@@ -209,12 +217,12 @@ public class RoomRegisterController {
                     flowPane.getChildren().add(imageView);
                 } catch (Exception e) {
                     logger.error("Error al procesar la imagen descargada del servidor: {}", serverImagePath, e);
-                    util.FXUtility.alert("Error", "No se pudo cargar una imagen desde el servidor: " + serverImagePath + " - " + e.getMessage());
+                    FXUtility.alert("Error", "No se pudo cargar una imagen desde el servidor: " + serverImagePath + " - " + e.getMessage());
                 }
             } else {
                 logger.warn("No se pudo descargar la imagen del servidor: {}. Estado: {}, Mensaje: {}",
                         serverImagePath, response.getStatus(), response.getMessage());
-                util.FXUtility.alert("Advertencia", "No se pudo descargar una imagen desde el servidor: " + serverImagePath + " - " + response.getMessage());
+                FXUtility.alert("Advertencia", "No se pudo descargar una imagen desde el servidor: " + serverImagePath + " - " + response.getMessage());
             }
         }
     }
@@ -228,7 +236,7 @@ public class RoomRegisterController {
             Hotel selectedHotel = hotelComboBox.getSelectionModel().getSelectedItem();
 
             if (numberStr.isEmpty() || priceStr.isEmpty() || description.isEmpty() || selectedHotel == null) {
-                util.FXUtility.alert("Error", "Por favor, complete todos los campos y seleccione un hotel.");
+                FXUtility.alert("Error", "Por favor, complete todos los campos y seleccione un hotel.");
                 return;
             }
 
@@ -238,39 +246,38 @@ public class RoomRegisterController {
             RoomStyle style = styleCombo.getValue();
 
             if (status == null || style == null) {
-                util.FXUtility.alert("Error", "Seleccione estado y estilo de la habitación.");
+                FXUtility.alert("Error", "Seleccione estado y estilo de la habitación.");
                 return;
             }
 
-            // ** CAMBIO CLAVE AQUÍ: Asigna las rutas de las imágenes temporales a la habitación
             Room room = new Room(number, price, description, status, style, new ArrayList<>(currentImagePaths));
             room.setHotelId(selectedHotel.getNumHotel());
             room.setHotel(selectedHotel);
 
-            Request request = new Request("registerRoom", room); // Esta acción ya existía
+
+            Request request = new Request("registerRoom", room);
             Response response = ClientConnectionManager.sendRequest(request);
 
             if ("201".equalsIgnoreCase(response.getStatus())) {
-                util.FXUtility.alertInfo("Éxito", "Habitación registrada correctamente.");
+                FXUtility.alertInfo("Éxito", "Habitación registrada correctamente.");
                 if (roomOptionsController != null) {
                     roomOptionsController.loadRoomsIntoRegister();
                 }
                 clearFields();
-                // currentImagePaths ya se limpia en clearFields()
             } else if ("409".equalsIgnoreCase(response.getStatus())) {
-                util.FXUtility.alert("Error", response.getMessage());
+                FXUtility.alert("Error", response.getMessage());
                 logger.warn("Intento de registrar habitación duplicada: {}", number);
             } else {
-                util.FXUtility.alert("Error", "Error al registrar habitación: " + response.getMessage());
+                FXUtility.alert("Error", "Error al registrar habitación: " + response.getMessage());
                 logger.error("Error del servidor al registrar habitación: Status: {}, Message: {}", response.getStatus(), response.getMessage());
             }
 
         } catch (NumberFormatException e) {
-            util.FXUtility.alert("Error", "Número de habitación o precio inválido.");
+            FXUtility.alert("Error", "Número de habitación o precio inválido.");
             logger.error("Error de formato al registrar habitación: {}", e.getMessage());
         } catch (Exception e) {
             logger.error("Error al registrar habitación: {}", e.getMessage());
-            util.FXUtility.alert("Error", "Error inesperado al registrar habitación: " + e.getMessage());
+            FXUtility.alert("Error", "Error inesperado al registrar habitación: " + e.getMessage());
         }
     }
 
@@ -278,10 +285,15 @@ public class RoomRegisterController {
     public void onCancel(ActionEvent event) {
         RoomOptionsController controller = Utility.loadPage2("roominterface/roomoptions.fxml", parentBp);
         controller.setMainController(mainController);
-        // Pasa el Stage también si `RoomOptionsController` lo necesita
         if (this.primaryStage != null) {
             controller.setStage(this.primaryStage);
+            controller.setLoggedInClerk(this.loggedInClerk); // <--- ADD THIS LINE
+            controller.setMainApp(this.mainAppReference);
+        } else {
+        FXUtility.alert("Error de Navegación", "No se pudo volver a la página de opciones de habitaciones.");
+        logger.error("Failed to load roomoptions.fxml from RoomRegisterController onCancel.");
         }
+
         roomOptionsController.loadRoomsIntoRegister();
         clearFields();
     }
@@ -307,7 +319,7 @@ public class RoomRegisterController {
                 }
             });
         } else {
-            util.FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
+            FXUtility.alert("Error", "No se pudieron cargar los hoteles para el ComboBox.");
             logger.error("Error al cargar hoteles para ComboBox: {}", response != null ? response.getMessage() : "Desconocido");
         }
     }

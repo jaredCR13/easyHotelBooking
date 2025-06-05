@@ -12,26 +12,40 @@
 
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.layout.Region?>
 <BorderPane fx:id="bp" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.hotelregister.HotelOptionsController">
 
     <!-- Sección superior azul -->
     <top>
+        <VBox spacing="0">
         <VBox spacing="10" style="-fx-background-color: #095ebb; -fx-padding: 20;">
             <Label style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;" text="Hotel Options" />
 
-
             <!-- Sección de botones -->
             <HBox alignment="TOP_LEFT" spacing="10">
-                <Button fx:id="registerButton" onAction="#registerHotelOnAction" prefWidth="100" text="Register Hotel" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
-                <Button fx:id="goBack" layoutX="40.0" layoutY="110.0" onAction="#goBackOnAction" prefWidth="120" text="Go back" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
+                <Button fx:id="registerButton" onAction="#registerHotelOnAction" prefWidth="100" text="Register Hotel" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
+                <Button fx:id="goBack" layoutX="40.0" layoutY="110.0" onAction="#goBackOnAction" prefWidth="120" text="Go back" style="-fx-background-color: #5fabff; -fx-text-fill: white;" />
             </HBox>
         </VBox>
 
+        <!-- Línea decorativa -->
+            <Region prefHeight="10" style="-fx-background-color: #3985d8;" VBox.vgrow="NEVER"/>
+        </VBox>
     </top>
 
-        <!-- Sección del TableView -->
+
     <center>
         <VBox spacing="20" style="-fx-padding: 30;">
+
+            <!-- Busqueda rápida -->
+            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 30 0 30;">
+                <Label text="Quick Search:" style="-fx-font-weight: bold; -fx-text-fill: #333;" />
+                <TextField fx:id="quickSearchField" promptText="Hotel Number" prefWidth="120"/>
+                <Button text="🔍" onAction="#onQuickHotelSearch" style="-fx-background-color: #3985d8; -fx-text-fill: white;" />
+                <Button text="Clear" onAction="#onClearSearch" style="-fx-background-color: #6c757d; -fx-text-fill: white;" />
+            </HBox>
+
+            <!-- Sección del TableView -->
             <TableView fx:id="hotelRegister" prefHeight="300" prefWidth="560">
                 <columns>
                     <TableColumn fx:id="numberHotelRegister" text="Number" prefWidth="100"/>

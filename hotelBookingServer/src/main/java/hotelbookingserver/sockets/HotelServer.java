@@ -35,7 +35,6 @@ public class HotelServer {
             }
         } catch (IOException e) {
             logger.error("Error al iniciar el servidor: {}", e.getMessage());
-
             throw new RuntimeException("Error starting server", e);
         } finally {
             stop();

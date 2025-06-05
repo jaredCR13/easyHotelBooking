@@ -1,25 +1,42 @@
 package hotelbookingcommon.domain;
 
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
-public class Booking {
+public class Booking implements Serializable {
 
     private int bookingNumber;
-    private Guest guest;
-    private Date starDate;
+    private int hotelId;
+    private int guestId;             // Solo el ID
+    private Date startDate;
     private Date endDate;
-    private FrontDeskClerk frontDeskClerk;
+    private String frontDeskClerkId; // Solo el ID
     private int daysOfStay;
-    private Room room;
+    private int roomNumber;          // Solo el número de habitación (que actúa como ID)
 
-    public Booking(int bookingNumber, Guest guest, Date starDate, Date endDate, FrontDeskClerk frontDeskClerk, int daysOfStay, Room room) {
+    public Booking(int bookingNumber,int hotelId, int guestId, Date starDate, Date endDate, String frontDeskClerkId, int daysOfStay, int roomNumber) {
         this.bookingNumber = bookingNumber;
-        this.guest = guest;
-        this.starDate = starDate;
+        this.hotelId= hotelId;
+        this.guestId = guestId;
+        this.startDate = starDate;
         this.endDate = endDate;
-        this.frontDeskClerk = frontDeskClerk;
+        this.frontDeskClerkId = frontDeskClerkId;
         this.daysOfStay = daysOfStay;
-        this.room = room;
+        this.roomNumber = roomNumber;
+
+    }
+
+    public Booking() {
+    }
+
+    public int getHotelId() {
+        return hotelId;
+    }
+
+    public void setHotelId(int hotelId) {
+        this.hotelId = hotelId;
     }
 
     public int getBookingNumber() {
@@ -30,20 +47,20 @@ public class Booking {
         this.bookingNumber = bookingNumber;
     }
 
-    public Guest getGuest() {
-        return guest;
+    public int getGuestId() { // Getter para el ID del huésped
+        return guestId;
     }
 
-    public void setGuest(Guest guest) {
-        this.guest = guest;
+    public void setGuestId(int guestId) { // Setter para el ID del huésped
+        this.guestId = guestId;
     }
 
-    public Date getStarDate() {
-        return starDate;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public void setStarDate(Date starDate) {
-        this.starDate = starDate;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public Date getEndDate() {
@@ -54,12 +71,12 @@ public class Booking {
         this.endDate = endDate;
     }
 
-    public FrontDeskClerk getFrontDesk() {
-        return frontDeskClerk;
+    public String getFrontDeskClerkId() { // Getter para el ID del recepcionista
+        return frontDeskClerkId;
     }
 
-    public void setFrontDesk(FrontDeskClerk frontDeskClerk) {
-        this.frontDeskClerk = frontDeskClerk;
+    public void setFrontDeskClerkId(String frontDeskClerkId) { // Setter para el ID del recepcionista
+        this.frontDeskClerkId = frontDeskClerkId;
     }
 
     public int getDaysOfStay() {
@@ -70,11 +87,51 @@ public class Booking {
         this.daysOfStay = daysOfStay;
     }
 
-    public Room getRoom() {
-        return room;
+    public int getRoomNumber() { // Getter para el número de habitación
+        return roomNumber;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
+    public void setRoomNumber(int roomNumber) { // Setter para el número de habitación
+        this.roomNumber = roomNumber;
+    }
+
+    public String getStartDateStr() {
+        if (startDate == null) return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(startDate);
+    }
+
+    public String getEndDateStr() {
+        if (endDate == null) return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(endDate);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Booking booking = (Booking) o;
+
+        return bookingNumber == booking.bookingNumber &&
+                hotelId == booking.hotelId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bookingNumber, hotelId);
+    }
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "bookingNumber=" + bookingNumber +
+                ", hotelId=" + hotelId +
+                ", guestId=" + guestId +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", frontDeskClerkId='" + frontDeskClerkId + '\'' +
+                ", daysOfStay=" + daysOfStay +
+                ", roomNumber=" + roomNumber +
+                '}';
     }
 }

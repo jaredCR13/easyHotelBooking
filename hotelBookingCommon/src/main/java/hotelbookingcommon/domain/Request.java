@@ -1,7 +1,9 @@
 package hotelbookingcommon.domain;
 
 
-public class Request {
+import java.io.Serializable;
+
+public class Request{
     private String action;
     private Object data;
 

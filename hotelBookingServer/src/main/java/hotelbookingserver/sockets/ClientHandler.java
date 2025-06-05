@@ -2,6 +2,7 @@ package hotelbookingserver.sockets;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import hotelbookingcommon.domain.Request;
 import hotelbookingcommon.domain.Response;
@@ -15,7 +16,9 @@ import java.net.Socket;
 public class ClientHandler implements Runnable {
     private static final Logger logger = LogManager.getLogger(ClientHandler.class);
     private final Socket socket;
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .create();
     private final ProtocolHandler handler = new ProtocolHandler();
 
     public ClientHandler(Socket socket) {
@@ -26,7 +29,7 @@ public class ClientHandler implements Runnable {
     public void run() {
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true) // Use OutputStreamWriter
+                PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true)
         ) {
             String line;
             while ((line = in.readLine()) != null) {
@@ -38,7 +41,6 @@ public class ClientHandler implements Runnable {
                     out.println(resJson);
                     logger.debug("Enviado al cliente {}: {}", socket.getInetAddress(), resJson);
                 } catch (JsonParseException e) {
-                    // Handle JSON parsing errors
                     Response errorResponse = new Response("ERROR", "Invalid JSON request", null);
                     String errorJson = gson.toJson(errorResponse);
                     out.println(errorJson);

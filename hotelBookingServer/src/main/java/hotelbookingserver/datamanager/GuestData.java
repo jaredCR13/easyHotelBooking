@@ -138,4 +138,5 @@ public class GuestData {
     public void close() throws IOException {
         if (raf != null) raf.close();
     }
+
 }

@@ -79,6 +79,10 @@ public class GuestRegisterController {
                 return;
             }
 
+            if (!email.matches("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$")) {
+                FXUtility.alert("Error de Validación", "Formato de correo electrónico inválido.");
+                return;
+            }
             Guest guest = new Guest(id, credential, name, lastName, address, email, phone, country);
             Request request = new Request("registerGuest", guest);
             Response response = ClientConnectionManager.sendRequest(request);

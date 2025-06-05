@@ -1,6 +1,7 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.bookingregister;
 
 import com.easyhotelbooking.hotelbookingsystem.Main;
+import com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController;
 import com.easyhotelbooking.hotelbookingsystem.controller.search.SearchController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -46,7 +47,7 @@ public class BookingRegisterController {
     @FXML private TextField daysOfStayTf;
     @FXML
     private FlowPane flowPane;
-    private Stage stage;
+
     private Hotel selectedHotelFromSearch;
     private Date startDate;
     private Date endDate;
@@ -56,15 +57,22 @@ public class BookingRegisterController {
     private Stage primaryStage;
     private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
     private Main mainAppReference;
+    private MainInterfaceController mainInterfaceController;
+    private BorderPane parentBp;
+    private SearchController searchController;
+
 
     public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
         this.loggedInClerk = loggedInClerk;
         logger.info("HotelOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
     }
 
-    public void setSearchApp(Main mainAppReference) {
+    public void setMainApp(Main mainAppReference) {
         this.mainAppReference = mainAppReference;
         logger.info("HotelOptionsController: Main application reference set.");
+    }
+    public void setSearchController(SearchController searchController){
+        this.searchController=searchController;
     }
     public void setSelectedHotelFromSearch(Hotel hotel,Date startDate,Date endDate) {
         this.selectedHotelFromSearch = hotel;
@@ -76,7 +84,16 @@ public class BookingRegisterController {
         updateRoomDetails();
         loadImagesIntoFlowPane();
     }
+    public void setStage(Stage stage) {
+        this.primaryStage = stage;
+    }
+    public void setMainController(MainInterfaceController mainController) {
 
+        this.mainInterfaceController=mainController;
+    }
+    public void setParentBp(BorderPane parentBp) {
+        this.parentBp = parentBp;
+    }
     @FXML
     public void initialize() {
         startDatePicker.valueProperty().addListener((obs, oldDate, newDate) -> updateDaysOfStay());
@@ -263,7 +280,7 @@ public class BookingRegisterController {
                 if ("201".equalsIgnoreCase(response.getStatus())) {
                     FXUtility.alertInfo("Éxito", "Reserva creada exitosamente!");
                     logger.info("Reserva exitosa: " + newBooking.getBookingNumber());
-                    onCancel(null); // O redirigir
+
                 } else {
                     FXUtility.alert("Error de Reserva", "No se pudo crear la reserva: " + response.getMessage());
                     logger.error("Fallo al crear reserva: " + response.getMessage());
@@ -279,10 +296,12 @@ public class BookingRegisterController {
             SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
 
             if (searchController != null) {
-                searchController.setStage(this.stage);
+                searchController.setStage(this.primaryStage);
+                searchController.setLoggedInClerk(this.loggedInClerk); // <--- ADD THIS LINE
+                searchController.setMainApp(this.mainAppReference);
+                    if (this.selectedHotelFromSearch != null) {
+                        searchController.setSearchCriteria(this.selectedHotelFromSearch, startDate, endDate);
 
-                if (this.selectedHotelFromSearch != null) {
-                    searchController.setSearchCriteria(this.selectedHotelFromSearch,startDate,endDate);
                     logger.info("Regresando a búsqueda y restableciendo hotel: " + this.selectedHotelFromSearch.getHotelName());
                 } else {
                     logger.warn("No se pudo restablecer el hotel en SearchController al cancelar. La vista de habitaciones puede no cargarse correctamente.");
@@ -360,5 +379,6 @@ public class BookingRegisterController {
             logger.info("No hay rutas de imagen para la habitación.");
         }
     }
+
 
 }

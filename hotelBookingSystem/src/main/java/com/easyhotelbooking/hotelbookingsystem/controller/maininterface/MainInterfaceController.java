@@ -386,6 +386,12 @@ public class MainInterfaceController {
 
         @FXML
         void frontDeskClerkOptionsOnAction() {
+                //Solo administrador puede acceder a esta seccion
+                if(loggedInClerk==null || loggedInClerk.getFrontDeskClerkRoleEnum()!=FrontDeskClerkRole.ADMINISTRATOR){
+                        FXUtility.alert("Permiso Denegado","No tienes los permisos para gestionar recepcionistas");
+                        return;
+                }
+
                 FrontDeskClerkOptionsController controller = Utility.loadPage2("frontdeskclerkinterface/frontdeskclerkoptions.fxml", bp);
                 controller.setMainApp(mainAppReference); // referencia a MainApp
                 controller.setLoggedInClerk(loggedInClerk); // recepcionista logueado
@@ -559,7 +565,9 @@ public class MainInterfaceController {
                                         searchController.setLoggedInClerk(loggedInClerk);
                                         Date startDate = java.util.Date.from(localStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                                         Date endDate = java.util.Date.from(localEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
+                                        List<Room> availableRooms = selectedHotel.getRooms().stream()
+                                                .filter(r -> RoomStatus.AVAILABLE.equals(r.getStatus()))
+                                                .collect(Collectors.toList());
                                         searchController.setSearchCriteria(selectedHotel, startDate, endDate);
 
                                 } else {

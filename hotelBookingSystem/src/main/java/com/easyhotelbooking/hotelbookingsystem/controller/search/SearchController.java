@@ -161,13 +161,13 @@ public class SearchController {
         String isoStart = startZoned.format(formatter);
         String isoEnd = endZoned.format(formatter);
 
-        // Crear un Map con los datos (en vez de Booking)
-        Map<String, Object> criteriaMap = new HashMap<>();
-        criteriaMap.put("hotelId", selectedHotel.getNumHotel());
-        criteriaMap.put("startDate", isoStart);
-        criteriaMap.put("endDate", isoEnd);
+        Booking bookingCriteria = new Booking();
+        bookingCriteria.setHotelId(selectedHotel.getNumHotel());
+        bookingCriteria.setStartDate(Date.from(startZoned.toInstant()));
+        bookingCriteria.setEndDate(Date.from(endZoned.toInstant()));
 
-        Request request = new Request("getAvailableRoomsByDate", criteriaMap);
+        Request request = new Request("getAvailableRoomsByDate", bookingCriteria);
+
 
         logger.info("Enviando solicitud de búsqueda para hotel ID: {}, desde {} hasta {}",
                 selectedHotel.getNumHotel(), isoStart, isoEnd);
@@ -297,6 +297,11 @@ public class SearchController {
                 // Pasa el hotel seleccionado a la instancia de BookingRegisterController
                 bookingRegController.setSelectedHotelFromSearch(this.selectedHotel, startDate, endDate);
                 bookingRegController.setSelectedRoomFromSearch(room);
+                bookingRegController.setMainController(mainController);
+                bookingRegController.setParentBp(bp); // para poder regresar después
+                bookingRegController.setSearchController(this); // si necesitas volver aquí
+                bookingRegController.setLoggedInClerk(this.loggedInClerk);
+                bookingRegController.setMainApp(this.mainAppReference);
             }
         });
 
@@ -378,7 +383,8 @@ public class SearchController {
         if (controller != null) {
             controller.setSelectedHotelFromSearchTable(selectedHotel, startDate, endDate);
             controller.setStage(stage);
-
+            controller.setMainApp(mainAppReference);
+            controller.setLoggedInClerk(loggedInClerk);
         }
     }
 }

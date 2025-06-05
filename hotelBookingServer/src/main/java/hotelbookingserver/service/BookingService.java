@@ -2,6 +2,7 @@ package hotelbookingserver.service;
 
 import hotelbookingcommon.domain.Booking;
 import hotelbookingcommon.domain.Room;
+import hotelbookingcommon.domain.RoomStatus;
 import hotelbookingserver.datamanager.BookingData;
 import hotelbookingserver.datamanager.FrontDeskClerkData;
 import hotelbookingserver.datamanager.GuestData;
@@ -177,7 +178,7 @@ public class BookingService {
         List<Booking> existingBookings = bookingData.findAll();
 
         for (Booking existingBooking : existingBookings) {
-            // Filter by room number AND hotel ID to check for conflicts
+
             if (existingBooking.getRoomNumber() == roomNumber && existingBooking.getHotelId() == hotelId) {
                 Date existingStartDate = existingBooking.getStartDate();
                 Date existingEndDate = existingBooking.getEndDate();
@@ -227,7 +228,13 @@ public class BookingService {
         List<Room> available = new ArrayList<>();
 
         for (Room room : allHotelRooms) {
-            logger.debug("Verificando conflictos para habitación {}", room.getRoomNumber());
+            logger.debug("Revisando habitación {} con estado: {}", room.getRoomNumber(), room.getStatus());
+
+            if (room.getStatus() == null || room.getStatus() != RoomStatus.AVAILABLE) {
+                logger.debug("Habitación {} ignorada por estado: {}", room.getRoomNumber(), room.getStatus());
+                continue;
+            }
+
             boolean hasConflict = hasConflictingBooking(room.getRoomNumber(), hotelId, startDate, endDate);
             if (!hasConflict) {
                 available.add(room);
@@ -237,5 +244,6 @@ public class BookingService {
         logger.info("Habitaciones disponibles encontradas: {}", available.size());
         return available;
     }
+
 
 }

@@ -1,5 +1,6 @@
 package com.easyhotelbooking.hotelbookingsystem.controller.bookingregister;
 
+import com.easyhotelbooking.hotelbookingsystem.Main;
 import com.easyhotelbooking.hotelbookingsystem.controller.search.SearchController;
 import com.easyhotelbooking.hotelbookingsystem.socket.ClientConnectionManager;
 import com.easyhotelbooking.hotelbookingsystem.util.FXUtility;
@@ -7,6 +8,7 @@ import com.easyhotelbooking.hotelbookingsystem.util.Utility;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import hotelbookingcommon.domain.*;
+import hotelbookingcommon.domain.LogIn.FrontDeskClerkDTO;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -52,7 +54,18 @@ public class BookingTableController {
     private Room selectedRoomFromSearch;
     private Hotel selectedHotelFromSearch;
     private Date startDate, endDate;
+    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+    private Main mainAppReference;
 
+    public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
+        this.loggedInClerk = loggedInClerk;
+        logger.info("HotelOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+    }
+
+    public void setMainApp(Main mainAppReference) {
+        this.mainAppReference = mainAppReference;
+        logger.info("HotelOptionsController: Main application reference set.");
+    }
 
     public void initialize() {
         bookingNumberColumn.setCellValueFactory(new PropertyValueFactory<>("bookingNumber"));
@@ -147,6 +160,8 @@ public class BookingTableController {
             controller.setBookingTableController(this);
             controller.setBooking(booking);
             controller.setSelectedHotel(selectedHotelFromSearch, startDate, endDate);
+            controller.setLoggedInClerk(loggedInClerk);
+            controller.setMainApp(mainAppReference);
         }
     }
 
@@ -181,6 +196,8 @@ public class BookingTableController {
             SearchController controller = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
             if (controller != null) {
                 controller.setStage(stage);
+                controller.setLoggedInClerk(loggedInClerk);
+                controller.setMainApp(mainAppReference);
                 if (selectedHotelFromSearch != null) {
                     controller.setSearchCriteria(selectedHotelFromSearch, startDate, endDate);
                 }

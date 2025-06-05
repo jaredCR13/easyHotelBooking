@@ -150,8 +150,11 @@ public class RoomService {
     }
     public List<Room> getRoomsByHotelId(int hotelId) {
         try {
-
             List<Room> allRooms = roomData.findAll();
+
+            allRooms.forEach(room ->
+                    logger.info("Habitación {} hotel {} estado {}", room.getRoomNumber(), room.getHotelId(), room.getStatus())
+            );
 
             return allRooms.stream()
                     .filter(room -> room.getHotelId() == hotelId)
@@ -161,6 +164,7 @@ public class RoomService {
             throw new RuntimeException("Error al obtener habitaciones por hotel ID", e);
         }
     }
+
     public Room getRoomById(int roomNumber) {
         try {
             Room foundRoom = roomData.findById(roomNumber);

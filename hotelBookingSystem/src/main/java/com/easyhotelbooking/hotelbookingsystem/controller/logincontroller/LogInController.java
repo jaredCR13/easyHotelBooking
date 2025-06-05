@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +24,7 @@ public class LogInController {
 
     private static final Logger logger = LogManager.getLogger(LogInController.class);
     private Gson gson = new Gson();
-
+    private Stage stage;
     private Main mainAppReference;
 
     public void setMainApp(Main mainAppReference) {
@@ -63,4 +64,6 @@ public class LogInController {
             FXUtility.alert("Error de Login", message);
         }
     }
+
+
 }

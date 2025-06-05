@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
-<?import javafx.geometry.*?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/23.0.1"
-           xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController">
+<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.maininterface.MainInterfaceController">
 
     <!-- Imagen de fondo -->
 
@@ -20,31 +27,32 @@
         <top>
             <VBox spacing="0">
                 <VBox spacing="10" style="-fx-background-color: #095ebb;">
-                    <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 10;">
-                        <Label text="🏨 HotelBooking" style="-fx-font-size: 22px; -fx-text-fill: white; -fx-font-weight: bold;" />
+                    <HBox alignment="CENTER_LEFT" prefHeight="53.0" prefWidth="912.0" spacing="15" style="-fx-padding: 10;">
+                        <Label style="-fx-font-size: 22px; -fx-text-fill: white; -fx-font-weight: bold;" text="🏨 HotelBooking" />
                         <MenuBar>
                             <menus>
                                 <Menu mnemonicParsing="false" text="Options">
                                     <items>
-                                        <MenuItem text="Hotel Options" onAction="#hotelOptionsOnAction"/>
-                                        <MenuItem text="Room Options" onAction="#roomOptionsOnAction"/>
-                                        <MenuItem text="Front Desk Clerk Options" onAction="#frontDeskClerkOptionsOnAction"/>
-                                        <MenuItem text="Guest Options" onAction="#guestOptionsOnAction"/>
+                                        <MenuItem onAction="#hotelOptionsOnAction" text="Hotel Options" />
+                                        <MenuItem onAction="#roomOptionsOnAction" text="Room Options" />
+                                        <MenuItem onAction="#frontDeskClerkOptionsOnAction" text="Front Desk Clerk Options" />
+                                        <MenuItem onAction="#guestOptionsOnAction" text="Guest Options" />
                                     </items>
                                 </Menu>
                             </menus>
                         </MenuBar>
+                  <Button mnemonicParsing="false" onAction="#logOutOnAction" text="Cerrar sesión" />
                     </HBox>
                 </VBox>
 
                 <!-- Buscador -->
                 <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 15 20 15 20; -fx-background-color: #BBCFE8FF;">
-                    <Label text="🔍" style="-fx-font-size: 18px;" />
-                    <ComboBox fx:id="hotelCombo" promptText="Destino" prefWidth="150"/>
+                    <Label style="-fx-font-size: 18px;" text="🔍" />
+                    <ComboBox fx:id="hotelCombo" prefWidth="150" promptText="Destino" />
                     <DatePicker fx:id="fromDate" />
                     <DatePicker fx:id="toDate" />
-                    <Button fx:id="clientSelectorButton" text="¿Quiénes?" prefWidth="100"/>
-                    <Button fx:id="searchButton" text="Buscar" onAction="#searchOnAction" style="-fx-background-color: #3985d8; -fx-text-fill: white;"/>
+                    <Button fx:id="clientSelectorButton" prefWidth="100" text="¿Quiénes?" />
+                    <Button fx:id="searchButton" onAction="#searchOnAction" style="-fx-background-color: #3985d8; -fx-text-fill: white;" text="Buscar" />
                 </HBox>
             </VBox>
         </top>
@@ -52,13 +60,13 @@
         <!-- CENTER: Contenido principal -->
         <!-- Centro -->
         <center>
-            <VBox spacing="15" style="-fx-padding: 15;" alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+            <VBox alignment="BOTTOM_CENTER" spacing="15" style="-fx-padding: 15;" VBox.vgrow="ALWAYS">
                 <!-- Espaciador flexible -->
                 <Region VBox.vgrow="ALWAYS" />
 
-                <Label text="Trending rooms" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" text="Trending rooms" />
 
-                <HBox spacing="15" alignment="CENTER">
+                <HBox alignment="CENTER" spacing="15">
                     <ImageView fitHeight="250" fitWidth="250" preserveRatio="true">
                         <image>
                             <Image url="@img/Captura de pantalla 2025-05-16 180737.png" />
@@ -82,5 +90,3 @@
         </center>
     </BorderPane>
 </StackPane>
-
-

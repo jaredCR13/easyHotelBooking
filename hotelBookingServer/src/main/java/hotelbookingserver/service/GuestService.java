@@ -12,7 +12,7 @@ import java.util.Objects;
 
 public class GuestService {
     private static final Logger logger = LogManager.getLogger(GuestService.class);
-    private static final String GUEST_FILE = "C:\\Users\\Lab01\\Desktop\\Proyecto\\DATA\\guests.dat";
+    private static final String GUEST_FILE = "C:\\Users\\PC\\Documents\\UCR\\Progra_II\\PROYECTO\\BinaryFilesLocal\\GuestFiles\\guests.dat";
 
     private GuestData guestData;
 
@@ -25,43 +25,38 @@ public class GuestService {
         }
     }
 
-    public boolean addGuest(Guest guest) {
-        try {
-            List<Guest> existingGuests = guestData.findAll();
+    public String addGuest(Guest guest) throws IOException {
+        List<Guest> existingGuests = guestData.findAll();
 
-            for (Guest existing : existingGuests) {
-                if (existing.getId() == guest.getId()) {
-                    logger.warn("ID duplicado: {}", guest.getId());
-                    return false;
-                }
-                if (Objects.equals(existing.getCredential(), guest.getCredential())) {
-                    logger.warn("Credential duplicado: {}", guest.getCredential());
-                    return false;
-                }
-                if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(guest.getEmail())) {
-                    logger.warn("Email duplicado: {}", guest.getEmail());
-                    return false;
-                }
-                if (existing.getPhoneNumber() != null && existing.getPhoneNumber().equals(guest.getPhoneNumber())) {
-                    logger.warn("Número de teléfono duplicado: {}", guest.getPhoneNumber());
-                    return false;
-                }
-                if (existing.getName() != null && existing.getLastName() != null &&
-                        guest.getName() != null && guest.getLastName() != null &&
-                        existing.getName().equalsIgnoreCase(guest.getName()) &&
-                        existing.getLastName().equalsIgnoreCase(guest.getLastName())) {
-                    logger.warn("Nombre y apellido duplicados: {} {}", guest.getName(), guest.getLastName());
-                    return false;
-                }
+        for (Guest existing : existingGuests) {
+            if (existing.getId() == guest.getId()) {
+                logger.warn("ID duplicado: {}", guest.getId());
+                return "ID " + guest.getId();
             }
-
-            guestData.insert(guest);
-            logger.info("Huésped agregado: {}", guest);
-            return true;
-        } catch (IOException e) {
-            logger.error("Error al agregar huésped: {}", e.getMessage());
-            return false;
+            if (Objects.equals(existing.getCredential(), guest.getCredential())) {
+                logger.warn("Credential duplicado: {}", guest.getCredential());
+                return "credencial " + guest.getCredential();
+            }
+            if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(guest.getEmail())) {
+                logger.warn("Email duplicado: {}", guest.getEmail());
+                return "correo electrónico " + guest.getEmail();
+            }
+            if (existing.getPhoneNumber() != null && existing.getPhoneNumber().equals(guest.getPhoneNumber())) {
+                logger.warn("Número de teléfono duplicado: {}", guest.getPhoneNumber());
+                return "número de teléfono " + guest.getPhoneNumber();
+            }
+            if (existing.getName() != null && existing.getLastName() != null &&
+                    guest.getName() != null && guest.getLastName() != null &&
+                    existing.getName().equalsIgnoreCase(guest.getName()) &&
+                    existing.getLastName().equalsIgnoreCase(guest.getLastName())) {
+                logger.warn("Nombre y apellido duplicados: {} {}", guest.getName(), guest.getLastName());
+                return "nombre y apellido (" + guest.getName() + " " + guest.getLastName() + ")"; // Return specific duplicate field
+            }
         }
+
+        guestData.insert(guest);
+        logger.info("Huésped agregado: {}", guest);
+        return null; // Success, no duplicate
     }
 
     public List<Guest> getAllGuests() {
@@ -90,45 +85,45 @@ public class GuestService {
         }
     }
 
-    public boolean updateGuest(Guest guest) {
-        try {
-            List<Guest> existingGuests = guestData.findAll();
+    public String updateGuest(Guest guest) throws IOException { // Changed return type to String
+        List<Guest> existingGuests = guestData.findAll();
+        boolean guestExists = false;
 
-            for (Guest existing : existingGuests) {
-                if (existing.getId() != guest.getId()) { // ignorar el mismo huésped
-                    if (Objects.equals(existing.getCredential(), guest.getCredential())) {
-                        logger.warn("Credential duplicado: {}", guest.getCredential());
-                        return false;
-                    }
-                    if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(guest.getEmail())) {
-                        logger.warn("Email duplicado: {}", guest.getEmail());
-                        return false;
-                    }
-                    if (existing.getPhoneNumber() != null && existing.getPhoneNumber().equals(guest.getPhoneNumber())) {
-                        logger.warn("Teléfono duplicado: {}", guest.getPhoneNumber());
-                        return false;
-                    }
-                    if (existing.getName() != null && existing.getLastName() != null &&
-                            guest.getName() != null && guest.getLastName() != null &&
-                            existing.getName().equalsIgnoreCase(guest.getName()) &&
-                            existing.getLastName().equalsIgnoreCase(guest.getLastName())) {
-                        logger.warn("Nombre y apellido duplicados: {} {}", guest.getName(), guest.getLastName());
-                        return false;
-                    }
+        for (Guest existing : existingGuests) {
+            if (existing.getId() == guest.getId()) {
+                guestExists = true; //ENCUENTRA EL GUEST A ACTUALIZAR
+            } else {
+                //REVISAMOE DUPLICADOS
+                if (Objects.equals(existing.getCredential(), guest.getCredential())) {
+                    logger.warn("Credential duplicado: {}", guest.getCredential());
+                    return "credencial " + guest.getCredential();
+                }
+                if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(guest.getEmail())) {
+                    logger.warn("Email duplicado: {}", guest.getEmail());
+                    return "correo electrónico " + guest.getEmail();
+                }
+                if (existing.getPhoneNumber() != null && existing.getPhoneNumber().equals(guest.getPhoneNumber())) {
+                    logger.warn("Teléfono duplicado: {}", guest.getPhoneNumber());
+                    return "número de teléfono " + guest.getPhoneNumber();
+                }
+                if (existing.getName() != null && existing.getLastName() != null &&
+                        guest.getName() != null && guest.getLastName() != null &&
+                        existing.getName().equalsIgnoreCase(guest.getName()) &&
+                        existing.getLastName().equalsIgnoreCase(guest.getLastName())) {
+                    logger.warn("Nombre y apellido duplicados: {} {}", guest.getName(), guest.getLastName());
+                    return "nombre y apellido (" + guest.getName() + " " + guest.getLastName() + ")";
                 }
             }
-
-            boolean updated = guestData.update(guest);
-            if (updated) {
-                logger.info("Huésped actualizado: {}", guest);
-            } else {
-                logger.warn("No se encontró huésped con ID: {}", guest.getId());
-            }
-            return updated;
-        } catch (IOException e) {
-            logger.error("Error al actualizar huésped: {}", e.getMessage());
-            return false;
         }
+
+        if (!guestExists) {
+            logger.warn("No se encontró huésped con ID: {}", guest.getId());
+            return "not found"; // Indicate that the guest to update was not found
+        }
+
+        guestData.update(guest);
+        logger.info("Huésped actualizado: {}", guest);
+        return null; // Success, no duplicate
     }
 
     public boolean deleteGuest(int id) {

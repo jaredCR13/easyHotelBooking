@@ -230,10 +230,6 @@ public class BookingService {
         for (Room room : allHotelRooms) {
             logger.debug("Revisando habitación {} con estado: {}", room.getRoomNumber(), room.getStatus());
 
-            if (room.getStatus() == null || room.getStatus() != RoomStatus.AVAILABLE) {
-                logger.debug("Habitación {} ignorada por estado: {}", room.getRoomNumber(), room.getStatus());
-                continue;
-            }
 
             boolean hasConflict = hasConflictingBooking(room.getRoomNumber(), hotelId, startDate, endDate);
             if (!hasConflict) {
@@ -244,6 +240,5 @@ public class BookingService {
         logger.info("Habitaciones disponibles encontradas: {}", available.size());
         return available;
     }
-
 
 }

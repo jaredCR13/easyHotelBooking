@@ -15,6 +15,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
@@ -34,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -53,6 +55,26 @@ public class SearchController {
     @FXML
     private ScrollPane scrollPane;
     @FXML
+    private CheckBox deluxeCheck;
+
+    @FXML
+    private CheckBox familyCheck;
+    @FXML
+    private CheckBox standardCheck;
+
+    @FXML
+    private CheckBox suiteCheck;
+
+    @FXML
+    private CheckBox checkHighPrice; // Agregado
+
+    @FXML
+    private CheckBox checkLowPrice; // Agregado
+
+    @FXML
+    private CheckBox checkMediumPrice; // Agregado
+
+    @FXML
     private Text hotelNameText;
     private MainInterfaceController mainController;
     private Stage stage;
@@ -71,24 +93,25 @@ public class SearchController {
     public void setStage(Stage stage) {
         this.stage = stage;
     }
-    private FrontDeskClerkDTO loggedInClerk; // Add a field to store the logged-in clerk
+
+    private FrontDeskClerkDTO loggedInClerk;
     private Main mainAppReference;
 
     public void setLoggedInClerk(FrontDeskClerkDTO loggedInClerk) {
         this.loggedInClerk = loggedInClerk;
-        logger.info("HotelOptionsController: Logged-in clerk received: {}", loggedInClerk.getUser());
+        logger.info("SearchController: Logged-in clerk received: {}", loggedInClerk.getUser());
     }
 
     public void setMainApp(Main mainAppReference) {
         this.mainAppReference = mainAppReference;
-        logger.info("HotelOptionsController: Main application reference set.");
+        logger.info("SearchController: Main application reference set.");
     }
 
     public void setSearchCriteria(Hotel hotel, Date startDate, Date endDate) {
         this.selectedHotel = hotel;
         this.startDate = startDate;
         this.endDate = endDate;
-        performSearch(); // Se llama aquí cuando se establece el hotel por primera vez
+        performSearch();
     }
 
     public Label getSearchResultsLabel() {
@@ -125,21 +148,18 @@ public class SearchController {
 
     public void refreshRoomDisplay() {
         if (selectedHotel != null) {
-
             performSearch();
             logger.info("refreshRoomDisplay llamado. Recargando habitaciones para hotel: " + selectedHotel.getHotelName());
         } else {
-
             logger.warn("refreshRoomDisplay llamado pero no hay hotel seleccionado. No se recargan las habitaciones.");
             searchResultsLabel.setText("Por favor, seleccione un hotel para buscar habitaciones.");
             roomsDisplayVBox.getChildren().clear();
         }
     }
 
-
     @FXML
     public void initialize() {
-
+        // Inicialización, si es necesaria
     }
 
     private void performSearch() {
@@ -153,13 +173,8 @@ public class SearchController {
         searchResultsLabel.setText("Buscando habitaciones disponibles en " + selectedHotel.getHotelName() + "...");
         hotelNameText.setText("Hotel: " + selectedHotel.getHotelName());
 
-        // Convertir fechas Date -> ISO 8601 string
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         ZonedDateTime startZoned = ZonedDateTime.ofInstant(startDate.toInstant(), ZoneId.systemDefault());
         ZonedDateTime endZoned = ZonedDateTime.ofInstant(endDate.toInstant(), ZoneId.systemDefault());
-
-        String isoStart = startZoned.format(formatter);
-        String isoEnd = endZoned.format(formatter);
 
         Booking bookingCriteria = new Booking();
         bookingCriteria.setHotelId(selectedHotel.getNumHotel());
@@ -168,9 +183,8 @@ public class SearchController {
 
         Request request = new Request("getAvailableRoomsByDate", bookingCriteria);
 
-
         logger.info("Enviando solicitud de búsqueda para hotel ID: {}, desde {} hasta {}",
-                selectedHotel.getNumHotel(), isoStart, isoEnd);
+                selectedHotel.getNumHotel(), startZoned.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME), endZoned.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
         new Thread(() -> {
             Response response = ClientConnectionManager.sendRequest(request);
@@ -183,12 +197,16 @@ public class SearchController {
                                 new TypeToken<List<Room>>() {
                                 }.getType()
                         );
+                        // Aplicar solo el filtro de disponibilidad en la búsqueda inicial
+                        List<Room> availableRooms = rooms.stream()
+                                .filter(room -> "AVAILABLE".equalsIgnoreCase(room.getStatus().toString()))
+                                .collect(Collectors.toList());
 
-                        if (rooms.isEmpty()) {
+                        if (availableRooms.isEmpty()) {
                             searchResultsLabel.setText("No se encontraron habitaciones disponibles para los criterios seleccionados.");
                         } else {
-                            searchResultsLabel.setText("Se encontraron " + rooms.size() + " habitaciones disponibles:");
-                            for (Room room : rooms) {
+                            searchResultsLabel.setText("Se encontraron " + availableRooms.size() + " habitaciones disponibles:");
+                            for (Room room : availableRooms) {
                                 roomsDisplayVBox.getChildren().add(createRoomCard(room));
                             }
                         }
@@ -203,7 +221,6 @@ public class SearchController {
                 }
             });
         }).start();
-
     }
 
 
@@ -294,12 +311,11 @@ public class SearchController {
         selectRoomButton.setOnAction(event -> {
             BookingRegisterController bookingRegController = Utility.loadPage2("bookinginterface/bookinginterface.fxml", bp);
             if (bookingRegController != null) {
-                // Pasa el hotel seleccionado a la instancia de BookingRegisterController
                 bookingRegController.setSelectedHotelFromSearch(this.selectedHotel, startDate, endDate);
                 bookingRegController.setSelectedRoomFromSearch(room);
                 bookingRegController.setMainController(mainController);
-                bookingRegController.setParentBp(bp); // para poder regresar después
-                bookingRegController.setSearchController(this); // si necesitas volver aquí
+                bookingRegController.setParentBp(bp);
+                bookingRegController.setSearchController(this);
                 bookingRegController.setLoggedInClerk(this.loggedInClerk);
                 bookingRegController.setMainApp(this.mainAppReference);
             }
@@ -361,7 +377,6 @@ public class SearchController {
 
     @FXML
     public void goBackOnAction(ActionEvent event) {
-
         if (mainAppReference != null && loggedInClerk != null) {
             mainAppReference.loadMainInterface(loggedInClerk);
             logger.info("SearchController: Volviendo a la interfaz principal con el recepcionista loggeado.");
@@ -371,10 +386,109 @@ public class SearchController {
         }
     }
 
+
     @FXML
     public void refreshWithFilterOnAction() {
+        if (selectedHotel == null || startDate == null || endDate == null) {
+            searchResultsLabel.setText("Faltan datos para la búsqueda. Asegúrese de seleccionar un hotel y fechas.");
+            roomsDisplayVBox.getChildren().clear();
+            return;
+        }
 
-        performSearch();
+        roomsDisplayVBox.getChildren().clear();
+        searchResultsLabel.setText("Buscando habitaciones disponibles en " + selectedHotel.getHotelName() + "...");
+        hotelNameText.setText("Hotel: " + selectedHotel.getHotelName());
+
+        ZonedDateTime startZoned = ZonedDateTime.ofInstant(startDate.toInstant(), ZoneId.systemDefault());
+        ZonedDateTime endZoned = ZonedDateTime.ofInstant(endDate.toInstant(), ZoneId.systemDefault());
+
+        Booking bookingCriteria = new Booking();
+        bookingCriteria.setHotelId(selectedHotel.getNumHotel());
+        bookingCriteria.setStartDate(Date.from(startZoned.toInstant()));
+        bookingCriteria.setEndDate(Date.from(endZoned.toInstant()));
+
+        Request request = new Request("getAvailableRoomsByDate", bookingCriteria);
+
+        new Thread(() -> {
+            Response response = ClientConnectionManager.sendRequest(request);
+
+            Platform.runLater(() -> {
+                if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                    try {
+                        List<Room> rooms = gson.fromJson(
+                                gson.toJson(response.getData()),
+                                new TypeToken<List<Room>>() {}.getType()
+                        );
+
+                        // Obtener los estilos seleccionados de los CheckBox de tipo de habitación
+                        List<RoomStyle> selectedStyles = getSelectedStylesFromCheckboxes();
+
+                        // Obtener los filtros de precio seleccionados
+                        boolean filterLow = checkLowPrice.isSelected();
+                        boolean filterMedium = checkMediumPrice.isSelected();
+                        boolean filterHigh = checkHighPrice.isSelected();
+
+                        // Aplicar los filtros: disponibilidad, estilo y precio
+                        List<Room> filteredRooms = rooms.stream()
+                                .filter(room -> "AVAILABLE".equalsIgnoreCase(room.getStatus().toString())) // Siempre filtrar por disponibilidad
+                                .filter(room -> selectedStyles.isEmpty() || selectedStyles.contains(room.getStyle())) // Filtrar por estilo, si no hay ninguno seleccionado, se incluyen todos
+                                .filter(room -> { // Nuevo filtro por precio
+                                    if (!filterLow && !filterMedium && !filterHigh) {
+                                        return true; // Si ningún checkbox de precio está seleccionado, no aplicar filtro de precio
+                                    }
+                                    return isPriceWithinRange(room.getRoomPrice(), filterLow, filterMedium, filterHigh);
+                                })
+                                .collect(Collectors.toList());
+
+                        if (filteredRooms.isEmpty()) {
+                            searchResultsLabel.setText("No se encontraron habitaciones disponibles con el filtro aplicado.");
+                        } else {
+                            searchResultsLabel.setText("Se encontraron " + filteredRooms.size() + " habitaciones:");
+                            for (Room room : filteredRooms) {
+                                roomsDisplayVBox.getChildren().add(createRoomCard(room));
+                            }
+                        }
+
+                    } catch (Exception e) {
+                        logger.error("Error al procesar los resultados con filtros: " + e.getMessage(), e);
+                        searchResultsLabel.setText("Error al mostrar los resultados con filtros.");
+                    }
+                } else {
+                    logger.warn("Respuesta del servidor no exitosa para filtros: {}", response.getMessage());
+                    searchResultsLabel.setText("No se pudieron obtener habitaciones con los filtros aplicados.");
+                }
+            });
+        }).start();
+    }
+
+    // Nuevo método para verificar si el precio de la habitación está dentro de los rangos seleccionados
+    private boolean isPriceWithinRange(double price, boolean filterLow, boolean filterMedium, boolean filterHigh) {
+        boolean matches = false;
+        if (filterLow && price >= 100 && price <= 499) {
+            matches = true;
+        }
+        if (filterMedium && price >= 500 && price <= 999) {
+            matches = true;
+        }
+        if (filterHigh && price >= 1000) {
+            matches = true;
+        }
+        return matches;
+    }
+
+    private List<RoomStyle> getSelectedStylesFromCheckboxes() {
+        List<RoomStyle> selectedStyles = new ArrayList<>();
+
+        if (deluxeCheck.isSelected()) selectedStyles.add(RoomStyle.DELUXE);
+        if (familyCheck.isSelected()) selectedStyles.add(RoomStyle.FAMILY);
+        if (standardCheck.isSelected()) selectedStyles.add(RoomStyle.STANDARD);
+        if (suiteCheck.isSelected()) selectedStyles.add(RoomStyle.SUITE);
+
+        // Si ningún checkbox de tipo de habitación está seleccionado, se considerarán todos los tipos
+        // Esto es útil si quieres mostrar todos los tipos de habitación por defecto si no se especifican filtros
+        // Si no quieres esto, puedes dejar el if (selectedStyles.isEmpty()) y el return selectedStyles directamente.
+        // No lo incluimos aquí porque el filtro se aplicará en el .filter() del stream.
+        return selectedStyles;
     }
 
     @FXML

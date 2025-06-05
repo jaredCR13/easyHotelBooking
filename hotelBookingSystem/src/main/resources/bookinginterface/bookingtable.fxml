@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="bp" prefHeight="469.0" prefWidth="1249.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingTableController">
+<BorderPane fx:id="bp" prefHeight="719.0" prefWidth="1249.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.easyhotelbooking.hotelbookingsystem.controller.bookingregister.BookingTableController">
 
     <!-- Sección superior azul -->
     <top>
@@ -28,20 +28,19 @@
             <Region prefHeight="10" style="-fx-background-color: #3985d8;" VBox.vgrow="NEVER" />
         </VBox>
     </top>
-
-    <center>
-        <VBox alignment="CENTER" spacing="20" style="-fx-padding: 30;">
+   <center>
+        <VBox alignment="CENTER" prefHeight="367.0" prefWidth="1249.0" spacing="20" style="-fx-padding: 30;" BorderPane.alignment="CENTER">
 
             <!-- Busqueda rápida -->
             <HBox fx:id="quickSearchBox" alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 0 10 0;">
                 <Label style="-fx-text-fill: #333;" text="Quick Search:" />
-                <TextField fx:id="quickSearchField" prefWidth="150" promptText="Enter room number" />
+                <TextField fx:id="quickSearchField" prefWidth="150" promptText="Enter booking number" />
                 <Button onAction="#onQuickSearch" style="-fx-background-color: #3985d8; -fx-text-fill: white;" text="🔍" />
                 <Button onAction="#onClearSearch" style="-fx-background-color: #6c757d; -fx-text-fill: white;" text="Clear" />
             </HBox>
 
             <!-- Sección del TableView -->
-            <TableView fx:id="roomRegister" prefHeight="300.0" prefWidth="1100.0">
+            <TableView fx:id="bookingRegister" prefHeight="300.0" prefWidth="1100.0">
                 <columns>
                     <TableColumn fx:id="bookingNumberColumn" prefWidth="100" text="Booking number" />
                     <TableColumn fx:id="hotelIdColumn" prefWidth="100" text="Hotel Id" />
@@ -55,5 +54,5 @@
                 </columns>
             </TableView>
         </VBox>
-    </center>
+   </center>
 </BorderPane>

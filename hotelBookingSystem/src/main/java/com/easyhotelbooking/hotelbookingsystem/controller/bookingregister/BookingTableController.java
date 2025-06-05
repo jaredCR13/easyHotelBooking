@@ -28,13 +28,15 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class BookingTableController {
 
     @FXML private BorderPane bp;
-    @FXML private TableView<Booking> roomRegister;
+    @FXML private TableView<Booking> bookingRegister;
     @FXML private TableColumn<Booking, Integer> bookingNumberColumn;
     @FXML private TableColumn<Booking, Integer> GuestIdColumn;
     @FXML private TableColumn<Booking, Integer> roomNumberColumn;
@@ -108,7 +110,7 @@ public class BookingTableController {
         if ("200".equalsIgnoreCase(response.getStatus())) {
             Type bookingListType = new TypeToken<List<Booking>>() {}.getType();
             List<Booking> bookings = new Gson().fromJson(new Gson().toJson(response.getData()), bookingListType);
-            roomRegister.setItems(FXCollections.observableArrayList(bookings));
+            bookingRegister.setItems(FXCollections.observableArrayList(bookings));
         } else {
             FXUtility.alert("Error", "No se pudieron cargar las reservaciones.");
             logger.error("Error al obtener reservaciones: {}", response != null ? response.getMessage() : "null");
@@ -211,13 +213,64 @@ public class BookingTableController {
 
 
 
-    public void onQuickSearch(ActionEvent event) {
+    @FXML
+    private void onQuickSearch() {
+        String bookingText = quickSearchField.getText().trim();
 
+        if (bookingText.isEmpty()) {
+            FXUtility.alert("Error", "Por favor ingrese el número de Reservación.");
+            return;
+        }
+
+        if (selectedHotelFromSearch == null) {
+            FXUtility.alert("Error", "Debe seleccionar un hotel para realizar la búsqueda de la reservación.");
+            logger.warn("Intento de búsqueda rápida sin hotel seleccionado.");
+            return;
+        }
+
+        try {
+            int bookingNumber = Integer.parseInt(bookingText);
+            int hotelId = selectedHotelFromSearch.getNumHotel(); // Obtener el hotelId del hotel seleccionado
+
+            // Crear un mapa para enviar la clave compuesta (bookingNumber y hotelId)
+            Map<String, Integer> bookingCriteria = new HashMap<>();
+            bookingCriteria.put("bookingNumber", bookingNumber);
+            bookingCriteria.put("hotelId", hotelId);
+
+            // Crear la solicitud con el comando y los criterios
+            Request request = new Request("getBookingById", bookingCriteria);
+            logger.info("Enviando solicitud de búsqueda rápida para bookingNumber: {} y hotelId: {}", bookingNumber, hotelId);
+
+            new Thread(() -> { // Ejecutar en un nuevo hilo para no bloquear la UI
+                Response response = ClientConnectionManager.sendRequest(request);
+
+                Platform.runLater(() -> { // Actualizar UI en el hilo de JavaFX
+                    if ("200".equalsIgnoreCase(response.getStatus()) && response.getData() != null) {
+                        Booking booking = new Gson().fromJson(new Gson().toJson(response.getData()), Booking.class);
+                        bookingRegister.setItems(FXCollections.observableArrayList(booking)); // Mostrar solo la reserva encontrada
+                        logger.info("Reserva encontrada: {}", booking.getBookingNumber());
+                    } else {
+                        FXUtility.alert("Error", "No existe una reservación con ese número en el hotel seleccionado.");
+                        logger.warn("Reserva no encontrada para bookingNumber {} y hotelId {}. Mensaje del servidor: {}", bookingNumber, hotelId, response != null ? response.getMessage() : "null");
+                    }
+                });
+            }).start();
+
+        } catch (NumberFormatException e) {
+            FXUtility.alert("Error", "El número de reservación debe ser un número entero válido.");
+            logger.error("Error de formato en el número de reservación: {}", bookingText, e);
+        } catch (Exception e) {
+            FXUtility.alert("Error", "Ocurrió un error inesperado al buscar la reservación.");
+            logger.error("Error inesperado en onQuickSearch: {}", e.getMessage(), e);
+        }
     }
 
-    public void onClearSearch(ActionEvent event) {
-
+    @FXML
+    void onClearSearch() {
+        quickSearchField.clear();
+        loadBookings();
     }
+
 
 
 }

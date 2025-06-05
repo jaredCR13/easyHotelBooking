@@ -79,19 +79,19 @@
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <CheckBox mnemonicParsing="false" />
+                                <CheckBox fx:id="checkLowPrice" mnemonicParsing="false" />
                                 <Label text="100$-499$" />
                             </children>
                         </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <CheckBox mnemonicParsing="false" />
+                                <CheckBox fx:id="checkMediumPrice" mnemonicParsing="false" />
                                 <Label text="500$-999$" />
                             </children>
                         </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <CheckBox mnemonicParsing="false" />
+                                <CheckBox fx:id="checkHighPrice" mnemonicParsing="false" />
                                 <Label />
                         <Label text="&gt;1000$" />
                             </children>
@@ -145,7 +145,7 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" prefHeight="40.0" spacing="10.0">
                 <children>
-                    <ImageView fx:id="sortIconImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" /> <Label text="Ordenar por: X" />
+                    <ImageView fx:id="sortIconImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
                 </children>
                 <VBox.margin>
                     <Insets bottom="10.0" />

@@ -43,9 +43,11 @@ public class Utility {
         try {
             FXMLLoader loader = new FXMLLoader(Utility.class.getResource("/" + fxmlFileName));
             Parent view = loader.load();
-            bp.setTop(view);
+            bp.setTop(null);
             bp.setBottom(null);
-            bp.setCenter(null);
+            bp.setCenter(view);
+            bp.setRight(null);
+            bp.setLeft(null);
             return loader.getController(); // Devuelve el controlador
         } catch (IOException e) {
             System.out.println("Error loading center content: " + fxmlFileName);

@@ -238,7 +238,8 @@ public class BookingRegisterController {
             FXUtility.alert("Error de validación", "La fecha de fin no puede ser anterior a la fecha de inicio.");
             return;
         }
-
+        localStartDate = localStartDate.plusDays(1);
+        localEndDate = localEndDate.plusDays(1);
         Date startDate = Date.from(localStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(localEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
@@ -280,7 +281,7 @@ public class BookingRegisterController {
                 if ("201".equalsIgnoreCase(response.getStatus())) {
                     FXUtility.alertInfo("Éxito", "Reserva creada exitosamente!");
                     logger.info("Reserva exitosa: " + newBooking.getBookingNumber());
-
+                    onCancel();
                 } else {
                     FXUtility.alert("Error de Reserva", "No se pudo crear la reserva: " + response.getMessage());
                     logger.error("Fallo al crear reserva: " + response.getMessage());
@@ -290,8 +291,8 @@ public class BookingRegisterController {
     }
 
 
-
-    public void onCancel(ActionEvent event) {
+     @FXML
+    public void onCancel() {
         try {
             SearchController searchController = Utility.loadPage2("searchinterface/searchinterface.fxml", bp);
 
@@ -379,6 +380,8 @@ public class BookingRegisterController {
             logger.info("No hay rutas de imagen para la habitación.");
         }
     }
+    private void clearFields(){
 
+    }
 
 }

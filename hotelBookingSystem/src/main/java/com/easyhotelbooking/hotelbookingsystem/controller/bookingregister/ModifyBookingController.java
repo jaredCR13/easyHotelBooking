@@ -131,7 +131,7 @@ public class ModifyBookingController {
         loadFrontDeskClerksIntoComboBox();
     }
     @FXML
-    void onCancel(ActionEvent event) {
+    void onCancel() {
 
         BookingTableController controller = Utility.loadPage2("bookinginterface/bookingtable.fxml", bp);
         if (controller != null) {
@@ -176,10 +176,34 @@ public class ModifyBookingController {
         try {
             int bookingId = booking.getBookingNumber();
             int hotelId = selectedHotel.getNumHotel();
-            int daysOfStay = Integer.parseInt(daysOfStayTf.getText());
 
-            Date startDate = Utility.convertToDate(startDatePicker.getValue());
-            Date endDate = Utility.convertToDate(endDatePicker.getValue());
+            String diasStr = daysOfStayTf.getText();
+            if (diasStr == null || diasStr.trim().isEmpty()) {
+                FXUtility.alert("Error", "La fecha de salida debe ser mayor que de entrada.");
+                return;
+            }
+
+            int daysOfStay;
+            daysOfStay = Integer.parseInt(diasStr.trim());
+
+
+            LocalDate localStartDate = startDatePicker.getValue();
+            LocalDate localEndDate = endDatePicker.getValue();
+
+            if (localStartDate == null || localEndDate == null) {
+                FXUtility.alert("Error de fechas", "Debes seleccionar las fechas de entrada y salida.");
+                return;
+            }
+
+            if (localEndDate.isBefore(localStartDate)) {
+                FXUtility.alert("Error de fechas", "La fecha de salida no puede ser anterior a la fecha de entrada.");
+                return;
+            }
+
+            localEndDate = localEndDate.plusDays(1);
+
+            Date startDate = Utility.convertToDate(localStartDate);
+            Date endDate = Utility.convertToDate(localEndDate);
 
             FrontDeskClerk selectedClerk = frontDeskClerkCombo.getValue();
             Guest selectedGuest = guestCombo.getValue();
@@ -191,7 +215,7 @@ public class ModifyBookingController {
 
             String clerkId = selectedClerk.getEmployeeId();
             int guestId = selectedGuest.getId();
-            int roomNumber = booking.getRoomNumber(); // Asumiendo que no se puede cambiar la habitación
+            int roomNumber = booking.getRoomNumber();
 
             Booking updatedBooking = new Booking(
                     bookingId, hotelId, guestId, startDate, endDate, clerkId, daysOfStay, roomNumber
@@ -202,19 +226,18 @@ public class ModifyBookingController {
 
             if ("200".equalsIgnoreCase(response.getStatus())) {
                 FXUtility.alertInfo("Éxito", "Reservación modificada correctamente.");
-                bookingTableController.loadBookings(); // 🔁 Recarga el TableView
+                bookingTableController.loadBookings();
+                onCancel();
             } else {
                 FXUtility.alert("Error", "No se pudo modificar la reservación: " + response.getMessage());
             }
 
-        } catch (NumberFormatException e) {
-            FXUtility.alert("Error", "Los campos numéricos no son válidos.");
-            logger.error("Error de formato: {}", e.getMessage(), e);
         } catch (Exception e) {
             logger.error("Error general: {}", e.getMessage(), e);
             FXUtility.alert("Error", "Error al modificar la reservación: " + e.getMessage());
         }
     }
+
 
     private void loadGuestsIntoComboBox() {
         Request request = new Request("getGuests", null); // O el método correcto para obtener todos los huéspedes
